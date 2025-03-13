@@ -91,6 +91,18 @@ body {
   border-bottom: 1px solid #ccc;
 }
 
+@media (min-width: 64em) {
+  .step-indicator-container {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .step-indicator-container .usa-step-indicator {
+    max-width: 800px;
+    width: 100%;
+  }
+}
+
 /* Center content in the pages */
 .page-content {
   display: flex;

@@ -22,7 +22,12 @@ function StepIndicator() {
   
   return (
     <div className="step-indicator-container">
-      <USWDSStepIndicator headingLevel="h4" ofText="of" stepText="Step">
+      <USWDSStepIndicator 
+        headingLevel="h4" 
+        ofText="of" 
+        stepText="Step"
+        className="usa-step-indicator"
+      >
         {steps.map((step, index) => {
           let status;
           if (index === currentStepIndex) {
