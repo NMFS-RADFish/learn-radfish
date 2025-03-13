@@ -1,11 +1,9 @@
 import "../index.css";
 import React from "react";
-import { Button, StepIndicator, StepIndicatorStep } from "@trussworks/react-uswds";
-import { useNavigate } from "react-router-dom";
+import { StepIndicator, StepIndicatorStep } from "@trussworks/react-uswds";
+import Footer from "../components/Footer";
 
 function CatchLog() {
-  const navigate = useNavigate();
-
   return (
     <>
       <div className="page-content">
@@ -22,16 +20,7 @@ function CatchLog() {
         <p>Record your catches here.</p>
       </div>
       
-      <footer className="sticky-footer">
-        <div className="footer-content">
-          <Button type="button" className="back-button" onClick={() => navigate('/start')}>
-            Back
-          </Button>
-          <Button type="button" className="next-button" onClick={() => navigate('/end')}>
-            Next
-          </Button>
-        </div>
-      </footer>
+      <Footer backPath="/start" nextPath="/end" />
     </>
   );
 }

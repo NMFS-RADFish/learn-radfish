@@ -1,11 +1,8 @@
 import "../index.css";
 import React from "react";
-import { Button } from "@trussworks/react-uswds";
-import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
 
 function Confirmation() {
-  const navigate = useNavigate();
-
   return (
     <>
       <div className="page-content">
@@ -13,13 +10,7 @@ function Confirmation() {
         <p>Your trip has been successfully submitted!</p>
       </div>
       
-      <footer className="sticky-footer">
-        <div className="footer-content single-button">
-          <Button type="button" onClick={() => navigate('/')}>
-            Home
-          </Button>
-        </div>
-      </footer>
+      <Footer nextPath="/" nextLabel="Home" />
     </>
   );
 }

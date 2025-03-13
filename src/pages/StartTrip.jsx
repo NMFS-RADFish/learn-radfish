@@ -1,11 +1,9 @@
 import "../index.css";
 import React from "react";
-import { Button, StepIndicator, StepIndicatorStep } from "@trussworks/react-uswds";
-import { useNavigate } from "react-router-dom";
+import { StepIndicator, StepIndicatorStep } from "@trussworks/react-uswds";
+import Footer from "../components/Footer";
 
 function StartTrip() {
-  const navigate = useNavigate();
-
   return (
     <>
       <div className="page-content">
@@ -22,13 +20,7 @@ function StartTrip() {
         <p>Enter your trip details here.</p>
       </div>
       
-      <footer className="sticky-footer">
-        <div className="footer-content single-button">
-          <Button type="button" onClick={() => navigate('/catch')}>
-            Next
-          </Button>
-        </div>
-      </footer>
+      <Footer nextPath="/catch" />
     </>
   );
 }
