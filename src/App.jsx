@@ -1,13 +1,8 @@
 import "./index.css";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import { Application } from "@nmfs-radfish/react-radfish";
-import {
-  Title,
-  NavMenuButton,
-  PrimaryNav,
-  Header,
-} from "@trussworks/react-uswds";
+import Header from "./components/Header";
 
 import HomePage from "./pages/Home";
 import StartTrip from "./pages/StartTrip";
@@ -26,35 +21,7 @@ function App({ application }) {
       <BrowserRouter>
         <div className="app-container">
           <header className="sticky-header">
-            <Header
-              basic
-              showMobileOverlay={isExpanded}
-              className="header-container"
-            >
-              <div className="usa-nav-container">
-                <div className="usa-navbar">
-                  <Title className="header-title">Pelagix Logo</Title>
-                  <NavMenuButton
-                    onClick={() => setExpanded((prvExpanded) => !prvExpanded)}
-                    label="Menu"
-                  />
-                </div>
-                <PrimaryNav
-                  items={[
-                    <Link
-                      to="/"
-                      style={{ color: `${isExpanded ? "black" : "white"}` }}
-                    >
-                      Home
-                    </Link>,
-                  ]}
-                  mobileExpanded={isExpanded}
-                  onToggleMobileNav={() =>
-                    setExpanded((prvExpanded) => !prvExpanded)
-                  }
-                ></PrimaryNav>
-              </div>
-            </Header>
+            <Header isExpanded={isExpanded} setExpanded={setExpanded} />
           </header>
           <main id="main-content" className="main-content">
             <Routes>
