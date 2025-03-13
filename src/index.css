@@ -19,4 +19,65 @@ code {
 html,
 body {
   width: 100%;
+  height: 100%;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.main-content {
+  flex: 1;
+  padding-bottom: 80px; /* Space for the footer */
+}
+
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  padding: 1rem;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 99;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.step-indicator-container {
+  margin: 2rem 0;
+}
+
+/* Center content in the pages */
+.page-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.footer-button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* For pages with only one button in the footer */
+.single-button {
+  justify-content: center;
 }
