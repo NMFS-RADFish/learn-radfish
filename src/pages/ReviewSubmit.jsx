@@ -24,10 +24,10 @@ function ReviewSubmit() {
       
       <footer className="sticky-footer">
         <div className="footer-content">
-          <Button type="button" onClick={() => navigate('/end')}>
+          <Button type="button" className="back-button" onClick={() => navigate('/end')}>
             Back
           </Button>
-          <Button type="button" onClick={() => navigate('/confirm')}>
+          <Button type="button" className="next-button" onClick={() => navigate('/confirm')}>
             Submit
           </Button>
         </div>

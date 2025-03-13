@@ -1,7 +1,7 @@
 import "../index.css";
 import React from "react";
-import { Button, GridContainer } from "@trussworks/react-uswds";
-import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@trussworks/react-uswds";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -13,10 +13,10 @@ function HomePage() {
         <h1>Welcome to RADFish</h1>
         <p>Track your fishing trips and catches with this application.</p>
       </div>
-      
+
       <footer className="sticky-footer">
         <div className="footer-content single-button">
-          <Button type="button" onClick={() => navigate('/start')}>
+          <Button type="button" onClick={() => navigate("/start")}>
             Start New Trip
           </Button>
         </div>

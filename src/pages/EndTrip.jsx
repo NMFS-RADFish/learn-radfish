@@ -24,10 +24,10 @@ function EndTrip() {
       
       <footer className="sticky-footer">
         <div className="footer-content">
-          <Button type="button" onClick={() => navigate('/catch')}>
+          <Button type="button" className="back-button" onClick={() => navigate('/catch')}>
             Back
           </Button>
-          <Button type="button" onClick={() => navigate('/review')}>
+          <Button type="button" className="next-button" onClick={() => navigate('/review')}>
             Next
           </Button>
         </div>

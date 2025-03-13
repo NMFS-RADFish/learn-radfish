@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { useState } from "react";
 import { Application } from "@nmfs-radfish/react-radfish";
 import {
-  GridContainer,
   Title,
   NavMenuButton,
   PrimaryNav,
@@ -34,7 +33,7 @@ function App({ application }) {
             >
               <div className="usa-nav-container">
                 <div className="usa-navbar">
-                  <Title className="header-title">RADFish Application</Title>
+                  <Title className="header-title">Pelagix Logo</Title>
                   <NavMenuButton
                     onClick={() => setExpanded((prvExpanded) => !prvExpanded)}
                     label="Menu"
@@ -58,16 +57,14 @@ function App({ application }) {
             </Header>
           </header>
           <main id="main-content" className="main-content">
-            <GridContainer>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/start" element={<StartTrip />} />
-                <Route path="/catch" element={<CatchLog />} />
-                <Route path="/end" element={<EndTrip />} />
-                <Route path="/review" element={<ReviewSubmit />} />
-                <Route path="/confirm" element={<Confirmation />} />
-              </Routes>
-            </GridContainer>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/start" element={<StartTrip />} />
+              <Route path="/catch" element={<CatchLog />} />
+              <Route path="/end" element={<EndTrip />} />
+              <Route path="/review" element={<ReviewSubmit />} />
+              <Route path="/confirm" element={<Confirmation />} />
+            </Routes>
           </main>
         </div>
       </BrowserRouter>

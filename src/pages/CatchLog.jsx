@@ -24,10 +24,10 @@ function CatchLog() {
       
       <footer className="sticky-footer">
         <div className="footer-content">
-          <Button type="button" onClick={() => navigate('/start')}>
+          <Button type="button" className="back-button" onClick={() => navigate('/start')}>
             Back
           </Button>
-          <Button type="button" onClick={() => navigate('/end')}>
+          <Button type="button" className="next-button" onClick={() => navigate('/end')}>
             Next
           </Button>
         </div>

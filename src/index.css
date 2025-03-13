@@ -58,6 +58,14 @@ body {
   padding: 0 1rem;
 }
 
+.back-button {
+  width: 30%;
+}
+
+.next-button {
+  width: 70%;
+}
+
 .step-indicator-container {
   margin: 2rem 0;
   width: 100%;
