@@ -7,7 +7,7 @@ function HomePage() {
     <>
       <div className="page-content">
         <img src="/icons/radfish.png" alt="RADFish logo" height="200" />
-        <h1>Welcome to RADFish</h1>
+        <h1>Welcome to Pelagix</h1>
         <p>Track your fishing trips and catches with this application.</p>
       </div>
 
