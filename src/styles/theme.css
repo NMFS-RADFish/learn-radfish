@@ -1,0 +1,37 @@
+:root {
+  --noaa-dark-blue: #0054a4;
+  --noaa-light-blue: #0093d0;
+  --noaa-yellow-one: #fff3cd;
+  --noaa-yellow-two: #ffeeba;
+  --noaa-yellow-three: #856404;
+  --noaa-accent-color: #00467f;
+  --noaa-text-color: #333;
+  --noaa-error-color: #af292e;
+  --noaa-button-hover: #0073b6;
+  --noaa-label-color: #0054a4;
+  --noaa-border-dark: #565c65;
+  --noaa-border-light: #ddd;
+}
+
+body {
+  font-family:
+    Arial Narrow,
+    sans-serif;
+  color: var(--noaa-text-color);
+  background-color: #f4f4f4;
+  line-height: 1.6;
+  border-radius: 4px;
+}
+
+.header-container {
+  background: var(--noaa-dark-blue);
+}
+
+.header-title {
+  color: white;
+}
+
+/* Minimum size for NOAA logo must be 72px (0.75 in) */
+.header-logo {
+  width: 72px;
+}
