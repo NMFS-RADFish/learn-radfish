@@ -17,6 +17,10 @@
   color: white;
 }
 
+.usa-form-group > #startTime-label{
+  margin-top: -1rem;
+}
+
 /* normalize css */
 body {
   margin: 0;
@@ -87,7 +91,6 @@ body {
   margin: 2rem 0;
   width: 100%;
   max-width: 100%;
-  padding-bottom: 2rem;
   border-bottom: 1px solid #ccc;
 }
 

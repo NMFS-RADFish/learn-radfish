@@ -122,60 +122,86 @@ function StartTrip() {
     <>
       <div className="page-content">
         <StepIndicator />
-        
         <h1>Start Trip</h1>
-        <p>Enter your trip details below to begin.</p>
-        
-        <div style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
+        <div style={{ 
+          width: '100%', 
+          maxWidth: '600px', 
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
           <Form onSubmit={handleSubmit}>
-            {/* Latitude Input */}
-            <FormGroup error={submitted && errors.latitude}>
-              <Label htmlFor="latitude" error={submitted && errors.latitude}>
-                Latitude
-              </Label>
-              {submitted && errors.latitude && (
-                <ErrorMessage id="latitude-error-message">
-                  {errors.latitude}
-                </ErrorMessage>
-              )}
-              <TextInput
-                id="latitude"
-                name="latitude"
-                type="number"
-                step="0.000001"
-                value={formData.latitude}
-                onChange={handleInputChange}
-                validationStatus={submitted && errors.latitude ? 'error' : undefined}
-                aria-describedby={submitted && errors.latitude ? "latitude-error-message" : undefined}
-              />
-            </FormGroup>
+            {/* Latitude and Longitude on same row */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+              {/* Latitude Input */}
+              <div style={{ flex: '1' }}>
+                <FormGroup error={submitted && errors.latitude}>
+                  <Label 
+                    htmlFor="latitude" 
+                    error={submitted && errors.latitude}
+                    style={{ textAlign: 'left', display: 'block', width: '100%' }}
+                  >
+                    Latitude<span className="text-secondary-vivid">*</span>
+                  </Label>
+                  <span className="usa-hint" style={{ textAlign: 'left', display: 'block' }}>DD</span>
+                  {submitted && errors.latitude && (
+                    <ErrorMessage id="latitude-error-message">
+                      {errors.latitude}
+                    </ErrorMessage>
+                  )}
+                  <TextInput
+                    id="latitude"
+                    name="latitude"
+                    type="number"
+                    step="0.000001"
+                    value={formData.latitude}
+                    onChange={handleInputChange}
+                    validationStatus={submitted && errors.latitude ? 'error' : undefined}
+                    aria-describedby={submitted && errors.latitude ? "latitude-error-message" : undefined}
+                  />
+                </FormGroup>
+              </div>
 
-            {/* Longitude Input */}
-            <FormGroup error={submitted && errors.longitude}>
-              <Label htmlFor="longitude" error={submitted && errors.longitude}>
-                Longitude
-              </Label>
-              {submitted && errors.longitude && (
-                <ErrorMessage id="longitude-error-message">
-                  {errors.longitude}
-                </ErrorMessage>
-              )}
-              <TextInput
-                id="longitude"
-                name="longitude"
-                type="number"
-                step="0.000001"
-                value={formData.longitude}
-                onChange={handleInputChange}
-                validationStatus={submitted && errors.longitude ? 'error' : undefined}
-                aria-describedby={submitted && errors.longitude ? "longitude-error-message" : undefined}
-              />
-            </FormGroup>
+              {/* Longitude Input */}
+              <div style={{ flex: '1' }}>
+                <FormGroup error={submitted && errors.longitude}>
+                  <Label 
+                    htmlFor="longitude" 
+                    error={submitted && errors.longitude}
+                    style={{ textAlign: 'left', display: 'block', width: '100%' }}
+                  >
+                    Longitude<span className="text-secondary-vivid">*</span>
+                  </Label>
+                  <span className="usa-hint" style={{ textAlign: 'left', display: 'block' }}>DD</span>
+                  {submitted && errors.longitude && (
+                    <ErrorMessage id="longitude-error-message">
+                      {errors.longitude}
+                    </ErrorMessage>
+                  )}
+                  <TextInput
+                    id="longitude"
+                    name="longitude"
+                    type="number"
+                    step="0.000001"
+                    value={formData.longitude}
+                    onChange={handleInputChange}
+                    validationStatus={submitted && errors.longitude ? 'error' : undefined}
+                    aria-describedby={submitted && errors.longitude ? "longitude-error-message" : undefined}
+                  />
+                </FormGroup>
+              </div>
+            </div>
 
-            {/* Weather Conditions Select */}
-            <FormGroup error={submitted && errors.weather}>
-              <Label htmlFor="weather" error={submitted && errors.weather}>
-                Weather Conditions
+            {/* Weather Conditions Select - Full Width */}
+            <FormGroup error={submitted && errors.weather} className="margin-bottom-4">
+              <Label 
+                htmlFor="weather" 
+                error={submitted && errors.weather}
+                style={{ textAlign: 'left', display: 'block', width: '100%' }}
+              >
+                Weather<span className="text-secondary-vivid">*</span>
               </Label>
               {submitted && errors.weather && (
                 <ErrorMessage id="weather-error-message">
@@ -190,17 +216,21 @@ function StartTrip() {
                 validationStatus={submitted && errors.weather ? 'error' : undefined}
                 aria-describedby={submitted && errors.weather ? "weather-error-message" : undefined}
               >
-                <option value="">- Select weather condition -</option>
+                <option value="">-Select-</option>
                 <option value="Sunny">Sunny</option>
                 <option value="Cloudy">Cloudy</option>
                 <option value="Rainy">Rainy</option>
               </Select>
             </FormGroup>
 
-            {/* Trip Start Time */}
-            <FormGroup error={submitted && errors.startTime}>
-              <Label htmlFor="startTime" error={submitted && errors.startTime}>
-                Trip Start Time
+            {/* Trip Start Time - Full Width */}
+            <FormGroup error={submitted && errors.startTime} className="margin-bottom-4">
+              <Label 
+                htmlFor="startTime" 
+                error={submitted && errors.startTime}
+                style={{ textAlign: 'left', display: 'block', width: '100%' }}
+              >
+                Time<span className="text-secondary-vivid">*</span>
               </Label>
               {submitted && errors.startTime && (
                 <ErrorMessage id="startTime-error-message">
@@ -210,7 +240,6 @@ function StartTrip() {
               <TimePicker
                 id="startTime"
                 name="startTime"
-                hint="hh:mm"
                 value={formData.startTime}
                 onChange={(time) => handleTimeChange(time)}
                 minTime="00:00"
