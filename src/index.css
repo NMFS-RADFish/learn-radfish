@@ -21,6 +21,10 @@
   margin-top: -1rem;
 }
 
+.usa-button {
+  margin-right: 0;
+}
+
 /* normalize css */
 body {
   margin: 0;

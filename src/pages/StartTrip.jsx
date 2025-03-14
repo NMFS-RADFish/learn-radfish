@@ -12,21 +12,16 @@ import {
 } from "@trussworks/react-uswds";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
-import { useLocalStorage } from "../hooks/useLocalStorage";
 
 function StartTrip() {
   const navigate = useNavigate();
-  const { setItem, getItem } = useLocalStorage();
   
-  // Initialize form data from localStorage if it exists
-  const [formData, setFormData] = useState(() => {
-    const savedData = getItem('tripData');
-    return savedData || {
-      latitude: '',
-      longitude: '',
-      weather: '',
-      startTime: '',
-    };
+  // TODO: Replace with RADFish IndexedDB Storage
+  const [formData, setFormData] = useState({
+    latitude: '',
+    longitude: '',
+    weather: '',
+    startTime: '',
   });
   
   const [errors, setErrors] = useState({});
@@ -111,9 +106,10 @@ function StartTrip() {
     const newErrors = validateForm();
     setErrors(newErrors);
     
-    // If no errors, save to localStorage and navigate to next page
+    // If no errors, save data and navigate to next page
     if (Object.keys(newErrors).length === 0) {
-      setItem('tripData', formData);
+      // TODO: Implement data storage here
+      console.log('Trip data to be saved:', formData);
       navigate('/catch');
     }
   };
