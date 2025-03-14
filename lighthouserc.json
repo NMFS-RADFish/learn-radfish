@@ -1,0 +1,15 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "npm run build && npm run serve",
+      "url": ["http://localhost:4173/"],
+      "numberOfRuns": 3,
+      "startServerReadyPattern": "localhost:4173"
+    },
+    "assert": {
+      "assertions": {
+        "categories:accessibility": ["error", { "minScore": 0.1 }]
+      }
+    }
+  }
+}
