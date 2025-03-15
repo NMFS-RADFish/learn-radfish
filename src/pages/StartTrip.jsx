@@ -1,4 +1,5 @@
 import "../index.css";
+import "./StartTrip.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,6 +13,11 @@ import {
 } from "@trussworks/react-uswds";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
+import { 
+  validateRequired, 
+  validateLatitude, 
+  validateLongitude
+} from "../utils/validation";
 
 function StartTrip() {
   const navigate = useNavigate();
@@ -68,32 +74,22 @@ function StartTrip() {
     const newErrors = {};
     
     // Validate latitude
-    if (!formData.latitude) {
-      newErrors.latitude = 'Latitude is required';
-    } else if (isNaN(formData.latitude) || 
-               Number(formData.latitude) < -90 || 
-               Number(formData.latitude) > 90) {
-      newErrors.latitude = 'Latitude must be between -90 and 90 degrees';
-    }
+    const latitudeError = validateRequired(formData.latitude, 'Latitude') || 
+                          validateLatitude(formData.latitude);
+    if (latitudeError) newErrors.latitude = latitudeError;
     
     // Validate longitude
-    if (!formData.longitude) {
-      newErrors.longitude = 'Longitude is required';
-    } else if (isNaN(formData.longitude) || 
-               Number(formData.longitude) < -180 || 
-               Number(formData.longitude) > 180) {
-      newErrors.longitude = 'Longitude must be between -180 and 180 degrees';
-    }
+    const longitudeError = validateRequired(formData.longitude, 'Longitude') || 
+                           validateLongitude(formData.longitude);
+    if (longitudeError) newErrors.longitude = longitudeError;
     
     // Validate weather
-    if (!formData.weather) {
-      newErrors.weather = 'Weather condition is required';
-    }
+    const weatherError = validateRequired(formData.weather, 'Weather condition');
+    if (weatherError) newErrors.weather = weatherError;
     
     // Validate start time
-    if (!formData.startTime) {
-      newErrors.startTime = 'Start time is required';
-    }
+    const timeError = validateRequired(formData.startTime, 'Start time');
+    if (timeError) newErrors.startTime = timeError;
     
     return newErrors;
   };
@@ -119,29 +115,21 @@ function StartTrip() {
       <div className="page-content">
         <StepIndicator />
         <h1>Start Trip</h1>
-        <div style={{ 
-          width: '100%', 
-          maxWidth: '600px', 
-          margin: '0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
+        <div className="start-trip-form-container">
           <Form onSubmit={handleSubmit}>
             {/* Latitude and Longitude on same row */}
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div className="coordinate-inputs">
               {/* Latitude Input */}
-              <div style={{ flex: '1' }}>
+              <div className="coordinate-input">
                 <FormGroup error={submitted && errors.latitude}>
                   <Label 
                     htmlFor="latitude" 
                     error={submitted && errors.latitude}
-                    style={{ textAlign: 'left', display: 'block', width: '100%' }}
+                    className="form-label"
                   >
                     Latitude<span className="text-secondary-vivid">*</span>
                   </Label>
-                  <span className="usa-hint" style={{ textAlign: 'left', display: 'block' }}>DD</span>
+                  <span className="usa-hint form-hint">DD</span>
                   {submitted && errors.latitude && (
                     <ErrorMessage id="latitude-error-message">
                       {errors.latitude}
@@ -161,16 +149,16 @@ function StartTrip() {
               </div>
 
               {/* Longitude Input */}
-              <div style={{ flex: '1' }}>
+              <div className="coordinate-input">
                 <FormGroup error={submitted && errors.longitude}>
                   <Label 
                     htmlFor="longitude" 
                     error={submitted && errors.longitude}
-                    style={{ textAlign: 'left', display: 'block', width: '100%' }}
+                    className="form-label"
                   >
                     Longitude<span className="text-secondary-vivid">*</span>
                   </Label>
-                  <span className="usa-hint" style={{ textAlign: 'left', display: 'block' }}>DD</span>
+                  <span className="usa-hint form-hint">DD</span>
                   {submitted && errors.longitude && (
                     <ErrorMessage id="longitude-error-message">
                       {errors.longitude}
@@ -195,7 +183,7 @@ function StartTrip() {
               <Label 
                 htmlFor="weather" 
                 error={submitted && errors.weather}
-                style={{ textAlign: 'left', display: 'block', width: '100%' }}
+                className="form-label"
               >
                 Weather<span className="text-secondary-vivid">*</span>
               </Label>
@@ -224,7 +212,7 @@ function StartTrip() {
               <Label 
                 htmlFor="startTime" 
                 error={submitted && errors.startTime}
-                style={{ textAlign: 'left', display: 'block', width: '100%' }}
+                className="form-label time-label"
               >
                 Time<span className="text-secondary-vivid">*</span>
               </Label>

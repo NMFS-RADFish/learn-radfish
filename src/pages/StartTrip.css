@@ -1,0 +1,49 @@
+.start-trip-form-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-label {
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+
+.form-hint {
+  text-align: left;
+  display: block;
+}
+
+.coordinate-inputs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.coordinate-input {
+  flex: 1;
+}
+
+.time-label {
+  margin-top: 0;
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 200px);
+  justify-content: center;
+} 
+
+/* Custom USWDS overrides */
+.usa-form-group > #startTime-label{
+  margin-top: -1rem;
+}
+
+
