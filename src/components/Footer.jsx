@@ -8,9 +8,18 @@ import { useNavigate } from "react-router-dom";
  * @param {string} [props.backPath] - Path to navigate to when back button is clicked
  * @param {string} props.nextPath - Path to navigate to when next/submit button is clicked
  * @param {string} [props.nextLabel="Next"] - Label for the next/submit button
+ * @param {Function} [props.onNextClick] - Callback function when next button is clicked
  */
-function Footer({ backPath, nextPath, nextLabel = "Next" }) {
+function Footer({ backPath, nextPath, nextLabel = "Next", onNextClick }) {
   const navigate = useNavigate();
+
+  const handleNextClick = (e) => {
+    if (onNextClick) {
+      onNextClick(e);
+    } else {
+      navigate(nextPath);
+    }
+  };
 
   return (
     <footer className="sticky-footer">
@@ -26,9 +35,9 @@ function Footer({ backPath, nextPath, nextLabel = "Next" }) {
           </Button>
         )}
         <Button 
-          type="button" 
+          type={onNextClick ? "submit" : "button"} 
           className={backPath ? "next-button" : ""} 
-          onClick={() => navigate(nextPath)}
+          onClick={handleNextClick}
         >
           {nextLabel}
         </Button>
