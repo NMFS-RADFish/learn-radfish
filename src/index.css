@@ -13,6 +13,8 @@
 
 .usa-button {
   margin-right: 0;
+  max-width: 20rem;
+  width: 100%;
 }
 
 @media (max-width: 63.99em) {
