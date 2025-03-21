@@ -1,11 +1,18 @@
 .start-trip-form-container {
   width: 100%;
-  max-width: 600px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+}
+
+/* Make form and form groups take full width */
+.start-trip-form-container form {
+  width: 100%;
+}
+
+.usa-form-group {
+  width: 100%;
 }
 
 .form-label {
@@ -17,6 +24,14 @@
 .form-hint {
   text-align: left;
   display: block;
+}
+
+/* Make inputs take full width */
+.usa-input,
+.usa-select,
+.usa-combo-box {
+  width: 100%;
+  max-width: none;
 }
 
 .coordinate-inputs {
@@ -34,11 +49,17 @@
   margin-top: 0;
 }
 
+/* Error message styling */
+.usa-error-message {
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+
 .page-content {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 200px);
-  justify-content: center;
 } 
 
 /* Custom USWDS overrides */
