@@ -18,9 +18,8 @@ import {
   validateLatitude,
   validateLongitude,
   validateChain,
-  validateLatitudeLength,
-  validateLongitudeLength,
 } from "../utils/validation";
+import { processCoordinateInput } from "../utils/inputProcessing";
 
 // Field name constants
 const FIELD_LATITUDE = "Latitude";
@@ -48,17 +47,29 @@ function StartTrip() {
     if (e && e.target) {
       const { name, value } = e.target;
 
-      // Apply character limits for latitude and longitude
-      if (name === "latitude" && !validateLatitudeLength(value)) {
-        return; // Skip update if exceeds limit
-      } else if (name === "longitude" && !validateLongitudeLength(value)) {
-        return; // Skip update if exceeds limit
+      // For latitude and longitude, apply input processing
+      if (name === FIELD_LATITUDE.toLowerCase() || name === FIELD_LONGITUDE.toLowerCase()) {
+        const { processedValue, skipUpdate } = processCoordinateInput(
+          value, 
+          name, 
+          e.target
+        );
+        
+        if (skipUpdate) {
+          return; // Skip update if validation says so
+        }
+        
+        setFormData({
+          ...formData,
+          [name]: processedValue,
+        });
+      } else {
+        // For other inputs, update normally
+        setFormData({
+          ...formData,
+          [name]: value,
+        });
       }
-
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
 
       // Clear error when user starts typing
       if (errors[name]) {
