@@ -13,7 +13,7 @@
  * @returns {string|null} Error message or null if valid
  */
 export const validateRequired = (value, fieldName) => {
-  if (!value && value !== 0) {
+  if (value === null || value === undefined || value === '') {
     return `${fieldName} is required`;
   }
   return null;
