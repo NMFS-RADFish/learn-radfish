@@ -4,7 +4,7 @@
 
 /* Custom USWDS overrides */
 .usa-nav-container {
-  padding: 2rem 0 .5rem 0;
+  padding: 2rem 0 0.5rem 0;
 }
 
 .usa-logo a {
@@ -13,13 +13,26 @@
 
 .usa-button {
   margin-right: 0;
-  max-width: 20rem;
   width: 100%;
+  max-width: none;
 }
 
-@media (max-width: 63.99em) {
+/* For tablet and desktop */
+@media (min-width: 480px) {
+  .usa-button {
+    max-width: 20rem;
+  }
+}
+
+/* Mobile-first navbar styles */
+.usa-navbar {
+  border-bottom: none;
+}
+
+/* For desktop */
+@media (min-width: 1024px) {
   .usa-navbar {
-    border-bottom: none;
+    border-bottom: 1px solid;
   }
 }
 
@@ -52,17 +65,18 @@ body {
   min-height: 100vh;
 }
 
+/* Mobile-first content container */
 .content-container {
   width: 100%;
-  max-width: 20rem;
+  max-width: none;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
-/* Remove max-width restriction for mobile view*/
-@media (max-width: 479px) {
+/* For tablet and desktop */
+@media (min-width: 480px) {
   .content-container {
-    max-width: none;
+    max-width: 20rem;
   }
 }
 
