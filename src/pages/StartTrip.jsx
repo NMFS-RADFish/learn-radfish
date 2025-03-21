@@ -47,14 +47,14 @@ function StartTrip() {
     // Check if e is an event (from TextInput/Select) or a direct value (from TimePicker)
     if (e && e.target) {
       const { name, value } = e.target;
-      
+
       // Apply character limits for latitude and longitude
-      if (name === 'latitude' && !validateLatitudeLength(value)) {
+      if (name === "latitude" && !validateLatitudeLength(value)) {
         return; // Skip update if exceeds limit
-      } else if (name === 'longitude' && !validateLongitudeLength(value)) {
+      } else if (name === "longitude" && !validateLongitudeLength(value)) {
         return; // Skip update if exceeds limit
       }
-      
+
       setFormData({
         ...formData,
         [name]: value,
@@ -105,10 +105,7 @@ function StartTrip() {
     if (longitudeError) newErrors.longitude = longitudeError;
 
     // Validate weather
-    const weatherError = validateRequired(
-      formData.weather,
-      FIELD_WEATHER,
-    );
+    const weatherError = validateRequired(formData.weather, FIELD_WEATHER);
     if (weatherError) newErrors.weather = weatherError;
 
     // Validate start time
@@ -160,7 +157,6 @@ function StartTrip() {
                       id="latitude"
                       name="latitude"
                       type="number"
-                      step="0.000001"
                       value={formData.latitude}
                       onChange={handleInputChange}
                       validationStatus={
@@ -171,9 +167,6 @@ function StartTrip() {
                           ? "latitude-error-message"
                           : undefined
                       }
-                      className="usa-input"
-                      min="-90"
-                      max="90"
                     />
                     <ErrorMessage id="latitude-error-message">
                       {(submitted && errors.latitude && errors.latitude) ||
@@ -193,12 +186,10 @@ function StartTrip() {
                       Longitude<span className="text-secondary-vivid">*</span>
                     </Label>
                     <span className="usa-hint form-hint">DD</span>
-
                     <TextInput
                       id="longitude"
                       name="longitude"
                       type="number"
-                      step="0.000001"
                       value={formData.longitude}
                       onChange={handleInputChange}
                       validationStatus={
@@ -209,9 +200,6 @@ function StartTrip() {
                           ? "longitude-error-message"
                           : undefined
                       }
-                      className="usa-input"
-                      min="-180"
-                      max="180"
                     />
                     <ErrorMessage id="longitude-error-message">
                       {(submitted && errors.longitude && errors.longitude) ||
@@ -246,7 +234,6 @@ function StartTrip() {
                       ? "weather-error-message"
                       : undefined
                   }
-                  className="usa-select"
                 >
                   <option value="">-Select-</option>
                   <option value="Sunny">Sunny</option>
@@ -277,7 +264,6 @@ function StartTrip() {
                   onChange={(time) => handleTimeChange(time)}
                   minTime="00:00"
                   maxTime="23:30"
-                  step={30}
                   validationStatus={
                     submitted && errors.startTime ? "error" : undefined
                   }

@@ -29,13 +29,6 @@
   border-bottom: none;
 }
 
-/* For desktop */
-@media (min-width: 1024px) {
-  .usa-navbar {
-    border-bottom: 1px solid;
-  }
-}
-
 /* normalize css */
 body {
   margin: 0;
