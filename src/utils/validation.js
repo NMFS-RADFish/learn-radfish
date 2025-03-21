@@ -67,13 +67,13 @@ export const validateLongitude = (value) => {
 /**
  * Helper to chain multiple validations together
  * Stops at the first error it finds
- *
+ * 
  * Example usage:
  * const error = validateChain(
  *   validateRequired(value, "Field Name"),
  *   validateLatitude(value)
  * );
- *
+ * 
  * @param {...(string|null)} validations - Results from validation functions
  * @returns {string|null} First error message or null if all valid
  */
@@ -82,4 +82,40 @@ export const validateChain = (...validations) => {
     if (validation) return validation;
   }
   return null;
+};
+
+/**
+ * Checks if the input value has more characters than the maximum allowed
+ * Ignores negative sign when counting characters
+ * 
+ * @param {string} value - The input value
+ * @param {number} maxLength - Maximum number of digits allowed
+ * @returns {boolean} True if value is valid, false if it exceeds max length
+ */
+export const validateCharLimit = (value, maxLength) => {
+  // Remove negative sign for length checking
+  const valueWithoutSign = value.toString().replace('-', '');
+  return valueWithoutSign.length <= maxLength;
+};
+
+/**
+ * Validates that latitude input doesn't exceed 3 digits (excluding negative sign)
+ * 
+ * @param {string} value - The latitude value
+ * @returns {boolean} True if value is valid, false if it exceeds max length
+ */
+export const validateLatitudeLength = (value) => {
+  // Latitude range is -90 to 90, so max 3 digits including decimal point
+  return validateCharLimit(value, 3);
+};
+
+/**
+ * Validates that longitude input doesn't exceed 4 digits (excluding negative sign)
+ * 
+ * @param {string} value - The longitude value
+ * @returns {boolean} True if value is valid, false if it exceeds max length
+ */
+export const validateLongitudeLength = (value) => {
+  // Longitude range is -180 to 180, so max 4 digits including decimal point
+  return validateCharLimit(value, 4);
 };

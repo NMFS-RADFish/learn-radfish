@@ -18,6 +18,8 @@ import {
   validateLatitude,
   validateLongitude,
   validateChain,
+  validateLatitudeLength,
+  validateLongitudeLength,
 } from "../utils/validation";
 
 // Field name constants
@@ -45,6 +47,14 @@ function StartTrip() {
     // Check if e is an event (from TextInput/Select) or a direct value (from TimePicker)
     if (e && e.target) {
       const { name, value } = e.target;
+      
+      // Apply character limits for latitude and longitude
+      if (name === 'latitude' && !validateLatitudeLength(value)) {
+        return; // Skip update if exceeds limit
+      } else if (name === 'longitude' && !validateLongitudeLength(value)) {
+        return; // Skip update if exceeds limit
+      }
+      
       setFormData({
         ...formData,
         [name]: value,
@@ -162,6 +172,8 @@ function StartTrip() {
                           : undefined
                       }
                       className="usa-input"
+                      min="-90"
+                      max="90"
                     />
                     <ErrorMessage id="latitude-error-message">
                       {(submitted && errors.latitude && errors.latitude) ||
@@ -198,6 +210,8 @@ function StartTrip() {
                           : undefined
                       }
                       className="usa-input"
+                      min="-180"
+                      max="180"
                     />
                     <ErrorMessage id="longitude-error-message">
                       {(submitted && errors.longitude && errors.longitude) ||
