@@ -27,6 +27,7 @@ function StepIndicator() {
         ofText="of" 
         stepText="Step"
         className="usa-step-indicator"
+        showLabels={false}
       >
         {steps.map((step, index) => {
           let status;
