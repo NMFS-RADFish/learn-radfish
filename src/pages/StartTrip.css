@@ -1,3 +1,19 @@
+/* Custom USWDS overrides */
+/* .usa-form-group {
+  width: 100%;
+} */
+
+.usa-input,
+.usa-select,
+.usa-combo-box {
+  width: 100%;
+}
+
+.usa-form-group > #startTime-label{
+  margin-top: -1rem;
+}
+
+/* Start Trip Form Styles */
 .start-trip-form-container {
   width: 100%;
   margin: 0 auto;
@@ -11,10 +27,6 @@
   width: 100%;
 }
 
-.usa-form-group {
-  width: 100%;
-}
-
 .form-label {
   text-align: left;
   display: block;
@@ -24,14 +36,6 @@
 .form-hint {
   text-align: left;
   display: block;
-}
-
-/* Make inputs take full width */
-.usa-input,
-.usa-select,
-.usa-combo-box {
-  width: 100%;
-  max-width: none;
 }
 
 .coordinate-inputs {
@@ -49,22 +53,10 @@
   margin-top: 0;
 }
 
-/* Error message styling */
-.usa-error-message {
-  text-align: left;
-  display: block;
-  width: 100%;
-}
-
 .page-content {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 200px);
 } 
-
-/* Custom USWDS overrides */
-.usa-form-group > #startTime-label{
-  margin-top: -1rem;
-}
 
 

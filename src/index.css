@@ -7,18 +7,18 @@
   padding: 2rem 0 .5rem 0;
 }
 
-@media (max-width: 63.99em) {
-  .usa-navbar {
-    border-bottom: none;
-  }
-}
-
 .usa-logo a {
   color: white;
 }
 
 .usa-button {
   margin-right: 0;
+}
+
+@media (max-width: 63.99em) {
+  .usa-navbar {
+    border-bottom: none;
+  }
 }
 
 /* normalize css */
@@ -43,6 +43,7 @@ body {
   height: 100%;
 }
 
+/* App layout styles */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -56,7 +57,7 @@ body {
   padding: 0 1rem;
 }
 
-/* Remove max-width restriction for mobile and tablet views */
+/* Remove max-width restriction for mobile view*/
 @media (max-width: 479px) {
   .content-container {
     max-width: none;
