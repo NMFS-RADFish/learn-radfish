@@ -17,7 +17,14 @@ import {
   validateRequired,
   validateLatitude,
   validateLongitude,
+  validateChain,
 } from "../utils/validation";
+
+// Field name constants
+const FIELD_LATITUDE = "Latitude";
+const FIELD_LONGITUDE = "Longitude";
+const FIELD_WEATHER = "Weather condition";
+const FIELD_START_TIME = "Start time";
 
 function StartTrip() {
   const navigate = useNavigate();
@@ -74,26 +81,28 @@ function StartTrip() {
     const newErrors = {};
 
     // Validate latitude
-    const latitudeError =
-      validateRequired(formData.latitude, "Latitude") ||
-      validateLatitude(formData.latitude);
+    const latitudeError = validateChain(
+      validateRequired(formData.latitude, FIELD_LATITUDE),
+      validateLatitude(formData.latitude),
+    );
     if (latitudeError) newErrors.latitude = latitudeError;
 
     // Validate longitude
-    const longitudeError =
-      validateRequired(formData.longitude, "Longitude") ||
-      validateLongitude(formData.longitude);
+    const longitudeError = validateChain(
+      validateRequired(formData.longitude, FIELD_LONGITUDE),
+      validateLongitude(formData.longitude),
+    );
     if (longitudeError) newErrors.longitude = longitudeError;
 
     // Validate weather
     const weatherError = validateRequired(
       formData.weather,
-      "Weather condition",
+      FIELD_WEATHER,
     );
     if (weatherError) newErrors.weather = weatherError;
 
     // Validate start time
-    const timeError = validateRequired(formData.startTime, "Start time");
+    const timeError = validateRequired(formData.startTime, FIELD_START_TIME);
     if (timeError) newErrors.startTime = timeError;
 
     return newErrors;
@@ -265,7 +274,8 @@ function StartTrip() {
                   }
                 />
                 <ErrorMessage id="startTime-error-message">
-                  {(submitted && errors.startTime && errors.startTime) || "\u00A0"}
+                  {(submitted && errors.startTime && errors.startTime) ||
+                    "\u00A0"}
                 </ErrorMessage>
               </FormGroup>
             </Form>

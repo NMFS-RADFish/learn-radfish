@@ -1,7 +1,15 @@
 /**
+ * Core validation utilities.
+ * These functions follow a consistent pattern:
+ * - Each returns null for valid values
+ * - Each returns an error message string for invalid values
+ * - Each is pure and has no side effects
+ */
+
+/**
  * Validates if a value is not empty
  * @param {any} value - The value to check
- * @param {string} fieldName - Name of the field for the error message
+ * @param {string} fieldName - Name of the field for error message
  * @returns {string|null} Error message or null if valid
  */
 export const validateRequired = (value, fieldName) => {
@@ -16,24 +24,25 @@ export const validateRequired = (value, fieldName) => {
  * @param {number|string} value - The value to check
  * @param {number} min - Minimum allowed value
  * @param {number} max - Maximum allowed value
- * @param {string} fieldName - Name of the field for the error message
+ * @param {string} fieldName - Name of the field for error message
  * @returns {string|null} Error message or null if valid
  */
 export const validateNumberRange = (value, min, max, fieldName) => {
-  if (value === '' || value === null || value === undefined) {
-    return null; // Empty check should be handled by validateRequired
+  // Skip validation if the field is empty (validateRequired should handle this)
+  if (value === "" || value === null || value === undefined) {
+    return null;
   }
-  
+
   const numValue = Number(value);
-  
+
   if (isNaN(numValue)) {
     return `${fieldName} must be a valid number`;
   }
-  
+
   if (numValue < min || numValue > max) {
     return `${fieldName} must be between ${min} and ${max}`;
   }
-  
+
   return null;
 };
 
@@ -43,7 +52,7 @@ export const validateNumberRange = (value, min, max, fieldName) => {
  * @returns {string|null} Error message or null if valid
  */
 export const validateLatitude = (value) => {
-  return validateNumberRange(value, -90, 90, 'Latitude');
+  return validateNumberRange(value, -90, 90, "Latitude");
 };
 
 /**
@@ -52,30 +61,25 @@ export const validateLatitude = (value) => {
  * @returns {string|null} Error message or null if valid
  */
 export const validateLongitude = (value) => {
-  return validateNumberRange(value, -180, 180, 'Longitude');
+  return validateNumberRange(value, -180, 180, "Longitude");
 };
 
 /**
- * Validates a form object with multiple fields
- * @param {Object} formData - The form data object
- * @param {Object} validationRules - Object mapping field names to validation functions
- * @returns {Object} Object with field names as keys and error messages as values
+ * Helper to chain multiple validations together
+ * Stops at the first error it finds
+ *
+ * Example usage:
+ * const error = validateChain(
+ *   validateRequired(value, "Field Name"),
+ *   validateLatitude(value)
+ * );
+ *
+ * @param {...(string|null)} validations - Results from validation functions
+ * @returns {string|null} First error message or null if all valid
  */
-export const validateForm = (formData, validationRules) => {
-  const errors = {};
-  
-  Object.entries(validationRules).forEach(([fieldName, validationFns]) => {
-    // Handle both single validation functions and arrays of validation functions
-    const validations = Array.isArray(validationFns) ? validationFns : [validationFns];
-    
-    for (const validationFn of validations) {
-      const error = validationFn(formData[fieldName], fieldName);
-      if (error) {
-        errors[fieldName] = error;
-        break; // Stop at the first error for this field
-      }
-    }
-  });
-  
-  return errors;
-}; 
+export const validateChain = (...validations) => {
+  for (const validation of validations) {
+    if (validation) return validation;
+  }
+  return null;
+};
