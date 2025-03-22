@@ -147,7 +147,6 @@ function StartTrip() {
       <div className="page-content">
         <div className="content-container">
           <StepIndicator />
-          <h1>Start Trip</h1>
           <div className="start-trip-form-container">
             <Form onSubmit={handleSubmit}>
               {/* Latitude and Longitude on same row */}
@@ -179,7 +178,7 @@ function StartTrip() {
                           : undefined
                       }
                     />
-                    <ErrorMessage id="latitude-error-message">
+                    <ErrorMessage id="latitude-error-message" className="error-message">
                       {(submitted && errors.latitude && errors.latitude) ||
                         "\u00A0"}
                     </ErrorMessage>
@@ -212,7 +211,7 @@ function StartTrip() {
                           : undefined
                       }
                     />
-                    <ErrorMessage id="longitude-error-message">
+                    <ErrorMessage id="longitude-error-message" className="error-message">
                       {(submitted && errors.longitude && errors.longitude) ||
                         "\u00A0"}
                     </ErrorMessage>
@@ -251,7 +250,7 @@ function StartTrip() {
                   <option value="Cloudy">Cloudy</option>
                   <option value="Rainy">Rainy</option>
                 </Select>
-                <ErrorMessage id="weather-error-message">
+                <ErrorMessage id="weather-error-message" className="error-message">
                   {(submitted && errors.weather && errors.weather) || "\u00A0"}
                 </ErrorMessage>
               </FormGroup>
@@ -269,8 +268,8 @@ function StartTrip() {
                   Time<span className="text-secondary-vivid">*</span>
                 </Label>
                 <TimePicker
-                  id="startTime"
-                  name="startTime"
+                  id="time"
+                  name="time"
                   value={formData.startTime}
                   onChange={(time) => handleTimeChange(time)}
                   minTime="00:00"
@@ -284,7 +283,7 @@ function StartTrip() {
                       : undefined
                   }
                 />
-                <ErrorMessage id="startTime-error-message">
+                <ErrorMessage id="startTime-error-message" className="error-message">
                   {(submitted && errors.startTime && errors.startTime) ||
                     "\u00A0"}
                 </ErrorMessage>

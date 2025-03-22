@@ -1,29 +1,22 @@
 /* Custom USWDS overrides */
-/* .usa-form-group {
-  width: 100%;
-} */
 
 .usa-combo-box {
   width: 100%;
 }
 
-.usa-form-group > #startTime-label{
-  margin-top: -1rem;
-}
-
 /* Start Trip Form Styles */
-.start-trip-form-container {
+/* .start-trip-form-container {
   width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
+} */
 
 /* Make form and form groups take full width */
-.start-trip-form-container form {
+/* .start-trip-form-container form {
   width: 100%;
-}
+} */
 
 .form-label {
   text-align: left;
@@ -36,25 +29,25 @@
   display: block;
 }
 
-.coordinate-inputs {
+/* .coordinate-inputs {
   display: flex;
   gap: 1rem;
   margin-bottom: 1.5rem;
   width: 100%;
-}
+} */
 
-.coordinate-input {
+/* .coordinate-input {
   flex: 1;
-}
+} */
 
-.time-label {
+/* .time-label {
   margin-top: 0;
-}
+} */
 
-.page-content {
+/* .page-content {
   display: flex;
   flex-direction: column;
   min-height: calc(100vh - 200px);
-} 
+}  */
 
 

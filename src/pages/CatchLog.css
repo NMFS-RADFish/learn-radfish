@@ -1,0 +1,122 @@
+/* Catch Log Form Styles */
+.catch-form-container {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Make form and form groups take full width */
+.catch-form-container form {
+  width: 100%;
+}
+
+/* Weight and Length inputs layout */
+.measurement-inputs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.measurement-input {
+  flex: 1;
+}
+
+/* Coordinate inputs layout */
+.coordinate-inputs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.coordinate-input {
+  flex: 1;
+}
+
+/* Catch form actions */
+.catch-form-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.add-catch-button {
+  min-width: 150px;
+}
+
+/* Catch List Styles */
+.catch-list-container {
+  width: 100%;
+  border-top: 1px solid #dfe1e2;
+  padding-top: 1.5rem;
+}
+
+.catch-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.catch-item {
+  padding: 1rem;
+  border: 1px solid #dfe1e2;
+  border-radius: 0.25rem;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.catch-item-content {
+  flex: 1;
+}
+
+.catch-item-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.catch-item-label {
+  font-weight: bold;
+}
+
+.catch-item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-catch-button,
+.delete-catch-button {
+  color: #1b1b1b;
+  margin: 0;
+  padding: 0.25rem;
+}
+
+.delete-catch-button {
+  color: #d83933;
+}
+
+.edit-catch-button:hover,
+.delete-catch-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 0.25rem;
+}
+
+/* Responsive Styles */
+@media (min-width: 640px) {
+  .catch-item-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .catch-item-details {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

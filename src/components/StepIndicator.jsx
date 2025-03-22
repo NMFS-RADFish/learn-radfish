@@ -12,7 +12,7 @@ function StepIndicator() {
   // Define the steps and their corresponding routes
   const steps = [
     { label: "Start Trip", path: "/start" },
-    { label: "Catch Log", path: "/catch" },
+    { label: "Log Catch", path: "/catch" },
     { label: "End Trip", path: "/end" },
     { label: "Review and Submit", path: "/review" }
   ];

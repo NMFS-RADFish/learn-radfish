@@ -17,6 +17,15 @@
   max-width: none;
 }
 
+.usa-form-group > #time-label{
+  margin-top: -1rem;
+}
+
+/* Error message styling */
+.error-message {
+  font-size: 14px;
+}
+
 /* For tablet and desktop */
 @media (min-width: 480px) {
   .usa-button {
