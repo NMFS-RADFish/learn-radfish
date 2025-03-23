@@ -242,7 +242,7 @@ function CatchLog() {
           
           {/* Catch entry form */}
           <div className="catch-form-container">
-            <h2 className="usa-prose">{editIndex !== null ? "Edit Catch" : "Add New Catch"}</h2>
+            {/* <h2 className="usa-prose">{editIndex !== null ? "Edit Catch" : "Add New Catch"}</h2> */}
             <Form onSubmit={handleAddCatch}>
               {/* Species dropdown */}
               <FormGroup error={submitted && errors.species}>
@@ -272,7 +272,6 @@ function CatchLog() {
                   <option value="Bluefin">Bluefin</option>
                   <option value="Salmon">Salmon</option>
                   <option value="Halibut">Halibut</option>
-                  <option value="Other">Other</option>
                 </Select>
                 <ErrorMessage id="species-error-message" className="error-message">
                   {(submitted && errors.species && errors.species) || "\u00A0"}

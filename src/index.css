@@ -107,9 +107,17 @@ body {
 .footer-content {
   display: flex;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: none;
+  gap: 1rem;
   margin: 0 auto;
   padding: 0 1rem;
+}
+
+/* For tablet and desktop */
+@media (min-width: 480px) {
+  .footer-content {
+    max-width: 20rem;
+  }
 }
 
 .back-button {
@@ -121,7 +129,7 @@ body {
 }
 
 .step-indicator-container {
-  margin: 2rem 0;
+  margin-top: 2rem;
   width: 100%;
   max-width: 100%;
   border-bottom: 1px solid #ccc;
