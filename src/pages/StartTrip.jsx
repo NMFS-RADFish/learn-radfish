@@ -148,7 +148,7 @@ function StartTrip() {
         <div className="content-container">
           <StepIndicator />
           <div className="start-trip-form-container">
-            <Form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit} large>
               {/* Latitude and Longitude on same row */}
               <div className="coordinate-inputs">
                 {/* Latitude Input */}
