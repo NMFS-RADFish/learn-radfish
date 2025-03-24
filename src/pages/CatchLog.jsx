@@ -1,6 +1,6 @@
 import "../index.css";
 import "./CatchLog.css";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Form,
@@ -34,6 +34,7 @@ const FIELD_TIME = "Catch time";
 
 function CatchLog() {
   const navigate = useNavigate();
+  const formRef = useRef(null);
 
   // Form data for the current catch being entered
   const [currentCatch, setCurrentCatch] = useState({
@@ -195,6 +196,7 @@ function CatchLog() {
     setEditIndex(index);
     setSubmitted(false);
     setErrors({});
+    formRef.current.scrollIntoView({ behavior: "smooth" });
   };
 
   // Handle deleting a catch
@@ -236,7 +238,7 @@ function CatchLog() {
 
   return (
     <>
-      <div className="page-content">
+      <div className="page-content" ref={formRef}>
         <div className="content-container">
           <StepIndicator />
           
