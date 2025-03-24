@@ -35,6 +35,7 @@ const FIELD_TIME = "Catch time";
 function CatchLog() {
   const navigate = useNavigate();
   const formRef = useRef(null);
+  const [timeKey, setTimeKey] = useState(0);
 
   // Form data for the current catch being entered
   const [currentCatch, setCurrentCatch] = useState({
@@ -48,13 +49,13 @@ function CatchLog() {
 
   // List of saved catches
   const [catches, setCatches] = useState([]);
-  
+
   // Track if form has been submitted for validation display
   const [submitted, setSubmitted] = useState(false);
-  
+
   // For editing existing catches
   const [editIndex, setEditIndex] = useState(null);
-  
+
   // Form validation errors
   const [errors, setErrors] = useState({});
 
@@ -66,15 +67,15 @@ function CatchLog() {
       // For latitude and longitude, apply input processing
       if (name === "latitude" || name === "longitude") {
         const { processedValue, skipUpdate } = processCoordinateInput(
-          value, 
-          name, 
-          e.target
+          value,
+          name,
+          e.target,
         );
-        
+
         if (skipUpdate) {
           return; // Skip update if validation says so
         }
-        
+
         setCurrentCatch({
           ...currentCatch,
           [name]: processedValue,
@@ -124,28 +125,28 @@ function CatchLog() {
     // Validate weight (positive number)
     const weightError = validateChain(
       validateRequired(currentCatch.weight, FIELD_WEIGHT),
-      validateNumberRange(currentCatch.weight, 0, 999999, FIELD_WEIGHT)
+      validateNumberRange(currentCatch.weight, 0, 999999, FIELD_WEIGHT),
     );
     if (weightError) newErrors.weight = weightError;
 
     // Validate length (positive number)
     const lengthError = validateChain(
       validateRequired(currentCatch.length, FIELD_LENGTH),
-      validateNumberRange(currentCatch.length, 0, 999999, FIELD_LENGTH)
+      validateNumberRange(currentCatch.length, 0, 999999, FIELD_LENGTH),
     );
     if (lengthError) newErrors.length = lengthError;
 
     // Validate latitude
     const latitudeError = validateChain(
       validateRequired(currentCatch.latitude, FIELD_LATITUDE),
-      validateLatitude(currentCatch.latitude)
+      validateLatitude(currentCatch.latitude),
     );
     if (latitudeError) newErrors.latitude = latitudeError;
 
     // Validate longitude
     const longitudeError = validateChain(
       validateRequired(currentCatch.longitude, FIELD_LONGITUDE),
-      validateLongitude(currentCatch.longitude)
+      validateLongitude(currentCatch.longitude),
     );
     if (longitudeError) newErrors.longitude = longitudeError;
 
@@ -186,6 +187,7 @@ function CatchLog() {
         longitude: "",
         time: "",
       });
+      setTimeKey((prevKey) => prevKey + 1); // Increment the key to force remount
       setSubmitted(false);
     }
   };
@@ -205,7 +207,7 @@ function CatchLog() {
       const updatedCatches = [...catches];
       updatedCatches.splice(index, 1);
       setCatches(updatedCatches);
-      
+
       // If we're currently editing this catch, reset the form
       if (editIndex === index) {
         setCurrentCatch({
@@ -228,10 +230,10 @@ function CatchLog() {
   // Handle form submission for navigating to next page
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // TODO: Save catches to storage/state management
     console.log("Catches to be saved:", catches);
-    
+
     // Navigate to next page
     navigate("/end");
   };
@@ -241,7 +243,7 @@ function CatchLog() {
       <div className="page-content" ref={formRef}>
         <div className="content-container">
           <StepIndicator />
-          
+
           {/* Catch entry form */}
           <div className="catch-form-container">
             {/* <h2 className="usa-prose">{editIndex !== null ? "Edit Catch" : "Add New Catch"}</h2> */}
@@ -275,7 +277,10 @@ function CatchLog() {
                   <option value="Salmon">Salmon</option>
                   <option value="Halibut">Halibut</option>
                 </Select>
-                <ErrorMessage id="species-error-message" className="error-message">
+                <ErrorMessage
+                  id="species-error-message"
+                  className="error-message"
+                >
                   {(submitted && errors.species && errors.species) || "\u00A0"}
                 </ErrorMessage>
               </FormGroup>
@@ -308,8 +313,12 @@ function CatchLog() {
                           : undefined
                       }
                     />
-                    <ErrorMessage id="weight-error-message" className="error-message">
-                      {(submitted && errors.weight && errors.weight) || "\u00A0"}
+                    <ErrorMessage
+                      id="weight-error-message"
+                      className="error-message"
+                    >
+                      {(submitted && errors.weight && errors.weight) ||
+                        "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
@@ -340,8 +349,12 @@ function CatchLog() {
                           : undefined
                       }
                     />
-                    <ErrorMessage id="length-error-message" className="error-message">
-                      {(submitted && errors.length && errors.length) || "\u00A0"}
+                    <ErrorMessage
+                      id="length-error-message"
+                      className="error-message"
+                    >
+                      {(submitted && errors.length && errors.length) ||
+                        "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
@@ -375,8 +388,12 @@ function CatchLog() {
                           : undefined
                       }
                     />
-                    <ErrorMessage id="latitude-error-message" className="error-message">
-                      {(submitted && errors.latitude && errors.latitude) || "\u00A0"}
+                    <ErrorMessage
+                      id="latitude-error-message"
+                      className="error-message"
+                    >
+                      {(submitted && errors.latitude && errors.latitude) ||
+                        "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
@@ -407,8 +424,12 @@ function CatchLog() {
                           : undefined
                       }
                     />
-                    <ErrorMessage id="longitude-error-message" className="error-message">
-                      {(submitted && errors.longitude && errors.longitude) || "\u00A0"}
+                    <ErrorMessage
+                      id="longitude-error-message"
+                      className="error-message"
+                    >
+                      {(submitted && errors.longitude && errors.longitude) ||
+                        "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
@@ -427,9 +448,9 @@ function CatchLog() {
                   Time<span className="text-secondary-vivid">*</span>
                 </Label>
                 <TimePicker
+                  key={timeKey}
                   id="catchTime"
                   name="time"
-                  value={currentCatch.time}
                   onChange={(time) => handleTimeChange(time)}
                   minTime="00:00"
                   maxTime="23:30"
@@ -437,9 +458,7 @@ function CatchLog() {
                     submitted && errors.time ? "error" : undefined
                   }
                   aria-describedby={
-                    submitted && errors.time
-                      ? "time-error-message"
-                      : undefined
+                    submitted && errors.time ? "time-error-message" : undefined
                   }
                 />
                 <ErrorMessage id="time-error-message" className="error-message">
@@ -466,25 +485,43 @@ function CatchLog() {
                     <div className="catch-item-content">
                       <FormGroup>
                         <Label className="recorded-label">Species:</Label>
-                        <div className="recorded-value">{catchItem.species}</div>
+                        <div className="recorded-value">
+                          {catchItem.species}
+                        </div>
                       </FormGroup>
                       <div className="catch-item-details">
-                        <div className="catch-item-measurement">
-                          <Label className="recorded-label">Weight:</Label>
-                          <div className="recorded-value">{catchItem.weight} lbs</div>
-                        </div>
-                        <div className="catch-item-measurement">
-                          <Label className="recorded-label">Length:</Label>
-                          <div className="recorded-value">{catchItem.length} inches</div>
-                        </div>
-                        <div className="catch-item-coordinates">
-                          <Label className="recorded-label">Coordinates:</Label>
-                          <div className="recorded-value">{catchItem.latitude}°, {catchItem.longitude}°</div>
-                        </div>
-                        <div className="catch-item-time">
+                        <FormGroup className="catch-item-group">
+                          <div className="catch-item-measurement">
+                            <Label className="recorded-label">Weight:</Label>
+                            <div className="recorded-value">
+                              {catchItem.weight} lbs
+                            </div>
+                          </div>
+                          <div className="catch-item-measurement">
+                            <Label className="recorded-label">Length:</Label>
+                            <div className="recorded-value">
+                              {catchItem.length} in
+                            </div>
+                          </div>
+                        </FormGroup>
+                        <FormGroup className="catch-item-group">
+                          <div className="catch-item-coordinates">
+                            <Label className="recorded-label">Latitude:</Label>
+                            <div className="recorded-value">
+                              {catchItem.latitude}°
+                            </div>
+                          </div>
+                          <div className="catch-item-coordinates">
+                            <Label className="recorded-label">Longitude:</Label>
+                            <div className="recorded-value">
+                              {catchItem.longitude}°
+                            </div>
+                          </div>
+                        </FormGroup>
+                        <FormGroup className="catch-item-time">
                           <Label className="recorded-label">Time:</Label>
                           <div className="recorded-value">{catchItem.time}</div>
-                        </div>
+                        </FormGroup>
                       </div>
                     </div>
                     <div className="catch-item-actions">
