@@ -17,8 +17,32 @@
   max-width: none;
 }
 
-.usa-form-group > #time-label{
+.usa-form-group > #time-label {
   margin-top: -1rem;
+}
+
+.usa-combo-box {
+  width: 100%;
+}
+
+.form-label {
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+
+.recorded-label {
+  font-weight: bold;
+  text-align: left;
+}
+
+.recorded-value {
+  text-align: left;
+}
+
+.form-hint {
+  text-align: left;
+  display: block;
 }
 
 /* Error message styling */
@@ -116,7 +140,7 @@ body {
 /* For tablet and desktop */
 @media (min-width: 480px) {
   .footer-content {
-    max-width: 20rem;
+    max-width: 30rem;
   }
 }
 

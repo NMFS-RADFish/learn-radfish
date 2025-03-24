@@ -1,5 +1,4 @@
 import "../index.css";
-import "./StartTrip.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -147,7 +146,6 @@ function StartTrip() {
       <div className="page-content">
         <div className="content-container">
           <StepIndicator />
-          <div className="start-trip-form-container">
             <Form onSubmit={handleSubmit} large>
               {/* Latitude and Longitude on same row */}
               <div className="coordinate-inputs">
@@ -263,7 +261,7 @@ function StartTrip() {
                 <Label
                   htmlFor="startTime"
                   error={submitted && errors.startTime}
-                  className="form-label time-label"
+                  className="form-label"
                 >
                   Time<span className="text-secondary-vivid">*</span>
                 </Label>
@@ -291,7 +289,6 @@ function StartTrip() {
             </Form>
           </div>
         </div>
-      </div>
 
       <Footer nextPath="/catch" onNextClick={handleSubmit} />
     </>

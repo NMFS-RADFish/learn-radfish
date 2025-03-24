@@ -243,7 +243,7 @@ function CatchLog() {
           {/* Catch entry form */}
           <div className="catch-form-container">
             {/* <h2 className="usa-prose">{editIndex !== null ? "Edit Catch" : "Add New Catch"}</h2> */}
-            <Form onSubmit={handleAddCatch}>
+            <Form onSubmit={handleAddCatch} large>
               {/* Species dropdown */}
               <FormGroup error={submitted && errors.species}>
                 <Label
@@ -462,19 +462,26 @@ function CatchLog() {
                 {catches.map((catchItem, index) => (
                   <div key={index} className="catch-item">
                     <div className="catch-item-content">
-                      <h3 className="margin-top-0 margin-bottom-05">{catchItem.species}</h3>
+                      <FormGroup>
+                        <Label className="recorded-label">Species:</Label>
+                        <div className="recorded-value">{catchItem.species}</div>
+                      </FormGroup>
                       <div className="catch-item-details">
                         <div className="catch-item-measurement">
-                          <span className="catch-item-label">Weight:</span> {catchItem.weight} lbs
+                          <Label className="recorded-label">Weight:</Label>
+                          <div className="recorded-value">{catchItem.weight} lbs</div>
                         </div>
                         <div className="catch-item-measurement">
-                          <span className="catch-item-label">Length:</span> {catchItem.length} inches
+                          <Label className="recorded-label">Length:</Label>
+                          <div className="recorded-value">{catchItem.length} inches</div>
                         </div>
                         <div className="catch-item-coordinates">
-                          <span className="catch-item-label">Coordinates:</span> {catchItem.latitude}°, {catchItem.longitude}°
+                          <Label className="recorded-label">Coordinates:</Label>
+                          <div className="recorded-value">{catchItem.latitude}°, {catchItem.longitude}°</div>
                         </div>
                         <div className="catch-item-time">
-                          <span className="catch-item-label">Time:</span> {catchItem.time}
+                          <Label className="recorded-label">Time:</Label>
+                          <div className="recorded-value">{catchItem.time}</div>
                         </div>
                       </div>
                     </div>
