@@ -225,7 +225,7 @@ function StartTrip() {
                   submitted && errors.startTime ? "error" : undefined
                 }
                 className={
-                  submitted && errors.tripDate ? "usa-input--error error-input-field" : ""
+                  submitted && errors.startTime ? "usa-input--error error-input-field" : ""
                 }
                 aria-describedby={
                   submitted && errors.startTime

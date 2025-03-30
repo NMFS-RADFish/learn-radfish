@@ -14,13 +14,6 @@ import {
 } from "@trussworks/react-uswds";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
-import {
-  validateRequired,
-  validateLatitude,
-  validateLongitude,
-  validateNumberRange,
-  validateChain,
-} from "../utils/validation";
 import { processCoordinateInput } from "../utils/inputProcessing";
 
 // Field name constants
@@ -30,6 +23,79 @@ const FIELD_LENGTH = "Length";
 const FIELD_LATITUDE = "Latitude";
 const FIELD_LONGITUDE = "Longitude";
 const FIELD_TIME = "Catch time";
+
+// Species options
+const SPECIES_OPTIONS = ["Yellowfin", "Bluefin", "Salmon", "Halibut"];
+
+// Validation functions
+// Validates that a field is not empty
+const validateRequired = (value, fieldName) => {
+  if (!value && value !== 0) {
+    return `${fieldName} is required`;
+  }
+  return null;
+};
+
+// Validates that a number is within a specified range
+const validateNumberRange = (value, min, max, fieldName) => {
+  if (value === "" || value === null || value === undefined) {
+    return null; // Empty validation is handled by validateRequired
+  }
+
+  const numValue = Number(value);
+
+  if (isNaN(numValue)) {
+    return `${fieldName} must be a valid number`;
+  }
+
+  if (numValue < min) {
+    return `${fieldName} must be at least ${min}`;
+  }
+
+  if (numValue > max) {
+    return `${fieldName} is too large`;
+  }
+
+  return null;
+};
+
+// Validates latitude is between -90 and 90
+const validateLatitude = (value) => {
+  if (value === "" || value === null || value === undefined) {
+    return null; // Empty validation is handled by validateRequired
+  }
+
+  const numValue = Number(value);
+
+  if (isNaN(numValue)) {
+    return `${FIELD_LATITUDE} must be a valid number`;
+  }
+
+  if (numValue < -90 || numValue > 90) {
+    return `${FIELD_LATITUDE} must be between -90 and 90`;
+  }
+
+  return null;
+};
+
+// Validates longitude is between -180 and 180
+const validateLongitude = (value) => {
+  if (value === "" || value === null || value === undefined) {
+    return null; // Empty validation is handled by validateRequired
+  }
+
+  const numValue = Number(value);
+
+  if (isNaN(numValue)) {
+    return `${FIELD_LONGITUDE} must be a valid number`;
+  }
+
+  if (numValue < -180 || numValue > 180) {
+    return `${FIELD_LONGITUDE} must be between -180 and 180`;
+  }
+
+  return null;
+};
 
 function CatchLog() {
   const navigate = useNavigate();
@@ -113,39 +179,52 @@ function CatchLog() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate species
+    // Validate species (required)
     const speciesError = validateRequired(currentCatch.species, FIELD_SPECIES);
     if (speciesError) newErrors.species = speciesError;
 
-    // Validate weight (positive number)
-    const weightError = validateChain(
-      validateRequired(currentCatch.weight, FIELD_WEIGHT),
-      validateNumberRange(currentCatch.weight, 0, 999999, FIELD_WEIGHT),
-    );
+    // Validate weight (required and reasonable range)
+    let weightError = validateRequired(currentCatch.weight, FIELD_WEIGHT);
+    if (!weightError && currentCatch.weight) {
+      weightError = validateNumberRange(
+        currentCatch.weight,
+        0,
+        2000,
+        FIELD_WEIGHT,
+      );
+    }
     if (weightError) newErrors.weight = weightError;
 
-    // Validate length (positive number)
-    const lengthError = validateChain(
-      validateRequired(currentCatch.length, FIELD_LENGTH),
-      validateNumberRange(currentCatch.length, 0, 999999, FIELD_LENGTH),
-    );
+    // Validate length (required and reasonable range)
+    let lengthError = validateRequired(currentCatch.length, FIELD_LENGTH);
+    if (!lengthError && currentCatch.length) {
+      lengthError = validateNumberRange(
+        currentCatch.length,
+        0,
+        240,
+        FIELD_LENGTH,
+      );
+    }
     if (lengthError) newErrors.length = lengthError;
 
-    // Validate latitude
-    const latitudeError = validateChain(
-      validateRequired(currentCatch.latitude, FIELD_LATITUDE),
-      validateLatitude(currentCatch.latitude),
-    );
+    // Validate latitude (required and valid range)
+    let latitudeError = validateRequired(currentCatch.latitude, FIELD_LATITUDE);
+    if (!latitudeError && currentCatch.latitude) {
+      latitudeError = validateLatitude(currentCatch.latitude);
+    }
     if (latitudeError) newErrors.latitude = latitudeError;
 
-    // Validate longitude
-    const longitudeError = validateChain(
-      validateRequired(currentCatch.longitude, FIELD_LONGITUDE),
-      validateLongitude(currentCatch.longitude),
+    // Validate longitude (required and valid range)
+    let longitudeError = validateRequired(
+      currentCatch.longitude,
+      FIELD_LONGITUDE,
     );
+    if (!longitudeError && currentCatch.longitude) {
+      longitudeError = validateLongitude(currentCatch.longitude);
+    }
     if (longitudeError) newErrors.longitude = longitudeError;
 
-    // Validate time
+    // Validate time (required)
     const timeError = validateRequired(currentCatch.time, FIELD_TIME);
     if (timeError) newErrors.time = timeError;
 
@@ -162,7 +241,6 @@ function CatchLog() {
 
     // If no errors, add catch to list
     if (Object.keys(newErrors).length === 0) {
-      
       // Add new catch
       setCatches([...catches, { ...currentCatch }]);
 
@@ -253,10 +331,11 @@ function CatchLog() {
                   }
                 >
                   <option value="">-Select-</option>
-                  <option value="Yellowfin">Yellowfin</option>
-                  <option value="Bluefin">Bluefin</option>
-                  <option value="Salmon">Salmon</option>
-                  <option value="Halibut">Halibut</option>
+                  {SPECIES_OPTIONS.map((species) => (
+                    <option key={species} value={species}>
+                      {species}
+                    </option>
+                  ))}
                 </Select>
                 <ErrorMessage
                   id="species-error-message"
@@ -342,9 +421,7 @@ function CatchLog() {
               </div>
 
               {/* Catch Time */}
-              <FormGroup
-                error={submitted && errors.time}
-              >
+              <FormGroup error={submitted && errors.time}>
                 <Label
                   htmlFor="catchTime"
                   error={submitted && errors.time}
@@ -363,6 +440,11 @@ function CatchLog() {
                   step={15}
                   validationStatus={
                     submitted && errors.time ? "error" : undefined
+                  }
+                  className={
+                    submitted && errors.time
+                      ? "usa-input--error error-input-field"
+                      : ""
                   }
                   aria-describedby={
                     submitted && errors.time ? "time-error-message" : undefined
@@ -450,7 +532,11 @@ function CatchLog() {
 
               {/* Add Catch Button */}
               <div className="catch-form-actions">
-                <Button type="submit" className="add-catch-button" accentStyle="cool">
+                <Button
+                  type="submit"
+                  className="add-catch-button"
+                  accentStyle="cool"
+                >
                   Add Catch
                 </Button>
               </div>
@@ -477,7 +563,7 @@ function CatchLog() {
                           Delete <Icon.Delete size={3} aria-hidden="true" />
                         </Button>
                       </div>
-                      
+
                       {/* Species dropdown */}
                       <FormGroup>
                         <Label
@@ -490,13 +576,20 @@ function CatchLog() {
                           id={`recorded-species-${index}`}
                           name="species"
                           value={catchItem.species}
-                          onChange={(e) => handleRecordedCatchChange(index, "species", e.target.value)}
+                          onChange={(e) =>
+                            handleRecordedCatchChange(
+                              index,
+                              "species",
+                              e.target.value,
+                            )
+                          }
                         >
                           <option value="">-Select-</option>
-                          <option value="Yellowfin">Yellowfin</option>
-                          <option value="Bluefin">Bluefin</option>
-                          <option value="Salmon">Salmon</option>
-                          <option value="Halibut">Halibut</option>
+                          {SPECIES_OPTIONS.map((species) => (
+                            <option key={species} value={species}>
+                              {species}
+                            </option>
+                          ))}
                         </Select>
                       </FormGroup>
 
@@ -509,7 +602,8 @@ function CatchLog() {
                               htmlFor={`recorded-weight-${index}`}
                               className="form-label"
                             >
-                              Weight<span className="text-secondary-vivid">*</span>
+                              Weight
+                              <span className="text-secondary-vivid">*</span>
                             </Label>
                             <span className="usa-hint form-hint">lbs</span>
                             <TextInput
@@ -517,8 +611,12 @@ function CatchLog() {
                               name="weight"
                               type="number"
                               value={catchItem.weight}
-                              onChange={(e) => 
-                                handleRecordedCatchChange(index, "weight", e.target.value)
+                              onChange={(e) =>
+                                handleRecordedCatchChange(
+                                  index,
+                                  "weight",
+                                  e.target.value,
+                                )
                               }
                             />
                           </FormGroup>
@@ -531,7 +629,8 @@ function CatchLog() {
                               htmlFor={`recorded-length-${index}`}
                               className="form-label"
                             >
-                              Length<span className="text-secondary-vivid">*</span>
+                              Length
+                              <span className="text-secondary-vivid">*</span>
                             </Label>
                             <span className="usa-hint form-hint">inches</span>
                             <TextInput
@@ -539,8 +638,12 @@ function CatchLog() {
                               name="length"
                               type="number"
                               value={catchItem.length}
-                              onChange={(e) => 
-                                handleRecordedCatchChange(index, "length", e.target.value)
+                              onChange={(e) =>
+                                handleRecordedCatchChange(
+                                  index,
+                                  "length",
+                                  e.target.value,
+                                )
                               }
                             />
                           </FormGroup>
@@ -559,7 +662,17 @@ function CatchLog() {
                           id={`recorded-time-${index}`}
                           name="time"
                           defaultValue={catchItem.time}
-                          onChange={(time) => handleRecordedTimeChange(index, time)}
+                          onChange={(time) =>
+                            handleRecordedTimeChange(index, time)
+                          }
+                          validationStatus={
+                            submitted && errors.time ? "error" : undefined
+                          }
+                          className={
+                            submitted && errors.time
+                              ? "usa-input--error error-input-field"
+                              : ""
+                          }
                           minTime="00:00"
                           maxTime="23:30"
                           step={15}
@@ -575,7 +688,8 @@ function CatchLog() {
                               htmlFor={`recorded-latitude-${index}`}
                               className="form-label"
                             >
-                              Latitude<span className="text-secondary-vivid">*</span>
+                              Latitude
+                              <span className="text-secondary-vivid">*</span>
                             </Label>
                             <span className="usa-hint form-hint">DD</span>
                             <TextInput
@@ -584,14 +698,19 @@ function CatchLog() {
                               type="number"
                               value={catchItem.latitude}
                               onChange={(e) => {
-                                const { processedValue, skipUpdate } = processCoordinateInput(
-                                  e.target.value,
-                                  "latitude",
-                                  e.target
-                                );
-                                
+                                const { processedValue, skipUpdate } =
+                                  processCoordinateInput(
+                                    e.target.value,
+                                    "latitude",
+                                    e.target,
+                                  );
+
                                 if (!skipUpdate) {
-                                  handleRecordedCatchChange(index, "latitude", processedValue);
+                                  handleRecordedCatchChange(
+                                    index,
+                                    "latitude",
+                                    processedValue,
+                                  );
                                 }
                               }}
                             />
@@ -605,7 +724,8 @@ function CatchLog() {
                               htmlFor={`recorded-longitude-${index}`}
                               className="form-label"
                             >
-                              Longitude<span className="text-secondary-vivid">*</span>
+                              Longitude
+                              <span className="text-secondary-vivid">*</span>
                             </Label>
                             <span className="usa-hint form-hint">DD</span>
                             <TextInput
@@ -614,14 +734,19 @@ function CatchLog() {
                               type="number"
                               value={catchItem.longitude}
                               onChange={(e) => {
-                                const { processedValue, skipUpdate } = processCoordinateInput(
-                                  e.target.value,
-                                  "longitude",
-                                  e.target
-                                );
-                                
+                                const { processedValue, skipUpdate } =
+                                  processCoordinateInput(
+                                    e.target.value,
+                                    "longitude",
+                                    e.target,
+                                  );
+
                                 if (!skipUpdate) {
-                                  handleRecordedCatchChange(index, "longitude", processedValue);
+                                  handleRecordedCatchChange(
+                                    index,
+                                    "longitude",
+                                    processedValue,
+                                  );
                                 }
                               }}
                             />
