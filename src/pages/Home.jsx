@@ -6,12 +6,13 @@ function HomePage() {
   return (
     <>
       <div className="page-content">
-        <img src="/icons/radfish.png" alt="RADFish logo" height="200" />
-        <h1>Welcome to Pelagix</h1>
-        <p>Track your fishing trips and catches with this application.</p>
+        <h1>Welcome Captain Jake Lawson</h1>
+        <div style={{ backgroundColor: '#d3d3d3', padding: '20px', marginTop: '20px', maxWidth: '30rem', width: '100%' }}>
+          <p>{'{previous trips & statuses}'}</p>
+        </div>
       </div>
 
-      <Footer nextPath="/start" nextLabel="Start New Trip" />
+      <Footer nextPath="/start" nextLabel="Start New Trip" showBackButton={false} />
     </>
   );
 }

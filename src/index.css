@@ -194,11 +194,6 @@ FOOTER STYLES
   justify-content: center;
 }
 
-/* For pages with only one button in the footer */
-.single-button {
-  justify-content: center;
-}
-
 /* 
 =========================================
 STEP INDICATOR STYLES

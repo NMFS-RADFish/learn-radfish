@@ -245,7 +245,7 @@ function StartTrip() {
         </div>
       </div>
 
-      <Footer nextPath="/catch" onNextClick={handleSubmit} />
+      <Footer backPath="/" nextPath="/catch" onNextClick={handleSubmit} />
     </>
   );
 }
