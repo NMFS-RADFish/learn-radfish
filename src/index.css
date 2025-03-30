@@ -112,6 +112,11 @@ USWDS COMPONENT OVERRIDES
 FORM STYLING
 =========================================
 */
+
+.form {
+  margin-top: 3rem;
+}
+
 .form-label {
   text-align: left;
   display: block;
@@ -130,6 +135,20 @@ FORM STYLING
 .form-hint {
   text-align: left;
   display: block;
+}
+
+.error-input-field {
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.error-input-field > input {
+  margin-top: 0;
+}
+
+.error-input-field > .usa-date-picker > input {
+  margin-top: 0;
 }
 
 /* Error message styling */

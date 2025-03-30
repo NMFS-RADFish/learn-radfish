@@ -3,26 +3,18 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Form,
-  Label,
-  TextInput,
   FormGroup,
   ErrorMessage,
   TimePicker,
   Select,
+  Label,
 } from "@trussworks/react-uswds";
+import { DatePicker } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
-import {
-  validateRequired,
-  validateLatitude,
-  validateLongitude,
-  validateChain,
-} from "../utils/validation";
-import { processCoordinateInput } from "../utils/inputProcessing";
 
 // Field name constants
-const FIELD_LATITUDE = "Latitude";
-const FIELD_LONGITUDE = "Longitude";
+const FIELD_DATE = "Trip date";
 const FIELD_WEATHER = "Weather condition";
 const FIELD_START_TIME = "Start time";
 
@@ -31,8 +23,7 @@ function StartTrip() {
 
   // TODO: Replace with RADFish IndexedDB Storage
   const [formData, setFormData] = useState({
-    latitude: "",
-    longitude: "",
+    tripDate: "",
     weather: "",
     startTime: "",
   });
@@ -46,29 +37,11 @@ function StartTrip() {
     if (e && e.target) {
       const { name, value } = e.target;
 
-      // For latitude and longitude, apply input processing
-      if (name === FIELD_LATITUDE.toLowerCase() || name === FIELD_LONGITUDE.toLowerCase()) {
-        const { processedValue, skipUpdate } = processCoordinateInput(
-          value, 
-          name, 
-          e.target
-        );
-        
-        if (skipUpdate) {
-          return; // Skip update if validation says so
-        }
-        
-        setFormData({
-          ...formData,
-          [name]: processedValue,
-        });
-      } else {
-        // For other inputs, update normally
-        setFormData({
-          ...formData,
-          [name]: value,
-        });
-      }
+      // Update form data normally
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
 
       // Clear error when user starts typing
       if (errors[name]) {
@@ -77,6 +50,30 @@ function StartTrip() {
           [name]: undefined,
         });
       }
+    }
+  };
+
+  // Handle date picker changes
+  const handleDateChange = (event) => {
+
+    // Extract the value from the event target
+    if (event && event.target && event.target.value) {
+      const dateValue = event.target.value;
+
+      setFormData({
+        ...formData,
+        tripDate: dateValue,
+      });
+
+      // Clear error when user selects a date
+      if (errors.tripDate) {
+        setErrors({
+          ...errors,
+          tripDate: undefined,
+        });
+      }
+    } else {
+      console.error("Could not extract date value from event:", event);
     }
   };
 
@@ -96,23 +93,21 @@ function StartTrip() {
     }
   };
 
+  // Validate a required field
+  const validateRequired = (value, fieldName) => {
+    if (!value || value.trim() === "") {
+      return `${fieldName} is required`;
+    }
+    return null;
+  };
+
   // Validate form data
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate latitude
-    const latitudeError = validateChain(
-      validateRequired(formData.latitude, FIELD_LATITUDE),
-      validateLatitude(formData.latitude),
-    );
-    if (latitudeError) newErrors.latitude = latitudeError;
-
-    // Validate longitude
-    const longitudeError = validateChain(
-      validateRequired(formData.longitude, FIELD_LONGITUDE),
-      validateLongitude(formData.longitude),
-    );
-    if (longitudeError) newErrors.longitude = longitudeError;
+    // Validate trip date
+    const dateError = validateRequired(formData.tripDate, FIELD_DATE);
+    if (dateError) newErrors.tripDate = dateError;
 
     // Validate weather
     const weatherError = validateRequired(formData.weather, FIELD_WEATHER);
@@ -146,149 +141,109 @@ function StartTrip() {
       <div className="page-content">
         <div className="content-container">
           <StepIndicator />
-            <Form onSubmit={handleSubmit} large>
-              {/* Latitude and Longitude on same row */}
-              <div className="coordinate-inputs">
-                {/* Latitude Input */}
-                <div className="coordinate-input">
-                  <FormGroup error={submitted && errors.latitude}>
-                    <Label
-                      htmlFor="latitude"
-                      error={submitted && errors.latitude}
-                      className="form-label"
-                    >
-                      Latitude<span className="text-secondary-vivid">*</span>
-                    </Label>
-                    <span className="usa-hint form-hint">DD</span>
+          <Form onSubmit={handleSubmit} large className="form">
+            {/* Trip Date */}
+            <FormGroup error={submitted && errors.tripDate}>
+              <DatePicker
+                id="tripDate"
+                name="tripDate"
+                value={formData.tripDate}
+                hint="Date"
+                onChange={handleDateChange}
+                className={
+                  submitted && errors.tripDate ? "usa-input--error error-input-field" : ""
+                }
+                aria-describedby={
+                  submitted && errors.tripDate
+                    ? "tripDate-error-message"
+                    : undefined
+                }
+              />
 
-                    <TextInput
-                      id="latitude"
-                      name="latitude"
-                      type="number"
-                      value={formData.latitude}
-                      onChange={handleInputChange}
-                      validationStatus={
-                        submitted && errors.latitude ? "error" : undefined
-                      }
-                      aria-describedby={
-                        submitted && errors.latitude
-                          ? "latitude-error-message"
-                          : undefined
-                      }
-                    />
-                    <ErrorMessage id="latitude-error-message" className="error-message">
-                      {(submitted && errors.latitude && errors.latitude) ||
-                        "\u00A0"}
-                    </ErrorMessage>
-                  </FormGroup>
-                </div>
+              <ErrorMessage
+                id="tripDate-error-message"
+                className="error-message"
+              >
+                {(submitted && errors.tripDate && errors.tripDate) || "\u00A0"}
+              </ErrorMessage>
+            </FormGroup>
 
-                {/* Longitude Input */}
-                <div className="coordinate-input">
-                  <FormGroup error={submitted && errors.longitude}>
-                    <Label
-                      htmlFor="longitude"
-                      error={submitted && errors.longitude}
-                      className="form-label"
-                    >
-                      Longitude<span className="text-secondary-vivid">*</span>
-                    </Label>
-                    <span className="usa-hint form-hint">DD</span>
-                    <TextInput
-                      id="longitude"
-                      name="longitude"
-                      type="number"
-                      value={formData.longitude}
-                      onChange={handleInputChange}
-                      validationStatus={
-                        submitted && errors.longitude ? "error" : undefined
-                      }
-                      aria-describedby={
-                        submitted && errors.longitude
-                          ? "longitude-error-message"
-                          : undefined
-                      }
-                    />
-                    <ErrorMessage id="longitude-error-message" className="error-message">
-                      {(submitted && errors.longitude && errors.longitude) ||
-                        "\u00A0"}
-                    </ErrorMessage>
-                  </FormGroup>
-                </div>
-              </div>
-
-              {/* Weather Conditions Select - Full Width */}
-              <FormGroup
+            {/* Weather Conditions Select - Full Width */}
+            <FormGroup error={submitted && errors.weather}>
+              <Label
+                htmlFor="weather"
                 error={submitted && errors.weather}
-                className="margin-bottom-4"
+                className="form-label"
               >
-                <Label
-                  htmlFor="weather"
-                  error={submitted && errors.weather}
-                  className="form-label"
-                >
-                  Weather<span className="text-secondary-vivid">*</span>
-                </Label>
-                <Select
-                  id="weather"
-                  name="weather"
-                  value={formData.weather}
-                  onChange={handleInputChange}
-                  validationStatus={
-                    submitted && errors.weather ? "error" : undefined
-                  }
-                  aria-describedby={
-                    submitted && errors.weather
-                      ? "weather-error-message"
-                      : undefined
-                  }
-                >
-                  <option value="">-Select-</option>
-                  <option value="Sunny">Sunny</option>
-                  <option value="Cloudy">Cloudy</option>
-                  <option value="Rainy">Rainy</option>
-                </Select>
-                <ErrorMessage id="weather-error-message" className="error-message">
-                  {(submitted && errors.weather && errors.weather) || "\u00A0"}
-                </ErrorMessage>
-              </FormGroup>
+                Weather<span className="text-secondary-vivid">*</span>
+              </Label>
+              <Select
+                id="weather"
+                name="weather"
+                value={formData.weather}
+                onChange={handleInputChange}
+                validationStatus={
+                  submitted && errors.weather ? "error" : undefined
+                }
+                aria-describedby={
+                  submitted && errors.weather
+                    ? "weather-error-message"
+                    : undefined
+                }
+              >
+                <option value="">-Select-</option>
+                <option value="Sunny">Sunny</option>
+                <option value="Cloudy">Cloudy</option>
+                <option value="Rainy">Rainy</option>
+              </Select>
+              <ErrorMessage
+                id="weather-error-message"
+                className="error-message"
+              >
+                {(submitted && errors.weather && errors.weather) || "\u00A0"}
+              </ErrorMessage>
+            </FormGroup>
 
-              {/* Trip Start Time - Full Width */}
-              <FormGroup
+            {/* Trip Start Time - Full Width */}
+            <FormGroup error={submitted && errors.startTime}>
+              <Label
+                htmlFor="startTime"
                 error={submitted && errors.startTime}
-                className="margin-bottom-4"
+                className="form-label"
               >
-                <Label
-                  htmlFor="startTime"
-                  error={submitted && errors.startTime}
-                  className="form-label"
-                >
-                  Time<span className="text-secondary-vivid">*</span>
-                </Label>
-                <TimePicker
-                  id="time"
-                  name="time"
-                  value={formData.startTime}
-                  onChange={(time) => handleTimeChange(time)}
-                  minTime="00:00"
-                  maxTime="23:30"
-                  validationStatus={
-                    submitted && errors.startTime ? "error" : undefined
-                  }
-                  aria-describedby={
-                    submitted && errors.startTime
-                      ? "startTime-error-message"
-                      : undefined
-                  }
-                />
-                <ErrorMessage id="startTime-error-message" className="error-message">
-                  {(submitted && errors.startTime && errors.startTime) ||
-                    "\u00A0"}
-                </ErrorMessage>
-              </FormGroup>
-            </Form>
-          </div>
+                Time<span className="text-secondary-vivid">*</span>
+              </Label>
+              <TimePicker
+                id="time"
+                name="time"
+                defaultValue={formData.startTime}
+                onChange={(time) => handleTimeChange(time)}
+                minTime="00:00"
+                maxTime="23:30"
+                step={15}
+                validationStatus={
+                  submitted && errors.startTime ? "error" : undefined
+                }
+                className={
+                  submitted && errors.tripDate ? "usa-input--error error-input-field" : ""
+                }
+                aria-describedby={
+                  submitted && errors.startTime
+                    ? "startTime-error-message"
+                    : undefined
+                }
+              />
+              <ErrorMessage
+                id="startTime-error-message"
+                className="error-message"
+              >
+                {(submitted && errors.startTime && errors.startTime) ||
+                  "\u00A0"}
+              </ErrorMessage>
+            </FormGroup>
+          </Form>
         </div>
+      </div>
 
       <Footer nextPath="/catch" onNextClick={handleSubmit} />
     </>
