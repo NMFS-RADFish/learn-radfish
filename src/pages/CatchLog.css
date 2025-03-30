@@ -46,69 +46,73 @@
   min-width: 150px;
 }
 
-/* Catch List Styles */
-.catch-list-container {
+/* Recorded Catches Styles */
+.recorded-catches-container {
   width: 100%;
   border-top: 1px solid #dfe1e2;
   padding-top: 1.5rem;
 }
 
-.catch-list {
+.recorded-catches-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
   width: 100%;
 }
 
-.catch-item {
-  padding: 1rem;
-  border: 1px solid #dfe1e2;
-  border-radius: 0.25rem;
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+.recorded-catch-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #dfe1e2;
 }
 
-.catch-item-content {
-  flex: 1;
+.recorded-catch-form {
+  position: relative;
+  width: 100%;
 }
 
-.catch-item-measurement {
-  display: flex;
-  flex-direction: column;
-}
-
-.catch-item-label {
-  font-weight: bold;
-}
-
-.catch-item-group {
-  display: flex;
-}
-
-.catch-item-group > div {
-  flex: 1;
-}
-
-.catch-item-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.edit-catch-button,
-.delete-catch-button {
-  color: #1b1b1b;
-  margin: 0;
-  padding: 0.25rem;
+.recorded-catch-actions {
+  position: absolute;
+  top: -15px;
+  right: 0;
 }
 
 .delete-catch-button {
   color: #d83933;
+  margin: 0;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.edit-catch-button:hover,
 .delete-catch-button:hover {
   background-color: rgba(0, 0, 0, 0.05);
   border-radius: 0.25rem;
+}
+
+/* Reduce spacing between form groups in recorded catches */
+.recorded-catch-form .usa-form-group {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.recorded-catch-form .form-label {
+  margin-top: 0;
+}
+
+/* Adjust spacing for recorded catches */
+.recorded-catch-form .usa-select,
+.recorded-catch-form .usa-input,
+.recorded-catch-form .usa-time-picker {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* Style for time display */
+.time-display {
+  font-size: 0.875rem;
+  color: #1b1b1b;
+  background-color: #f0f0f0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
 }

@@ -1,6 +1,6 @@
 import "../index.css";
 import "./CatchLog.css";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Form,
@@ -34,7 +34,6 @@ const FIELD_TIME = "Catch time";
 
 function CatchLog() {
   const navigate = useNavigate();
-  const formRef = useRef(null);
   const [timeKey, setTimeKey] = useState(0);
 
   // Form data for the current catch being entered
@@ -52,9 +51,6 @@ function CatchLog() {
 
   // Track if form has been submitted for validation display
   const [submitted, setSubmitted] = useState(false);
-
-  // For editing existing catches
-  const [editIndex, setEditIndex] = useState(null);
 
   // Form validation errors
   const [errors, setErrors] = useState({});
@@ -167,16 +163,9 @@ function CatchLog() {
 
     // If no errors, add catch to list
     if (Object.keys(newErrors).length === 0) {
-      if (editIndex !== null) {
-        // Update existing catch
-        const updatedCatches = [...catches];
-        updatedCatches[editIndex] = { ...currentCatch };
-        setCatches(updatedCatches);
-        setEditIndex(null);
-      } else {
-        // Add new catch
-        setCatches([...catches, { ...currentCatch }]);
-      }
+      
+      // Add new catch
+      setCatches([...catches, { ...currentCatch }]);
 
       // Reset form
       setCurrentCatch({
@@ -192,13 +181,24 @@ function CatchLog() {
     }
   };
 
-  // Handle editing a catch
-  const handleEditCatch = (index) => {
-    setCurrentCatch({ ...catches[index] });
-    setEditIndex(index);
-    setSubmitted(false);
-    setErrors({});
-    formRef.current.scrollIntoView({ behavior: "smooth" });
+  // Handle catch input change for recorded catches
+  const handleRecordedCatchChange = (index, field, value) => {
+    const updatedCatches = [...catches];
+    updatedCatches[index] = {
+      ...updatedCatches[index],
+      [field]: value,
+    };
+    setCatches(updatedCatches);
+  };
+
+  // Handle time change for recorded catches
+  const handleRecordedTimeChange = (index, time) => {
+    const updatedCatches = [...catches];
+    updatedCatches[index] = {
+      ...updatedCatches[index],
+      time: time,
+    };
+    setCatches(updatedCatches);
   };
 
   // Handle deleting a catch
@@ -207,23 +207,6 @@ function CatchLog() {
       const updatedCatches = [...catches];
       updatedCatches.splice(index, 1);
       setCatches(updatedCatches);
-
-      // If we're currently editing this catch, reset the form
-      if (editIndex === index) {
-        setCurrentCatch({
-          species: "",
-          weight: "",
-          length: "",
-          latitude: "",
-          longitude: "",
-          time: "",
-        });
-        setEditIndex(null);
-        setSubmitted(false);
-      } else if (editIndex !== null && editIndex > index) {
-        // Adjust editIndex if we're deleting a catch before the one being edited
-        setEditIndex(editIndex - 1);
-      }
     }
   };
 
@@ -240,13 +223,12 @@ function CatchLog() {
 
   return (
     <>
-      <div className="page-content" ref={formRef}>
+      <div className="page-content">
         <div className="content-container">
           <StepIndicator />
 
           {/* Catch entry form */}
           <div className="catch-form-container">
-            {/* <h2 className="usa-prose">{editIndex !== null ? "Edit Catch" : "Add New Catch"}</h2> */}
             <Form onSubmit={handleAddCatch} large>
               {/* Species dropdown */}
               <FormGroup error={submitted && errors.species}>
@@ -451,9 +433,11 @@ function CatchLog() {
                   key={timeKey}
                   id="catchTime"
                   name="time"
-                  onChange={(time) => handleTimeChange(time)}
+                  defaultValue={currentCatch.time}
+                  onChange={handleTimeChange}
                   minTime="00:00"
                   maxTime="23:30"
+                  step={15}
                   validationStatus={
                     submitted && errors.time ? "error" : undefined
                   }
@@ -466,81 +450,186 @@ function CatchLog() {
                 </ErrorMessage>
               </FormGroup>
 
-              {/* Add/Update Catch Button */}
+              {/* Add Catch Button */}
               <div className="catch-form-actions">
-                <Button type="submit" className="add-catch-button">
-                  {editIndex !== null ? "Update Catch" : "Add Catch"}
+                <Button type="submit" className="add-catch-button" accentStyle="cool">
+                  Add Catch
                 </Button>
               </div>
             </Form>
           </div>
 
-          {/* Catch List */}
+          {/* Recorded Catches List */}
           {catches.length > 0 && (
-            <div className="catch-list-container margin-top-4">
+            <div className="recorded-catches-container">
               <h2 className="usa-prose">Recorded Catches</h2>
-              <div className="catch-list">
+              <div className="recorded-catches-list">
                 {catches.map((catchItem, index) => (
-                  <div key={index} className="catch-item">
-                    <div className="catch-item-content">
-                      <FormGroup>
-                        <Label className="recorded-label">Species:</Label>
-                        <div className="recorded-value">
-                          {catchItem.species}
-                        </div>
-                      </FormGroup>
-                      <div className="catch-item-details">
-                        <FormGroup className="catch-item-group">
-                          <div className="catch-item-measurement">
-                            <Label className="recorded-label">Weight:</Label>
-                            <div className="recorded-value">
-                              {catchItem.weight} lbs
-                            </div>
-                          </div>
-                          <div className="catch-item-measurement">
-                            <Label className="recorded-label">Length:</Label>
-                            <div className="recorded-value">
-                              {catchItem.length} in
-                            </div>
-                          </div>
-                        </FormGroup>
-                        <FormGroup className="catch-item-group">
-                          <div className="catch-item-coordinates">
-                            <Label className="recorded-label">Latitude:</Label>
-                            <div className="recorded-value">
-                              {catchItem.latitude}°
-                            </div>
-                          </div>
-                          <div className="catch-item-coordinates">
-                            <Label className="recorded-label">Longitude:</Label>
-                            <div className="recorded-value">
-                              {catchItem.longitude}°
-                            </div>
-                          </div>
-                        </FormGroup>
-                        <FormGroup className="catch-item-time">
-                          <Label className="recorded-label">Time:</Label>
-                          <div className="recorded-value">{catchItem.time}</div>
-                        </FormGroup>
+                  <div key={index} className="recorded-catch-item">
+                    <div className="recorded-catch-form">
+                      {/* Delete Button */}
+                      <div className="recorded-catch-actions">
+                        <Button
+                          type="button"
+                          unstyled
+                          onClick={() => handleDeleteCatch(index)}
+                          className="delete-catch-button"
+                          aria-label="Delete this catch"
+                        >
+                          Delete <Icon.Delete size={3} aria-hidden="true" />
+                        </Button>
                       </div>
-                    </div>
-                    <div className="catch-item-actions">
-                      <Button
-                        type="button"
-                        unstyled
-                        onClick={() => handleEditCatch(index)}
-                        className="edit-catch-button"
-                      >
-                        <Icon.Edit size={3} />
-                      </Button>
-                      <Button
-                        type="button"
-                        unstyled
-                        onClick={() => handleDeleteCatch(index)}
-                        className="delete-catch-button"
-                      >
-                        <Icon.Delete size={3} />
-                      </Button>
+                      
+                      {/* Species dropdown */}
+                      <FormGroup>
+                        <Label
+                          htmlFor={`recorded-species-${index}`}
+                          className="form-label"
+                        >
+                          Species<span className="text-secondary-vivid">*</span>
+                        </Label>
+                        <Select
+                          id={`recorded-species-${index}`}
+                          name="species"
+                          value={catchItem.species}
+                          onChange={(e) => handleRecordedCatchChange(index, "species", e.target.value)}
+                        >
+                          <option value="">-Select-</option>
+                          <option value="Yellowfin">Yellowfin</option>
+                          <option value="Bluefin">Bluefin</option>
+                          <option value="Salmon">Salmon</option>
+                          <option value="Halibut">Halibut</option>
+                        </Select>
+                      </FormGroup>
+
+                      {/* Weight and Length on same row */}
+                      <div className="measurement-inputs">
+                        {/* Weight Input */}
+                        <div className="measurement-input">
+                          <FormGroup>
+                            <Label
+                              htmlFor={`recorded-weight-${index}`}
+                              className="form-label"
+                            >
+                              Weight<span className="text-secondary-vivid">*</span>
+                            </Label>
+                            <span className="usa-hint form-hint">lbs</span>
+                            <TextInput
+                              id={`recorded-weight-${index}`}
+                              name="weight"
+                              type="number"
+                              value={catchItem.weight}
+                              onChange={(e) => 
+                                handleRecordedCatchChange(index, "weight", e.target.value)
+                              }
+                            />
+                          </FormGroup>
+                        </div>
+
+                        {/* Length Input */}
+                        <div className="measurement-input">
+                          <FormGroup>
+                            <Label
+                              htmlFor={`recorded-length-${index}`}
+                              className="form-label"
+                            >
+                              Length<span className="text-secondary-vivid">*</span>
+                            </Label>
+                            <span className="usa-hint form-hint">inches</span>
+                            <TextInput
+                              id={`recorded-length-${index}`}
+                              name="length"
+                              type="number"
+                              value={catchItem.length}
+                              onChange={(e) => 
+                                handleRecordedCatchChange(index, "length", e.target.value)
+                              }
+                            />
+                          </FormGroup>
+                        </div>
+                      </div>
+
+                      {/* Latitude and Longitude on same row */}
+                      <div className="coordinate-inputs">
+                        {/* Latitude Input */}
+                        <div className="coordinate-input">
+                          <FormGroup>
+                            <Label
+                              htmlFor={`recorded-latitude-${index}`}
+                              className="form-label"
+                            >
+                              Latitude<span className="text-secondary-vivid">*</span>
+                            </Label>
+                            <span className="usa-hint form-hint">DD</span>
+                            <TextInput
+                              id={`recorded-latitude-${index}`}
+                              name="latitude"
+                              type="number"
+                              value={catchItem.latitude}
+                              onChange={(e) => {
+                                const { processedValue, skipUpdate } = processCoordinateInput(
+                                  e.target.value,
+                                  "latitude",
+                                  e.target
+                                );
+                                
+                                if (!skipUpdate) {
+                                  handleRecordedCatchChange(index, "latitude", processedValue);
+                                }
+                              }}
+                            />
+                          </FormGroup>
+                        </div>
+
+                        {/* Longitude Input */}
+                        <div className="coordinate-input">
+                          <FormGroup>
+                            <Label
+                              htmlFor={`recorded-longitude-${index}`}
+                              className="form-label"
+                            >
+                              Longitude<span className="text-secondary-vivid">*</span>
+                            </Label>
+                            <span className="usa-hint form-hint">DD</span>
+                            <TextInput
+                              id={`recorded-longitude-${index}`}
+                              name="longitude"
+                              type="number"
+                              value={catchItem.longitude}
+                              onChange={(e) => {
+                                const { processedValue, skipUpdate } = processCoordinateInput(
+                                  e.target.value,
+                                  "longitude",
+                                  e.target
+                                );
+                                
+                                if (!skipUpdate) {
+                                  handleRecordedCatchChange(index, "longitude", processedValue);
+                                }
+                              }}
+                            />
+                          </FormGroup>
+                        </div>
+                      </div>
+
+                      {/* Catch Time */}
+                      <FormGroup className="margin-bottom-4">
+                        <Label
+                          htmlFor={`recorded-time-${index}`}
+                          className="form-label time-label"
+                        >
+                          Time<span className="text-secondary-vivid">*</span>
+                        </Label>
+                        <TimePicker
+                          id={`recorded-time-${index}`}
+                          name="time"
+                          defaultValue={catchItem.time}
+                          onChange={(time) => handleRecordedTimeChange(index, time)}
+                          minTime="00:00"
+                          maxTime="23:30"
+                          step={15}
+                        />
+                      </FormGroup>
                     </div>
                   </div>
                 ))}
