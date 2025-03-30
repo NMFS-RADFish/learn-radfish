@@ -1,5 +1,4 @@
 import "../index.css";
-import "./CatchLog.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -342,6 +341,38 @@ function CatchLog() {
                 </div>
               </div>
 
+              {/* Catch Time */}
+              <FormGroup
+                error={submitted && errors.time}
+              >
+                <Label
+                  htmlFor="catchTime"
+                  error={submitted && errors.time}
+                  className="form-label time-label"
+                >
+                  Time<span className="text-secondary-vivid">*</span>
+                </Label>
+                <TimePicker
+                  key={timeKey}
+                  id="catchTime"
+                  name="time"
+                  defaultValue={currentCatch.time}
+                  onChange={handleTimeChange}
+                  minTime="00:00"
+                  maxTime="23:30"
+                  step={15}
+                  validationStatus={
+                    submitted && errors.time ? "error" : undefined
+                  }
+                  aria-describedby={
+                    submitted && errors.time ? "time-error-message" : undefined
+                  }
+                />
+                <ErrorMessage id="time-error-message" className="error-message">
+                  {(submitted && errors.time && errors.time) || "\u00A0"}
+                </ErrorMessage>
+              </FormGroup>
+
               {/* Latitude and Longitude on same row */}
               <div className="coordinate-inputs">
                 {/* Latitude Input */}
@@ -416,39 +447,6 @@ function CatchLog() {
                   </FormGroup>
                 </div>
               </div>
-
-              {/* Catch Time */}
-              <FormGroup
-                error={submitted && errors.time}
-                className="margin-bottom-4"
-              >
-                <Label
-                  htmlFor="catchTime"
-                  error={submitted && errors.time}
-                  className="form-label time-label"
-                >
-                  Time<span className="text-secondary-vivid">*</span>
-                </Label>
-                <TimePicker
-                  key={timeKey}
-                  id="catchTime"
-                  name="time"
-                  defaultValue={currentCatch.time}
-                  onChange={handleTimeChange}
-                  minTime="00:00"
-                  maxTime="23:30"
-                  step={15}
-                  validationStatus={
-                    submitted && errors.time ? "error" : undefined
-                  }
-                  aria-describedby={
-                    submitted && errors.time ? "time-error-message" : undefined
-                  }
-                />
-                <ErrorMessage id="time-error-message" className="error-message">
-                  {(submitted && errors.time && errors.time) || "\u00A0"}
-                </ErrorMessage>
-              </FormGroup>
 
               {/* Add Catch Button */}
               <div className="catch-form-actions">
@@ -549,6 +547,25 @@ function CatchLog() {
                         </div>
                       </div>
 
+                      {/* Catch Time */}
+                      <FormGroup>
+                        <Label
+                          htmlFor={`recorded-time-${index}`}
+                          className="form-label time-label"
+                        >
+                          Time<span className="text-secondary-vivid">*</span>
+                        </Label>
+                        <TimePicker
+                          id={`recorded-time-${index}`}
+                          name="time"
+                          defaultValue={catchItem.time}
+                          onChange={(time) => handleRecordedTimeChange(index, time)}
+                          minTime="00:00"
+                          maxTime="23:30"
+                          step={15}
+                        />
+                      </FormGroup>
+
                       {/* Latitude and Longitude on same row */}
                       <div className="coordinate-inputs">
                         {/* Latitude Input */}
@@ -611,25 +628,6 @@ function CatchLog() {
                           </FormGroup>
                         </div>
                       </div>
-
-                      {/* Catch Time */}
-                      <FormGroup className="margin-bottom-4">
-                        <Label
-                          htmlFor={`recorded-time-${index}`}
-                          className="form-label time-label"
-                        >
-                          Time<span className="text-secondary-vivid">*</span>
-                        </Label>
-                        <TimePicker
-                          id={`recorded-time-${index}`}
-                          name="time"
-                          defaultValue={catchItem.time}
-                          onChange={(time) => handleRecordedTimeChange(index, time)}
-                          minTime="00:00"
-                          maxTime="23:30"
-                          step={15}
-                        />
-                      </FormGroup>
                     </div>
                   </div>
                 ))}
