@@ -1,5 +1,5 @@
 import "../index.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Form,
@@ -9,6 +9,7 @@ import {
   Select,
   Label,
 } from "@trussworks/react-uswds";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
@@ -18,15 +19,52 @@ const FIELD_END_TIME = "End time";
 
 function EndTrip() {
   const navigate = useNavigate();
+  const app = useApplication();
 
-  // Form state
+  // Form state - naming to match schema field names
   const [formData, setFormData] = useState({
-    weather: "",
+    endWeather: "",
     endTime: "",
   });
 
+  const [tripId, setTripId] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  
+  // Load existing trip data
+  useEffect(() => {
+    const loadExistingTrip = async () => {
+      try {
+        if (!app) return;
+        
+        const tripStore = app.stores["trip"];
+        const Form = tripStore.getCollection("Form");
+        
+        // Get draft trips
+        const existingTrips = await Form.find({ status: "draft" });
+        
+        if (existingTrips.length === 0) {
+          console.warn("No draft trips found, redirecting to start trip page");
+          navigate("/start");
+          return;
+        }
+        
+        // Use the first draft trip
+        const draftTrip = existingTrips[0];
+        setTripId(draftTrip.id);
+        
+        // Set form data from existing trip - using field names matching schema
+        setFormData({
+          endWeather: draftTrip.endWeather || "",
+          endTime: draftTrip.endTime || "",
+        });
+      } catch (error) {
+        console.error("Error loading trip data:", error);
+      }
+    };
+    
+    loadExistingTrip();
+  }, [app, navigate]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -78,8 +116,8 @@ function EndTrip() {
     const newErrors = {};
 
     // Validate weather
-    const weatherError = validateRequired(formData.weather, FIELD_WEATHER);
-    if (weatherError) newErrors.weather = weatherError;
+    const weatherError = validateRequired(formData.endWeather, FIELD_WEATHER);
+    if (weatherError) newErrors.endWeather = weatherError;
 
     // Validate end time
     const timeError = validateRequired(formData.endTime, FIELD_END_TIME);
@@ -89,7 +127,7 @@ function EndTrip() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
 
@@ -97,10 +135,41 @@ function EndTrip() {
     setErrors(newErrors);
 
     // If no errors, save data and navigate to next page
-    if (Object.keys(newErrors).length === 0) {
-      // TODO: Implement data storage here
-      console.log("End trip data to be saved:", formData);
-      navigate("/review");
+    if (Object.keys(newErrors).length === 0 && tripId) {
+      try {
+        const tripStore = app.stores["trip"];
+        const Form = tripStore.getCollection("Form");
+        
+        // Retrieve the trip to update
+        const trips = await Form.find({ id: tripId });
+        
+        if (!trips || trips.length === 0) {
+          console.error("Trip not found with ID:", tripId);
+          return;
+        }
+        
+        const tripToUpdate = trips[0];
+        
+        // Prepare update data and update trip
+        const updateData = {
+          endWeather: formData.endWeather,
+          endTime: formData.endTime,
+          status: "completed",
+          step: 4
+        };
+        // Update trip using array format
+        await Form.update(
+          {
+            id: tripToUpdate.id,
+            ...updateData
+          }
+        );
+        navigate("/review");
+      } catch (error) {
+        console.error("Error saving end trip data:", error);
+      }
+    } else {
+      console.warn("Not proceeding with update due to errors or missing trip ID");
     }
   };
 
@@ -111,25 +180,25 @@ function EndTrip() {
           <StepIndicator />
           <Form onSubmit={handleSubmit} large className="form">
             {/* Weather Conditions Select */}
-            <FormGroup error={submitted && errors.weather}>
+            <FormGroup error={submitted && errors.endWeather}>
               <Label
-                htmlFor="weather"
-                error={submitted && errors.weather}
+                htmlFor="endWeather"
+                error={submitted && errors.endWeather}
                 className="form-label"
               >
                 Weather<span className="text-secondary-vivid">*</span>
               </Label>
               <Select
-                id="weather"
-                name="weather"
-                value={formData.weather}
+                id="endWeather"
+                name="endWeather"
+                value={formData.endWeather}
                 onChange={handleInputChange}
                 validationStatus={
-                  submitted && errors.weather ? "error" : undefined
+                  submitted && errors.endWeather ? "error" : undefined
                 }
                 aria-describedby={
-                  submitted && errors.weather
-                    ? "weather-error-message"
+                  submitted && errors.endWeather
+                    ? "endWeather-error-message"
                     : undefined
                 }
               >
@@ -139,10 +208,10 @@ function EndTrip() {
                 <option value="Rainy">Rainy</option>
               </Select>
               <ErrorMessage
-                id="weather-error-message"
+                id="endWeather-error-message"
                 className="error-message"
               >
-                {(submitted && errors.weather && errors.weather) || "\u00A0"}
+                {(submitted && errors.endWeather && errors.endWeather) || "\u00A0"}
               </ErrorMessage>
             </FormGroup>
 

@@ -340,12 +340,181 @@ RESPONSIVE STYLES
   .content-container {
     max-width: 30rem;
   }
-  
+
   .footer-content {
     max-width: 30rem;
   }
-  
+
   .usa-button {
     max-width: 30rem;
   }
+}
+
+/* 
+=========================================
+REVIEW SUBMIT PAGE STYLES
+=========================================
+*/
+
+/* Basic info box styling */
+.info-box {
+  background-color: transparent;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  border-bottom: 1px solid #dfe1e2;
+}
+
+/* Card style for trip info boxes */
+.trip-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  width: 48%; /* Make cards take up roughly half the width */
+}
+
+/* Cards container for side-by-side layout */
+.trip-cards-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 3rem;
+}
+
+.trip-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trip-card-header {
+  background-color: var(--noaa-yellow-two);
+  padding: 1rem 1.5rem;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trip-card-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.trip-card-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trip-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.trip-info-row span {
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 4.5rem;
+  padding-right: 0.5rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.catch-summary {
+  padding: 1rem 0;
+  border-bottom: none;
+}
+
+.catch-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.catch-table th {
+  background-color: #f0f0f0;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #dfe1e2;
+}
+
+.catch-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #dfe1e2;
+}
+
+.catch-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Add some responsive styling */
+@media (min-width: 480px) {
+  .catch-table th,
+  .catch-table td {
+    padding: 1rem;
+  }
+}
+
+/* Responsive styling for mobile screens */
+@media (max-width: 640px) {
+  .trip-cards-container {
+    flex-direction: column;
+  }
+
+  .trip-card {
+    width: 100%;
+  }
+}
+
+/* Catch Summary Card Styles */
+.catch-summary-card {
+  width: 100%;
+}
+
+.catch-summary-card .trip-card-body {
+  padding: 0;
+  overflow: hidden;
+}
+
+.catch-summary-card .trip-card-header {
+  background-color: var(--noaa-yellow-two);
+}
+
+/* RADFish Table Styles */
+.catch-summary-card table {
+  width: 100%;
+  border: none;
+  margin: 0;
+}
+
+.catch-summary-card thead th {
+  background-color: #f0f0f0;
+  padding: 1rem;
+  font-weight: 600;
+  text-align: left;
+  font-size: 0.96rem;
+}
+
+.catch-summary-card tbody td {
+  padding: 1rem;
+  border-bottom: 1px solid #dfe1e2;
 }

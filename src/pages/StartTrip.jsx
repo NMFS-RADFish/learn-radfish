@@ -1,5 +1,5 @@
 import "../index.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Form,
@@ -9,7 +9,7 @@ import {
   Select,
   Label,
 } from "@trussworks/react-uswds";
-import { DatePicker } from "@nmfs-radfish/react-radfish";
+import { DatePicker, useApplication } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
@@ -20,14 +20,16 @@ const FIELD_START_TIME = "Start time";
 
 function StartTrip() {
   const navigate = useNavigate();
+  const app = useApplication();
 
-  // TODO: Replace with RADFish IndexedDB Storage
+  // Form state with RADFish IndexedDB Storage
   const [formData, setFormData] = useState({
     tripDate: "",
     weather: "",
     startTime: "",
   });
 
+  const [tripId, setTripId] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -55,7 +57,6 @@ function StartTrip() {
 
   // Handle date picker changes
   const handleDateChange = (event) => {
-
     // Extract the value from the event target
     if (event && event.target && event.target.value) {
       const dateValue = event.target.value;
@@ -120,8 +121,38 @@ function StartTrip() {
     return newErrors;
   };
 
+  // Load existing trip data
+  useEffect(() => {
+    const loadExistingTrip = async () => {
+      try {
+        const tripStore = app.stores["trip"];
+        const Form = tripStore.getCollection("Form");
+
+        // Get all trips in "draft" status
+        const existingTrips = await Form.find({ status: "draft" });
+
+        // If a draft trip exists, use it
+        if (existingTrips.length > 0) {
+          const draftTrip = existingTrips[0];
+          setTripId(draftTrip.id);
+          setFormData({
+            tripDate: draftTrip.tripDate || "",
+            weather: draftTrip.weather || "",
+            startTime: draftTrip.startTime || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error loading trip data:", error);
+      }
+    };
+
+    if (app) {
+      loadExistingTrip();
+    }
+  }, [app]);
+
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
 
@@ -130,9 +161,39 @@ function StartTrip() {
 
     // If no errors, save data and navigate to next page
     if (Object.keys(newErrors).length === 0) {
-      // TODO: Implement data storage here
-      console.log("Trip data to be saved:", formData);
-      navigate("/catch");
+      try {
+        const tripStore = app.stores["trip"];
+        const Form = tripStore.getCollection("Form");
+
+        if (tripId) {
+          // Update existing trip using array format
+          await Form.update({
+            id: tripId,
+            tripDate: formData.tripDate,
+            weather: formData.weather,
+            startTime: formData.startTime,
+            status: "draft",
+          });
+        } else {
+          // Create new trip
+          const newTripId = crypto.randomUUID();
+          await Form.create({
+            id: newTripId,
+            tripDate: formData.tripDate,
+            weather: formData.weather,
+            startTime: formData.startTime,
+            step: 1,
+            status: "draft",
+            endWeather: "",
+            endTime: "",
+          });
+          setTripId(newTripId);
+        }
+
+        navigate("/catch");
+      } catch (error) {
+        console.error("Error saving trip data:", error, "Trip ID:", tripId);
+      }
     }
   };
 
@@ -151,7 +212,9 @@ function StartTrip() {
                 hint="Date"
                 onChange={handleDateChange}
                 className={
-                  submitted && errors.tripDate ? "usa-input--error error-input-field" : ""
+                  submitted && errors.tripDate
+                    ? "usa-input--error error-input-field"
+                    : ""
                 }
                 aria-describedby={
                   submitted && errors.tripDate
@@ -225,7 +288,9 @@ function StartTrip() {
                   submitted && errors.startTime ? "error" : undefined
                 }
                 className={
-                  submitted && errors.startTime ? "usa-input--error error-input-field" : ""
+                  submitted && errors.startTime
+                    ? "usa-input--error error-input-field"
+                    : ""
                 }
                 aria-describedby={
                   submitted && errors.startTime

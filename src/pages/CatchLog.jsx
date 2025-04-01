@@ -1,5 +1,5 @@
 import "../index.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Form,
@@ -12,6 +12,7 @@ import {
   Button,
   Icon,
 } from "@trussworks/react-uswds";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 import { processCoordinateInput } from "../utils/inputProcessing";
@@ -99,7 +100,9 @@ const validateLongitude = (value) => {
 
 function CatchLog() {
   const navigate = useNavigate();
+  const app = useApplication();
   const [timeKey, setTimeKey] = useState(0);
+  const [tripId, setTripId] = useState(null);
 
   // Form data for the current catch being entered
   const [currentCatch, setCurrentCatch] = useState({
@@ -119,6 +122,43 @@ function CatchLog() {
 
   // Form validation errors
   const [errors, setErrors] = useState({});
+  
+  // Load existing trip and catches
+  useEffect(() => {
+    const loadTripAndCatches = async () => {
+      try {
+        if (!app) return;
+        
+        const tripStore = app.stores["trip"];
+        const Form = tripStore.getCollection("Form");
+        
+        // Get draft trips
+        const existingTrips = await Form.find({ status: "draft" });
+        
+        if (existingTrips.length === 0) {
+          console.warn("No draft trips found, redirecting to start trip page");
+          navigate("/start");
+          return;
+        }
+        
+        // Use the first draft trip
+        const draftTrip = existingTrips[0];
+        setTripId(draftTrip.id);
+        
+        // Get catches for this trip
+        const Catch = tripStore.getCollection("Catch");
+        const existingCatches = await Catch.find({ tripId: draftTrip.id });
+        
+        if (existingCatches.length > 0) {
+          setCatches(existingCatches);
+        }
+      } catch (error) {
+        console.error("Error loading trip data:", error);
+      }
+    };
+    
+    loadTripAndCatches();
+  }, [app, navigate]);
 
   // Handle input changes for text fields and selects
   const handleInputChange = (e) => {
@@ -232,70 +272,161 @@ function CatchLog() {
   };
 
   // Handle adding a new catch
-  const handleAddCatch = (e) => {
+  const handleAddCatch = async (e) => {
     e.preventDefault();
     setSubmitted(true);
 
     const newErrors = validateForm();
     setErrors(newErrors);
 
-    // If no errors, add catch to list
-    if (Object.keys(newErrors).length === 0) {
-      // Add new catch
-      setCatches([...catches, { ...currentCatch }]);
+    // If no errors, add catch to IndexedDB
+    if (Object.keys(newErrors).length === 0 && tripId) {
+      try {
+        const tripStore = app.stores["trip"];
+        const Catch = tripStore.getCollection("Catch");
+        
+        // Create new catch with UUID and tripId
+        const newCatchData = {
+          ...currentCatch,
+          id: crypto.randomUUID(),
+          tripId: tripId,
+          // Convert string values to numbers
+          weight: Number(currentCatch.weight),
+          length: Number(currentCatch.length),
+          latitude: Number(currentCatch.latitude),
+          longitude: Number(currentCatch.longitude)
+        };
+        
+        // Save to IndexedDB
+        await Catch.create(newCatchData);
+        
+        // Add to local state
+        setCatches([...catches, newCatchData]);
 
-      // Reset form
-      setCurrentCatch({
-        species: "",
-        weight: "",
-        length: "",
-        latitude: "",
-        longitude: "",
-        time: "",
-      });
-      setTimeKey((prevKey) => prevKey + 1); // Increment the key to force remount
-      setSubmitted(false);
+        // Reset form
+        setCurrentCatch({
+          species: "",
+          weight: "",
+          length: "",
+          latitude: "",
+          longitude: "",
+          time: "",
+        });
+        setTimeKey((prevKey) => prevKey + 1); // Increment the key to force remount
+        setSubmitted(false);
+      } catch (error) {
+        console.error("Error adding catch:", error);
+      }
     }
   };
 
   // Handle catch input change for recorded catches
-  const handleRecordedCatchChange = (index, field, value) => {
+  const handleRecordedCatchChange = async (index, field, value) => {
     const updatedCatches = [...catches];
+    const catchToUpdate = updatedCatches[index];
+    
+    // Update local state
     updatedCatches[index] = {
-      ...updatedCatches[index],
+      ...catchToUpdate,
       [field]: value,
     };
     setCatches(updatedCatches);
+    
+    try {
+      const tripStore = app.stores["trip"];
+      const Catch = tripStore.getCollection("Catch");
+      
+      // Prepare updated data with type conversion if needed
+      const updateData = { [field]: value };
+      if (field === 'weight' || field === 'length' || field === 'latitude' || field === 'longitude') {
+        updateData[field] = Number(value);
+      }
+      
+      // Update catch field using array format
+      await Catch.update(
+        {
+          id: catchToUpdate.id,
+          ...updateData
+        }
+      );
+    } catch (error) {
+      console.error("Error updating catch:", error, "Catch ID:", catchToUpdate.id);
+    }
   };
 
   // Handle time change for recorded catches
-  const handleRecordedTimeChange = (index, time) => {
+  const handleRecordedTimeChange = async (index, time) => {
     const updatedCatches = [...catches];
+    const catchToUpdate = updatedCatches[index];
+    
+    // Update local state
     updatedCatches[index] = {
-      ...updatedCatches[index],
+      ...catchToUpdate,
       time: time,
     };
     setCatches(updatedCatches);
+    
+    try {
+      const tripStore = app.stores["trip"];
+      const Catch = tripStore.getCollection("Catch");
+      
+      // Update catch time using array format
+      await Catch.update(
+        {
+          id: catchToUpdate.id,
+          time
+        }
+      );
+    } catch (error) {
+      console.error("Error updating catch time:", error, "Catch ID:", catchToUpdate.id);
+    }
   };
 
   // Handle deleting a catch
-  const handleDeleteCatch = (index) => {
+  const handleDeleteCatch = async (index) => {
     if (window.confirm("Are you sure you want to delete this catch?")) {
-      const updatedCatches = [...catches];
-      updatedCatches.splice(index, 1);
-      setCatches(updatedCatches);
+      try {
+        const catchToDelete = catches[index];
+        
+        const tripStore = app.stores["trip"];
+        const Catch = tripStore.getCollection("Catch");
+        
+        // Delete from IndexedDB
+        await Catch.remove(catchToDelete.id);
+        
+        // Update local state
+        const updatedCatches = [...catches];
+        updatedCatches.splice(index, 1);
+        setCatches(updatedCatches);
+      } catch (error) {
+        console.error("Error deleting catch:", error);
+      }
     }
   };
 
   // Handle form submission for navigating to next page
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // TODO: Save catches to storage/state management
-    console.log("Catches to be saved:", catches);
-
-    // Navigate to next page
-    navigate("/end");
+    if (tripId) {
+      try {
+        const tripStore = app.stores["trip"];
+        const Form = tripStore.getCollection("Form");
+        
+        // Update trip step using array format
+        await Form.update(
+          {
+            id: tripId,
+            step: 3
+          }
+        );
+        navigate("/end");
+      } catch (error) {
+        console.error("Error updating trip step:", error, "Trip ID:", tripId);
+      }
+    } else {
+      console.error("No trip ID available");
+    }
   };
 
   return (
