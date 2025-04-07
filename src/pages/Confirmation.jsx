@@ -40,7 +40,7 @@ function Confirmation() {
           <p>Your trip has been successfully submitted!</p>
         </div>
       </div>
-      <Footer backPath="/" />
+      <Footer nextPath="/" nextLabel="Home" showBackButton={false} />
     </>
   );
 }

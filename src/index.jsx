@@ -77,11 +77,9 @@ const app = new Application({
               },
               latitude: {
                 type: "number",
-                required: true,
               },
               longitude: {
                 type: "number",
-                required: true,
               },
               time: {
                 type: "string",
