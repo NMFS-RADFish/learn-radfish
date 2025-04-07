@@ -22,6 +22,8 @@ const FIELD_START_TIME = "Start time";
 function StartTrip() {
   const navigate = useNavigate();
   const app = useApplication();
+  const [timeKey, setTimeKey] = useState(0); // Add key for TimePicker remounting
+  const [dateKey, setDateKey] = useState(0); // Add key for DatePicker remounting
 
   // Form state with RADFish IndexedDB Storage
   const [formData, setFormData] = useState({
@@ -134,6 +136,10 @@ function StartTrip() {
             weather: currentTrip.weather || "",
             startTime: currentTrip.startTime || "",
           });
+          
+          // Force remount of date and time pickers to show saved values
+          setDateKey(prevKey => prevKey + 1);
+          setTimeKey(prevKey => prevKey + 1);
         }
       } catch (error) {
         console.error("Error loading trip data:", error);
@@ -209,6 +215,7 @@ function StartTrip() {
                 Date<span className="text-secondary-vivid">*</span>
               </Label>
               <DatePicker
+                key={dateKey}
                 id="tripDate"
                 name="tripDate"
                 defaultValue={formData.tripDate}
@@ -238,6 +245,7 @@ function StartTrip() {
                 Time<span className="text-secondary-vivid">*</span>
               </Label>
               <TimePicker
+                key={timeKey}
                 id="time"
                 name="time"
                 defaultValue={formData.startTime}

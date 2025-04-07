@@ -20,6 +20,7 @@ const FIELD_END_TIME = "End time";
 function EndTrip() {
   const navigate = useNavigate();
   const app = useApplication();
+  const [timeKey, setTimeKey] = useState(0); // Add key for TimePicker remounting
 
   // Form state - naming to match schema field names
   const [formData, setFormData] = useState({
@@ -58,6 +59,9 @@ function EndTrip() {
           endWeather: currentTrip.endWeather || "",
           endTime: currentTrip.endTime || "",
         });
+        
+        // Force remount of time picker to show saved value
+        setTimeKey(prevKey => prevKey + 1);
       } catch (error) {
         console.error("Error loading trip data:", error);
       }
@@ -65,6 +69,7 @@ function EndTrip() {
 
     loadExistingTrip();
   }, [app, navigate]);
+
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -182,6 +187,46 @@ function EndTrip() {
         <div className="content-container">
           <StepIndicator />
           <Form onSubmit={handleSubmit} large className="form">
+            {/* Trip End Time */}
+            <FormGroup error={submitted && errors.endTime}>
+              <Label
+                htmlFor="endTime"
+                error={submitted && errors.endTime}
+                className="form-label"
+              >
+                Time<span className="text-secondary-vivid">*</span>
+              </Label>
+              <TimePicker
+                key={timeKey}
+                id="time"
+                name="time"
+                defaultValue={formData.endTime}
+                onChange={(time) => handleTimeChange(time)}
+                minTime="00:00"
+                maxTime="23:30"
+                step={15}
+                validationStatus={
+                  submitted && errors.endTime ? "error" : undefined
+                }
+                className={
+                  submitted && errors.endTime
+                    ? "usa-input--error error-input-field"
+                    : ""
+                }
+                aria-describedby={
+                  submitted && errors.endTime
+                    ? "endTime-error-message"
+                    : undefined
+                }
+              />
+              <ErrorMessage
+                id="endTime-error-message"
+                className="error-message"
+              >
+                {(submitted && errors.endTime && errors.endTime) || "\u00A0"}
+              </ErrorMessage>
+            </FormGroup>
+
             {/* Weather Conditions Select */}
             <FormGroup error={submitted && errors.endWeather}>
               <Label
@@ -216,45 +261,6 @@ function EndTrip() {
               >
                 {(submitted && errors.endWeather && errors.endWeather) ||
                   "\u00A0"}
-              </ErrorMessage>
-            </FormGroup>
-
-            {/* Trip End Time */}
-            <FormGroup error={submitted && errors.endTime}>
-              <Label
-                htmlFor="endTime"
-                error={submitted && errors.endTime}
-                className="form-label"
-              >
-                Time<span className="text-secondary-vivid">*</span>
-              </Label>
-              <TimePicker
-                id="time"
-                name="time"
-                defaultValue={formData.endTime}
-                onChange={(time) => handleTimeChange(time)}
-                minTime="00:00"
-                maxTime="23:30"
-                step={15}
-                validationStatus={
-                  submitted && errors.endTime ? "error" : undefined
-                }
-                className={
-                  submitted && errors.endTime
-                    ? "usa-input--error error-input-field"
-                    : ""
-                }
-                aria-describedby={
-                  submitted && errors.endTime
-                    ? "endTime-error-message"
-                    : undefined
-                }
-              />
-              <ErrorMessage
-                id="endTime-error-message"
-                className="error-message"
-              >
-                {(submitted && errors.endTime && errors.endTime) || "\u00A0"}
               </ErrorMessage>
             </FormGroup>
           </Form>
