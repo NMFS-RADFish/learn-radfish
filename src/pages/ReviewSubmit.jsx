@@ -1,8 +1,7 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApplication } from "@nmfs-radfish/react-radfish";
-import { Table } from "@nmfs-radfish/react-radfish";
+import { useApplication, Table } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
@@ -26,22 +25,24 @@ function ReviewSubmit() {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
         
-        // Get completed trips
-        const completedTrips = await Form.find({ status: "completed" });
+        // Look for trips ready for review (in-progress with endTime and endWeather)
+        const inProgressTrips = await Form.find({ status: "in-progress" });
+        const readyTrips = inProgressTrips.filter(trip => trip.endTime && trip.endWeather);
         
-        if (completedTrips.length === 0) {
-          setError("No completed trip found");
-          navigate("/start");
+        if (readyTrips.length === 0) {
+          setError("No trip ready for review found");
+          navigate("/end");
           return;
         }
         
-        // Use the most recent completed trip
-        const completedTrip = completedTrips[0];
-        setTrip(completedTrip);
+        // Use the first in-progress trip that has end data
+        const selectedTrip = readyTrips[0];
+        
+        setTrip(selectedTrip);
         
         // Get catches for this trip
         const Catch = tripStore.getCollection("Catch");
-        const tripCatches = await Catch.find({ tripId: completedTrip.id });
+        const tripCatches = await Catch.find({ tripId: selectedTrip.id });
         setCatches(tripCatches);
         
         // Aggregate catches by species
@@ -98,6 +99,29 @@ function ReviewSubmit() {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString();
+  };
+  
+  // Handle trip submission
+  const handleSubmit = async () => {
+    try {
+      if (!trip) return;
+      
+      const tripStore = app.stores["trip"];
+      const Form = tripStore.getCollection("Form");
+      
+      // Update trip status to submitted
+      await Form.update(
+        {
+          id: trip.id,
+          status: "submitted"
+        }
+      );
+      
+      // Navigate to confirmation page
+      navigate("/confirm");
+    } catch (error) {
+      console.error("Error submitting trip:", error);
+    }
   };
 
   if (loading) {
@@ -204,7 +228,11 @@ function ReviewSubmit() {
         </div>
       </div>
       
-      <Footer backPath="/end" nextPath="/confirm" nextLabel="Submit" />
+      <Footer 
+        backPath="/end" 
+        nextLabel="Submit" 
+        onNextClick={handleSubmit} 
+      />
     </>
   );
 }

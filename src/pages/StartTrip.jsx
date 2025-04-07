@@ -8,8 +8,9 @@ import {
   TimePicker,
   Select,
   Label,
+  DatePicker,
 } from "@trussworks/react-uswds";
-import { DatePicker, useApplication } from "@nmfs-radfish/react-radfish";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
@@ -56,25 +57,18 @@ function StartTrip() {
   };
 
   // Handle date picker changes
-  const handleDateChange = (event) => {
-    // Extract the value from the event target
-    if (event && event.target && event.target.value) {
-      const dateValue = event.target.value;
+  const handleDateChange = (value) => {
+    setFormData({
+      ...formData,
+      tripDate: value || '',
+    });
 
-      setFormData({
-        ...formData,
-        tripDate: dateValue,
+    // Clear error when user selects a date
+    if (errors.tripDate) {
+      setErrors({
+        ...errors,
+        tripDate: undefined,
       });
-
-      // Clear error when user selects a date
-      if (errors.tripDate) {
-        setErrors({
-          ...errors,
-          tripDate: undefined,
-        });
-      }
-    } else {
-      console.error("Could not extract date value from event:", event);
     }
   };
 
@@ -128,17 +122,17 @@ function StartTrip() {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
 
-        // Get all trips in "draft" status
-        const existingTrips = await Form.find({ status: "draft" });
+        // Get all trips in "in-progress" status
+        const existingTrips = await Form.find({ status: "in-progress" });
 
-        // If a draft trip exists, use it
+        // If an in-progress trip exists, use it
         if (existingTrips.length > 0) {
-          const draftTrip = existingTrips[0];
-          setTripId(draftTrip.id);
+          const currentTrip = existingTrips[0];
+          setTripId(currentTrip.id);
           setFormData({
-            tripDate: draftTrip.tripDate || "",
-            weather: draftTrip.weather || "",
-            startTime: draftTrip.startTime || "",
+            tripDate: currentTrip.tripDate || "",
+            weather: currentTrip.weather || "",
+            startTime: currentTrip.startTime || "",
           });
         }
       } catch (error) {
@@ -166,14 +160,16 @@ function StartTrip() {
         const Form = tripStore.getCollection("Form");
 
         if (tripId) {
-          // Update existing trip using array format
-          await Form.update({
-            id: tripId,
-            tripDate: formData.tripDate,
-            weather: formData.weather,
-            startTime: formData.startTime,
-            status: "draft",
-          });
+          // Update existing trip
+          await Form.update(
+            {
+              id: tripId,
+              tripDate: formData.tripDate,
+              weather: formData.weather,
+              startTime: formData.startTime,
+              status: "in-progress"
+            }
+          );
         } else {
           // Create new trip
           const newTripId = crypto.randomUUID();
@@ -183,7 +179,7 @@ function StartTrip() {
             weather: formData.weather,
             startTime: formData.startTime,
             step: 1,
-            status: "draft",
+            status: "in-progress",
             endWeather: "",
             endTime: "",
           });
@@ -205,65 +201,30 @@ function StartTrip() {
           <Form onSubmit={handleSubmit} large className="form">
             {/* Trip Date */}
             <FormGroup error={submitted && errors.tripDate}>
+              <Label
+                htmlFor="tripDate"
+                error={submitted && errors.tripDate}
+                className="form-label"
+              >
+                Date<span className="text-secondary-vivid">*</span>
+              </Label>
               <DatePicker
                 id="tripDate"
                 name="tripDate"
-                value={formData.tripDate}
-                hint="Date"
+                defaultValue={formData.tripDate}
                 onChange={handleDateChange}
+                aria-describedby="tripDate-hint"
                 className={
                   submitted && errors.tripDate
                     ? "usa-input--error error-input-field"
                     : ""
                 }
-                aria-describedby={
-                  submitted && errors.tripDate
-                    ? "tripDate-error-message"
-                    : undefined
-                }
               />
-
               <ErrorMessage
                 id="tripDate-error-message"
                 className="error-message"
               >
                 {(submitted && errors.tripDate && errors.tripDate) || "\u00A0"}
-              </ErrorMessage>
-            </FormGroup>
-
-            {/* Weather Conditions Select - Full Width */}
-            <FormGroup error={submitted && errors.weather}>
-              <Label
-                htmlFor="weather"
-                error={submitted && errors.weather}
-                className="form-label"
-              >
-                Weather<span className="text-secondary-vivid">*</span>
-              </Label>
-              <Select
-                id="weather"
-                name="weather"
-                value={formData.weather}
-                onChange={handleInputChange}
-                validationStatus={
-                  submitted && errors.weather ? "error" : undefined
-                }
-                aria-describedby={
-                  submitted && errors.weather
-                    ? "weather-error-message"
-                    : undefined
-                }
-              >
-                <option value="">-Select-</option>
-                <option value="Sunny">Sunny</option>
-                <option value="Cloudy">Cloudy</option>
-                <option value="Rainy">Rainy</option>
-              </Select>
-              <ErrorMessage
-                id="weather-error-message"
-                className="error-message"
-              >
-                {(submitted && errors.weather && errors.weather) || "\u00A0"}
               </ErrorMessage>
             </FormGroup>
 
@@ -304,6 +265,42 @@ function StartTrip() {
               >
                 {(submitted && errors.startTime && errors.startTime) ||
                   "\u00A0"}
+              </ErrorMessage>
+            </FormGroup>
+
+            {/* Weather Conditions Select - Full Width */}
+            <FormGroup error={submitted && errors.weather}>
+              <Label
+                htmlFor="weather"
+                error={submitted && errors.weather}
+                className="form-label"
+              >
+                Weather<span className="text-secondary-vivid">*</span>
+              </Label>
+              <Select
+                id="weather"
+                name="weather"
+                value={formData.weather}
+                onChange={handleInputChange}
+                validationStatus={
+                  submitted && errors.weather ? "error" : undefined
+                }
+                aria-describedby={
+                  submitted && errors.weather
+                    ? "weather-error-message"
+                    : undefined
+                }
+              >
+                <option value="">-Select-</option>
+                <option value="Sunny">Sunny</option>
+                <option value="Cloudy">Cloudy</option>
+                <option value="Rainy">Rainy</option>
+              </Select>
+              <ErrorMessage
+                id="weather-error-message"
+                className="error-message"
+              >
+                {(submitted && errors.weather && errors.weather) || "\u00A0"}
               </ErrorMessage>
             </FormGroup>
           </Form>

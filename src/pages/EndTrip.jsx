@@ -30,39 +30,39 @@ function EndTrip() {
   const [tripId, setTripId] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
-  
+
   // Load existing trip data
   useEffect(() => {
     const loadExistingTrip = async () => {
       try {
         if (!app) return;
-        
+
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
-        
-        // Get draft trips
-        const existingTrips = await Form.find({ status: "draft" });
-        
+
+        // Get in-progress trips
+        const existingTrips = await Form.find({ status: "in-progress" });
+
         if (existingTrips.length === 0) {
-          console.warn("No draft trips found, redirecting to start trip page");
+          console.warn("No in-progress trips found, redirecting to start trip page");
           navigate("/start");
           return;
         }
-        
-        // Use the first draft trip
-        const draftTrip = existingTrips[0];
-        setTripId(draftTrip.id);
-        
+
+        // Use the first in-progress trip
+        const currentTrip = existingTrips[0];
+        setTripId(currentTrip.id);
+
         // Set form data from existing trip - using field names matching schema
         setFormData({
-          endWeather: draftTrip.endWeather || "",
-          endTime: draftTrip.endTime || "",
+          endWeather: currentTrip.endWeather || "",
+          endTime: currentTrip.endTime || "",
         });
       } catch (error) {
         console.error("Error loading trip data:", error);
       }
     };
-    
+
     loadExistingTrip();
   }, [app, navigate]);
 
@@ -139,25 +139,26 @@ function EndTrip() {
       try {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
-        
+
         // Retrieve the trip to update
         const trips = await Form.find({ id: tripId });
-        
+
         if (!trips || trips.length === 0) {
           console.error("Trip not found with ID:", tripId);
           return;
         }
-        
+
         const tripToUpdate = trips[0];
-        
+
         // Prepare update data and update trip
+        // Set status to "in-progress" while the trip is being reviewed
         const updateData = {
           endWeather: formData.endWeather,
           endTime: formData.endTime,
-          status: "completed",
-          step: 4
+          status: "in-progress",
+          step: 4,
         };
-        // Update trip using array format
+        // Update trip
         await Form.update(
           {
             id: tripToUpdate.id,
@@ -169,7 +170,9 @@ function EndTrip() {
         console.error("Error saving end trip data:", error);
       }
     } else {
-      console.warn("Not proceeding with update due to errors or missing trip ID");
+      console.warn(
+        "Not proceeding with update due to errors or missing trip ID",
+      );
     }
   };
 
@@ -211,7 +214,8 @@ function EndTrip() {
                 id="endWeather-error-message"
                 className="error-message"
               >
-                {(submitted && errors.endWeather && errors.endWeather) || "\u00A0"}
+                {(submitted && errors.endWeather && errors.endWeather) ||
+                  "\u00A0"}
               </ErrorMessage>
             </FormGroup>
 
@@ -236,7 +240,9 @@ function EndTrip() {
                   submitted && errors.endTime ? "error" : undefined
                 }
                 className={
-                  submitted && errors.endTime ? "usa-input--error error-input-field" : ""
+                  submitted && errors.endTime
+                    ? "usa-input--error error-input-field"
+                    : ""
                 }
                 aria-describedby={
                   submitted && errors.endTime

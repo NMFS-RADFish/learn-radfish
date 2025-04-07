@@ -132,22 +132,22 @@ function CatchLog() {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
         
-        // Get draft trips
-        const existingTrips = await Form.find({ status: "draft" });
+        // Get in-progress trips
+        const existingTrips = await Form.find({ status: "in-progress" });
         
         if (existingTrips.length === 0) {
-          console.warn("No draft trips found, redirecting to start trip page");
+          console.warn("No in-progress trips found, redirecting to start trip page");
           navigate("/start");
           return;
         }
         
-        // Use the first draft trip
-        const draftTrip = existingTrips[0];
-        setTripId(draftTrip.id);
+        // Use the first in-progress trip
+        const currentTrip = existingTrips[0];
+        setTripId(currentTrip.id);
         
         // Get catches for this trip
         const Catch = tripStore.getCollection("Catch");
-        const existingCatches = await Catch.find({ tripId: draftTrip.id });
+        const existingCatches = await Catch.find({ tripId: currentTrip.id });
         
         if (existingCatches.length > 0) {
           setCatches(existingCatches);
@@ -247,22 +247,17 @@ function CatchLog() {
     }
     if (lengthError) newErrors.length = lengthError;
 
-    // Validate latitude (required and valid range)
-    let latitudeError = validateRequired(currentCatch.latitude, FIELD_LATITUDE);
-    if (!latitudeError && currentCatch.latitude) {
-      latitudeError = validateLatitude(currentCatch.latitude);
+    // Validate latitude (optional but must be valid if provided)
+    if (currentCatch.latitude) {
+      const latitudeError = validateLatitude(currentCatch.latitude);
+      if (latitudeError) newErrors.latitude = latitudeError;
     }
-    if (latitudeError) newErrors.latitude = latitudeError;
 
-    // Validate longitude (required and valid range)
-    let longitudeError = validateRequired(
-      currentCatch.longitude,
-      FIELD_LONGITUDE,
-    );
-    if (!longitudeError && currentCatch.longitude) {
-      longitudeError = validateLongitude(currentCatch.longitude);
+    // Validate longitude (optional but must be valid if provided)
+    if (currentCatch.longitude) {
+      const longitudeError = validateLongitude(currentCatch.longitude);
+      if (longitudeError) newErrors.longitude = longitudeError;
     }
-    if (longitudeError) newErrors.longitude = longitudeError;
 
     // Validate time (required)
     const timeError = validateRequired(currentCatch.time, FIELD_TIME);
@@ -290,11 +285,12 @@ function CatchLog() {
           ...currentCatch,
           id: crypto.randomUUID(),
           tripId: tripId,
-          // Convert string values to numbers
+          // Convert string values to numbers for required fields
           weight: Number(currentCatch.weight),
           length: Number(currentCatch.length),
-          latitude: Number(currentCatch.latitude),
-          longitude: Number(currentCatch.longitude)
+          // Convert coordinates to numbers only if provided
+          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : null,
+          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : null
         };
         
         // Save to IndexedDB
@@ -342,7 +338,7 @@ function CatchLog() {
         updateData[field] = Number(value);
       }
       
-      // Update catch field using array format
+      // Update catch field
       await Catch.update(
         {
           id: catchToUpdate.id,
@@ -370,7 +366,7 @@ function CatchLog() {
       const tripStore = app.stores["trip"];
       const Catch = tripStore.getCollection("Catch");
       
-      // Update catch time using array format
+      // Update catch time
       await Catch.update(
         {
           id: catchToUpdate.id,
@@ -413,7 +409,7 @@ function CatchLog() {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
         
-        // Update trip step using array format
+        // Update trip step
         await Form.update(
           {
             id: tripId,
@@ -596,7 +592,7 @@ function CatchLog() {
                       error={submitted && errors.latitude}
                       className="form-label"
                     >
-                      Latitude<span className="text-secondary-vivid">*</span>
+                      Latitude
                     </Label>
                     <span className="usa-hint form-hint">DD</span>
                     <TextInput
@@ -632,7 +628,7 @@ function CatchLog() {
                       error={submitted && errors.longitude}
                       className="form-label"
                     >
-                      Longitude<span className="text-secondary-vivid">*</span>
+                      Longitude
                     </Label>
                     <span className="usa-hint form-hint">DD</span>
                     <TextInput
@@ -820,7 +816,6 @@ function CatchLog() {
                               className="form-label"
                             >
                               Latitude
-                              <span className="text-secondary-vivid">*</span>
                             </Label>
                             <span className="usa-hint form-hint">DD</span>
                             <TextInput
@@ -856,7 +851,6 @@ function CatchLog() {
                               className="form-label"
                             >
                               Longitude
-                              <span className="text-secondary-vivid">*</span>
                             </Label>
                             <span className="usa-hint form-hint">DD</span>
                             <TextInput

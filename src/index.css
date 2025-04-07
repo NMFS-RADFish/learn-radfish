@@ -166,7 +166,7 @@ FOOTER STYLES
   bottom: 0;
   width: 100%;
   background-color: white;
-  padding: 1rem;
+  padding: 0 1rem 1rem;
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   z-index: 99;
 }
@@ -177,7 +177,7 @@ FOOTER STYLES
   max-width: none;
   gap: 1rem;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 1rem;
 }
 
 .back-button {
@@ -395,7 +395,7 @@ REVIEW SUBMIT PAGE STYLES
 }
 
 .trip-card-header {
-  background-color: var(--noaa-yellow-two);
+  background-color: var(--noaa-light-blue);
   padding: 1rem 1.5rem;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
@@ -496,7 +496,7 @@ REVIEW SUBMIT PAGE STYLES
 }
 
 .catch-summary-card .trip-card-header {
-  background-color: var(--noaa-yellow-two);
+  background-color: var(--noaa-light-blue);
 }
 
 /* RADFish Table Styles */
