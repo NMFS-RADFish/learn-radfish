@@ -9,8 +9,8 @@ import StartTrip from "./pages/StartTrip";
 import CatchLog from "./pages/CatchLog";
 import EndTrip from "./pages/EndTrip";
 import ReviewSubmit from "./pages/ReviewSubmit";
-import Confirmation from "./pages/Confirmation";
-
+import OnlineConfirmation from "./pages/OnlineConfirmation";
+import OfflineConfirmation from "./pages/OfflineConfirmation";
 function App({ application }) {
   const [isExpanded, setExpanded] = useState(false);
   return (
@@ -30,7 +30,11 @@ function App({ application }) {
               <Route path="/catch" element={<CatchLog />} />
               <Route path="/end" element={<EndTrip />} />
               <Route path="/review" element={<ReviewSubmit />} />
-              <Route path="/confirm" element={<Confirmation />} />
+              <Route path="/online-confirm" element={<OnlineConfirmation />} />
+              <Route
+                path="/offline-confirm"
+                element={<OfflineConfirmation />}
+              />
             </Routes>
           </main>
         </div>

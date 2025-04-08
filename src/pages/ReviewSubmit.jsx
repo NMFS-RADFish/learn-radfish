@@ -110,20 +110,22 @@ function ReviewSubmit() {
       const tripStore = app.stores["trip"];
       const Form = tripStore.getCollection("Form");
       
-      // If offline, save with 'Not Submitted' status
-      // If online, save with 'submitted' status
-      const status = isOffline ? "Not Submitted" : "submitted";
-      
-      // Update trip status
-      await Form.update(
-        {
+      if (isOffline) {
+        // If offline, save with 'Not Submitted' status and go to offline confirmation
+        await Form.update({
           id: trip.id,
-          status
-        }
-      );
-      
-      // Navigate to confirmation page
-      navigate("/confirm");
+          status: "Not Submitted"
+        });
+        console.log("Offline confirmation");
+        navigate("/offline-confirm");
+      } else {
+        // If online, save with 'submitted' status and go to online confirmation
+        await Form.update({
+          id: trip.id,
+          status: "submitted"
+        });
+        navigate("/online-confirm");
+      }
     } catch (error) {
       console.error("Error submitting trip:", error);
     }
