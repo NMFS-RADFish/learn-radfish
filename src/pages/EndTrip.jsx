@@ -70,7 +70,6 @@ function EndTrip() {
     loadExistingTrip();
   }, [app, navigate]);
 
-
   // Handle input changes
   const handleInputChange = (e) => {
     if (e && e.target) {

@@ -102,6 +102,10 @@ USWDS COMPONENT OVERRIDES
   width: 100%;
 }
 
+.usa-hint {
+  text-align: left;
+}
+
 /* Mobile-first navbar styles */
 .usa-navbar {
   border-bottom: none;
@@ -517,4 +521,141 @@ REVIEW SUBMIT PAGE STYLES
 .catch-summary-card tbody td {
   padding: 1rem;
   border-bottom: 1px solid #dfe1e2;
+}
+
+/* Button Styles */
+.usa-button--success {
+  background-color: #00a91c; /* Green for success */
+  color: white;
+}
+
+.usa-button--success:hover {
+  background-color: #008817; /* Darker green on hover */
+}
+
+/* 
+=========================================
+RECENT TRIPS STYLES
+=========================================
+*/
+
+/* Trip cards on home page */
+.trip-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.trip-card-modern {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.trip-card-header-modern {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  color: white;
+}
+
+.trip-header-submitted {
+  background-color: #2e8540;
+}
+
+.trip-header-not-submitted {
+  background-color: #e41d3d;
+}
+
+.trip-header-in-progress {
+  background-color: #fdb81e;
+}
+
+.trip-card-header-date {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.trip-status-indicator {
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.trip-card-content {
+  padding: 16px;
+}
+
+.trip-stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.trip-stat-row:last-child {
+  border-bottom: none;
+}
+
+.trip-stat-label {
+  font-weight: 500;
+  color: #555;
+}
+
+.trip-stat-value {
+  font-weight: 600;
+}
+
+.start-trip-button {
+  background-color: #0076a8; /* NOAA blue */
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 30rem;
+  margin: 2rem auto 0;
+  text-align: center;
+  display: block;
+  transition: background-color 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.start-trip-button:hover {
+  background-color: #00557a;
+}
+
+.trip-stats-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+}
+
+.trip-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.trip-stat-value {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.trip-stat-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 4px;
 }

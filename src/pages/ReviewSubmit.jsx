@@ -1,13 +1,14 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useApplication, Table } from "@nmfs-radfish/react-radfish";
+import { useApplication, Table, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
 function ReviewSubmit() {
   const navigate = useNavigate();
   const app = useApplication();
+  const { isOffline } = useOfflineStatus();
   const [trip, setTrip] = useState(null);
   const [catches, setCatches] = useState([]);
   const [aggregatedCatches, setAggregatedCatches] = useState([]);
@@ -60,7 +61,7 @@ function ReviewSubmit() {
     loadTripData();
   }, [app, navigate]);
   
-  // Aggregate catches by species, calculating average weight and length
+  // Aggregate catches by species, calculating total weight and average length
   const aggregateCatchesBySpecies = (catchData) => {
     const speciesMap = {};
     
@@ -80,14 +81,14 @@ function ReviewSubmit() {
       speciesMap[catchItem.species].count++;
     });
     
-    // Calculate averages
+    // Calculate totals and averages
     return Object.values(speciesMap).map(item => {
-      const avgWeight = item.weights.reduce((sum, val) => sum + val, 0) / item.count;
+      const totalWeight = item.weights.reduce((sum, val) => sum + val, 0);
       const avgLength = item.lengths.reduce((sum, val) => sum + val, 0) / item.count;
       
       return {
         species: item.species,
-        avgWeight: avgWeight.toFixed(2),
+        totalWeight: totalWeight.toFixed(2),
         avgLength: avgLength.toFixed(2),
         count: item.count
       };
@@ -109,11 +110,15 @@ function ReviewSubmit() {
       const tripStore = app.stores["trip"];
       const Form = tripStore.getCollection("Form");
       
-      // Update trip status to submitted
+      // If offline, save with 'Not Submitted' status
+      // If online, save with 'submitted' status
+      const status = isOffline ? "Not Submitted" : "submitted";
+      
+      // Update trip status
       await Form.update(
         {
           id: trip.id,
-          status: "submitted"
+          status
         }
       );
       
@@ -209,13 +214,13 @@ function ReviewSubmit() {
                     id: index,
                     species: item.species,
                     count: item.count,
-                    avgWeight: `${item.avgWeight} lbs`,
+                    totalWeight: `${item.totalWeight} lbs`,
                     avgLength: `${item.avgLength} in`
                   }))}
                   columns={[
                     { key: "species", label: "Species", sortable: true },
                     { key: "count", label: "Count", sortable: true },
-                    { key: "avgWeight", label: "Avg. Weight", sortable: true },
+                    { key: "totalWeight", label: "Total Weight", sortable: true },
                     { key: "avgLength", label: "Avg. Length", sortable: true }
                   ]}
 
@@ -230,7 +235,10 @@ function ReviewSubmit() {
       
       <Footer 
         backPath="/end" 
-        nextLabel="Submit" 
+        nextLabel={isOffline ? "Save" : "Submit"} 
+        nextButtonProps={{
+          className: isOffline ? undefined : "usa-button--success"
+        }}
         onNextClick={handleSubmit} 
       />
     </>

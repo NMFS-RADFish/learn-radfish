@@ -62,7 +62,7 @@ function StartTrip() {
   const handleDateChange = (value) => {
     setFormData({
       ...formData,
-      tripDate: value || '',
+      tripDate: value || "",
     });
 
     // Clear error when user selects a date
@@ -131,15 +131,27 @@ function StartTrip() {
         if (existingTrips.length > 0) {
           const currentTrip = existingTrips[0];
           setTripId(currentTrip.id);
+          
+          // Format the date properly if it exists
+          let formattedDate = "";
+          if (currentTrip.tripDate) {
+            const date = new Date(currentTrip.tripDate);
+            if (!isNaN(date.getTime())) {
+              // Format as YYYY-MM-DD for the DatePicker
+              formattedDate = date.toISOString().split('T')[0];
+            }
+          }
+          
+          // Set form data with properly formatted date
           setFormData({
-            tripDate: currentTrip.tripDate || "",
+            tripDate: formattedDate,
             weather: currentTrip.weather || "",
             startTime: currentTrip.startTime || "",
           });
           
-          // Force remount of date and time pickers to show saved values
-          setDateKey(prevKey => prevKey + 1);
-          setTimeKey(prevKey => prevKey + 1);
+          // Force remount of pickers to refresh with new values
+          setDateKey(prev => prev + 1);
+          setTimeKey(prev => prev + 1);
         }
       } catch (error) {
         console.error("Error loading trip data:", error);
@@ -167,15 +179,13 @@ function StartTrip() {
 
         if (tripId) {
           // Update existing trip
-          await Form.update(
-            {
-              id: tripId,
-              tripDate: formData.tripDate,
-              weather: formData.weather,
-              startTime: formData.startTime,
-              status: "in-progress"
-            }
-          );
+          await Form.update({
+            id: tripId,
+            tripDate: formData.tripDate,
+            weather: formData.weather,
+            startTime: formData.startTime,
+            status: "in-progress",
+          });
         } else {
           // Create new trip
           const newTripId = crypto.randomUUID();
@@ -214,6 +224,9 @@ function StartTrip() {
               >
                 Date<span className="text-secondary-vivid">*</span>
               </Label>
+              <div className="usa-hint" id="appointment-date-hint">
+                mm/dd/yyyy
+              </div>
               <DatePicker
                 key={dateKey}
                 id="tripDate"

@@ -1,21 +1,23 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
-import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 
 function HomePage() {
   const app = useApplication();
-  const { isOffline } = useOfflineStatus();
   const [trips, setTrips] = useState([]);
-
-  // Load all trips
+  const [tripStats, setTripStats] = useState({});
+  
+  // Load trips on component mount
   useEffect(() => {
-    const loadTrips = async () => {
+    // Load all trips and their catch data
+    const loadTripsAndCatches = async () => {
       try {
         if (!app) return;
         
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        const Catch = tripStore.getCollection("Catch");
         
         // Get all trips, ordered by most recent first
         const allTrips = await Form.find({});
@@ -30,18 +32,42 @@ function HomePage() {
         });
         
         setTrips(sortedTrips);
+        
+        // Get catch data for all trips
+        const stats = {};
+        
+        // Process each trip to get its catch statistics
+        for (const trip of sortedTrips) {
+          const tripCatches = await Catch.find({ tripId: trip.id });
+          
+          if (tripCatches.length > 0) {
+            // Calculate statistics
+            const totalCount = tripCatches.length;
+            
+            const totalWeight = tripCatches.reduce((sum, catchItem) => 
+              sum + (catchItem.weight || 0), 0).toFixed(1);
+              
+            const totalLength = tripCatches.reduce((sum, catchItem) => 
+              sum + (catchItem.length || 0), 0);
+              
+            const avgLength = totalCount > 0 
+              ? (totalLength / totalCount).toFixed(1) 
+              : 0;
+            
+            stats[trip.id] = { totalCount, totalWeight, avgLength };
+          } else {
+            stats[trip.id] = { totalCount: 0, totalWeight: 0, avgLength: 0 };
+          }
+        }
+        
+        setTripStats(stats);
       } catch (error) {
-        console.error("Error loading trips:", error);
+        console.error("Error loading trips and catches:", error);
       }
     };
-    
-    loadTrips();
-    
-    // Set up an interval to reload trips when offline status might have changed
-    const intervalId = setInterval(loadTrips, 5000);
-    
-    return () => clearInterval(intervalId);
-  }, [app, isOffline]); // Add isOffline dependency to reload when online status changes
+
+    loadTripsAndCatches();
+  }, [app]);
 
   // Format date from ISO string
   const formatDate = (dateString) => {
@@ -50,26 +76,17 @@ function HomePage() {
     return date.toLocaleDateString();
   };
 
-  // Get status badge color
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "draft": return "#e5a000"; // amber
-      case "in-progress": return "#f5c400"; // yellow
-      case "Not Submitted": return "#e41d3d"; // red
-      case "submitted": return "#00a91c"; // green-warm
-      default: return "#71767a"; // gray
-    }
+  // Get human-readable status
+  const getStatusLabel = (trip) => {
+    if (trip.status === "submitted") return "SUBMITTED";
+    if (trip.status === "in-progress") return "IN PROGRESS";
+    return "NOT SUBMITTED";
   };
 
-  // Get human-readable status
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case "draft": return "Draft";
-      case "in-progress": return "In Progress";
-      case "Not Submitted": return "Not Submitted";
-      case "submitted": return "Submitted";
-      default: return status;
-    }
+  const getHeaderClass = (trip) => {
+    if (trip.status === "submitted") return "trip-header-submitted";
+    if (trip.status === "in-progress") return "trip-header-in-progress";
+    return "trip-header-not-submitted";
   };
 
   return (
@@ -77,50 +94,46 @@ function HomePage() {
       <div className="page-content">
         <h1>Welcome Captain</h1>
         
-        {isOffline && (
-          <div style={{ backgroundColor: '#e41d3d', color: 'white', padding: '10px', marginTop: '10px', maxWidth: '30rem', width: '100%', borderRadius: '4px' }}>
-            You are currently offline. Your trips will be saved locally and synced when you're back online.
-          </div>
-        )}
+        <h2 style={{ textAlign: 'center', margin: '1.5rem 0 1rem', fontWeight: 'bold', fontSize: '1.5rem' }}>Recent Trips</h2>
         
-        <div style={{ padding: '20px', marginTop: '20px', maxWidth: '30rem', width: '100%' }}>
-          <h2>Recent Trips</h2>
-          
-          {trips.length === 0 ? (
-            <p>No trips found. Start a new trip to record your fishing activity.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {trips.map(trip => (
-                <div key={trip.id} style={{ 
-                  border: '1px solid #dfe1e2', 
-                  borderRadius: '4px',
-                  padding: '10px'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: 'bold' }}>{formatDate(trip.tripDate)}</span>
-                    <span style={{ 
-                      backgroundColor: getStatusColor(trip.status),
-                      color: 'white',
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem'
-                    }}>
-                      {getStatusLabel(trip.status)}
-                    </span>
+        {trips.length === 0 ? (
+          <p>No trips found. Start a new trip to record your fishing activity.</p>
+        ) : (
+          <div className="trip-card-list">
+            {trips.map((trip) => (
+              <div key={trip.id} className="trip-card-modern">
+                <div className={`trip-card-header-modern ${getHeaderClass(trip)}`}>
+                  <div className="trip-card-header-date">
+                    {formatDate(trip.tripDate)}
                   </div>
-                  <div style={{ marginTop: '5px' }}>
-                    <span>Weather: {trip.weather}</span>
-                    {trip.endWeather && (
-                      <span> → {trip.endWeather}</span>
-                    )}
+                  <div className="trip-status-indicator">
+                    {getStatusLabel(trip)}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <div className="trip-card-content">
+                  <div className="trip-stats-container">
+                    <div className="trip-stat-item">
+                      <div className="trip-stat-label">Fish Count</div>
+                      <div className="trip-stat-value">{tripStats[trip.id]?.totalCount || 0}</div>
+                    </div>
+                    
+                    <div className="trip-stat-item">
+                      <div className="trip-stat-label">Total Weight</div>
+                      <div className="trip-stat-value">{tripStats[trip.id]?.totalWeight || 0} lbs</div>
+                    </div>
+                    
+                    <div className="trip-stat-item">
+                      <div className="trip-stat-label">Avg Length</div>
+                      <div className="trip-stat-value">{tripStats[trip.id]?.avgLength || 0} in</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
+      
       <Footer nextPath="/start" nextLabel="Start New Trip" showBackButton={false} />
     </>
   );

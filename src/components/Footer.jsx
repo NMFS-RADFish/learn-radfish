@@ -8,10 +8,22 @@ import { useNavigate } from "react-router-dom";
  * @param {string} [props.backPath="/"] - Path to navigate to when back button is clicked
  * @param {string} props.nextPath - Path to navigate to when next/submit button is clicked
  * @param {string} [props.nextLabel="Next"] - Label for the next/submit button
+ * @param {string} [props.backButtonLabel="Back"] - Label for the back button
  * @param {Function} [props.onNextClick] - Callback function when next button is clicked
  * @param {boolean} [props.showBackButton=true] - Whether to show the back button
+ * @param {boolean} [props.showNextButton=true] - Whether to show the next button
+ * @param {Object} [props.nextButtonProps={}] - Additional props for the next button
  */
-function Footer({ backPath = "/", nextPath, nextLabel = "Next", onNextClick, showBackButton = true }) {
+function Footer({ 
+  backPath = "/", 
+  nextPath, 
+  nextLabel = "Next", 
+  backButtonLabel = "Back",
+  onNextClick, 
+  showBackButton = true,
+  showNextButton = true,
+  nextButtonProps = {}
+}) {
   const navigate = useNavigate();
 
   const handleNextClick = (e) => {
@@ -32,16 +44,19 @@ function Footer({ backPath = "/", nextPath, nextLabel = "Next", onNextClick, sho
             className="back-button" 
             onClick={() => navigate(backPath)}
           >
-            Back
+            {backButtonLabel}
           </Button>
         )}
-        <Button 
-          type={onNextClick ? "submit" : "button"} 
-          className={showBackButton ? "next-button" : ""} 
-          onClick={handleNextClick}
-        >
-          {nextLabel}
-        </Button>
+        {showNextButton && (
+          <Button 
+            type={onNextClick ? "submit" : "button"} 
+            className={`${showBackButton ? "next-button" : ""} ${nextButtonProps.className || ""}`}
+            onClick={handleNextClick}
+            {...nextButtonProps}
+          >
+            {nextLabel}
+          </Button>
+        )}
       </div>
     </footer>
   );

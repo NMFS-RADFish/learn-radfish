@@ -296,8 +296,8 @@ function CatchLog() {
         // Save to IndexedDB
         await Catch.create(newCatchData);
         
-        // Add to local state
-        setCatches([...catches, newCatchData]);
+        // Add to local state at the beginning of the array (top of the list)
+        setCatches([newCatchData, ...catches]);
 
         // Reset form
         setCurrentCatch({

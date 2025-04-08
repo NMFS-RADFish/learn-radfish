@@ -51,7 +51,7 @@ const app = new Application({
               status: {
                 type: "string",
                 required: true,
-                default: "draft", // draft, in-progress, submitted
+                default: "none", // none, in-progress, Not Submitted, submitted
               },
             },
           },
