@@ -150,7 +150,13 @@ function CatchLog() {
         const existingCatches = await Catch.find({ tripId: currentTrip.id });
         
         if (existingCatches.length > 0) {
-          setCatches(existingCatches);
+           // Ensure lat/lon are empty strings if null/undefined to prevent uncontrolled inputs
+           const formattedCatches = existingCatches.map(catchData => ({
+            ...catchData,
+            latitude: catchData.latitude ?? "", 
+            longitude: catchData.longitude ?? "",
+          }));
+          setCatches(formattedCatches); 
         }
       } catch (error) {
         console.error("Error loading trip data:", error);
@@ -288,9 +294,9 @@ function CatchLog() {
           // Convert string values to numbers for required fields
           weight: Number(currentCatch.weight),
           length: Number(currentCatch.length),
-          // Convert coordinates to numbers only if provided
-          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : null,
-          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : null
+          // Convert coordinates to numbers only if provided, otherwise undefined
+          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : undefined,
+          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : undefined
         };
         
         // Save to IndexedDB
