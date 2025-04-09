@@ -399,7 +399,7 @@ REVIEW SUBMIT PAGE STYLES
 }
 
 .trip-card-header {
-  background-color: var(--noaa-light-blue);
+  background-color: #162E51;
   padding: 1rem 1.5rem;
   border-top-left-radius: 12px;
   border-top-right-radius: 12px;
@@ -411,7 +411,7 @@ REVIEW SUBMIT PAGE STYLES
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: white;
 }
 
 .trip-card-body {
@@ -500,7 +500,7 @@ REVIEW SUBMIT PAGE STYLES
 }
 
 .catch-summary-card .trip-card-header {
-  background-color: var(--noaa-light-blue);
+  background-color: #162E51;
 }
 
 /* RADFish Table Styles */
@@ -525,12 +525,12 @@ REVIEW SUBMIT PAGE STYLES
 
 /* Button Styles */
 .usa-button--success {
-  background-color: #00a91c; /* Green for success */
+  background-color: #4D8055;/* Green for success */
   color: white;
 }
 
 .usa-button--success:hover {
-  background-color: #008817; /* Darker green on hover */
+  background-color: #3d6644; /* Darker shade of #4D8055 */
 }
 
 /* 
@@ -568,19 +568,19 @@ RECENT TRIPS STYLES
 }
 
 .trip-header-submitted {
-  background-color: #2e8540;
+  background-color: #4D8055;
 }
 
 .trip-header-not-submitted {
-  background-color: #e41d3d;
+  background-color: #162E51;
 }
 
 .trip-header-in-progress {
-  background-color: #fdb81e;
+  background-color: #FA9441;
 }
 
 .trip-card-header-date {
-  background-color: rgba(255, 255, 255, 0.2);
+  /* background-color: rgba(255, 255, 255, 0.2); */
   padding: 6px 12px;
   border-radius: 5px;
   font-weight: 700;
@@ -589,7 +589,7 @@ RECENT TRIPS STYLES
 
 .trip-status-indicator {
   font-weight: 700;
-  font-size: 10px;
+  font-size: 16px;
 }
 
 .trip-card-content {
@@ -659,3 +659,4 @@ RECENT TRIPS STYLES
   font-size: 14px;
   margin-bottom: 4px;
 }
+
