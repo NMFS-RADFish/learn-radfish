@@ -1,65 +1,62 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useApplication, Table, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
 function ReviewSubmit() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const tripId = location.state?.tripId;
   const app = useApplication();
   const { isOffline } = useOfflineStatus();
   const [trip, setTrip] = useState(null);
-  const [catches, setCatches] = useState([]);
   const [aggregatedCatches, setAggregatedCatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Load trip and catch data
+  // Load trip and catch data based on state tripId
   useEffect(() => {
     const loadTripData = async () => {
+      setLoading(true);
+      if (!app || !tripId) {
+        console.warn("App or Trip ID not available in state, cannot load review data.");
+        navigate("/");
+        return;
+      }
+      
       try {
-        if (!app) return;
-        
-        setLoading(true);
-        
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        const trips = await Form.find({ id: tripId });
         
-        // Look for trips ready for review (in-progress with endTime and endWeather)
-        const inProgressTrips = await Form.find({ status: "in-progress" });
-        const readyTrips = inProgressTrips.filter(trip => trip.endTime && trip.endWeather);
-        
-        if (readyTrips.length === 0) {
-          setError("No trip ready for review found");
-          navigate("/end");
+        if (trips.length === 0) {
+          setError(`Trip with ID ${tripId} not found`);
+          setLoading(false);
           return;
         }
         
-        // Use the first in-progress trip that has end data
-        const selectedTrip = readyTrips[0];
-        
+        const selectedTrip = trips[0];
         setTrip(selectedTrip);
         
-        // Get catches for this trip
         const Catch = tripStore.getCollection("Catch");
         const tripCatches = await Catch.find({ tripId: selectedTrip.id });
-        setCatches(tripCatches);
         
-        // Aggregate catches by species
         const aggregatedData = aggregateCatchesBySpecies(tripCatches);
         setAggregatedCatches(aggregatedData);
         
-        setLoading(false);
       } catch (err) {
         console.error("Error loading trip data:", err);
         setError("Failed to load trip data");
+        navigate("/");
+      } finally {
         setLoading(false);
       }
     };
     
     loadTripData();
-  }, [app, navigate]);
+  }, [app, tripId, navigate]);
   
   // Aggregate catches by species, calculating total weight and average length
   const aggregateCatchesBySpecies = (catchData) => {
@@ -102,42 +99,79 @@ function ReviewSubmit() {
     return date.toLocaleDateString();
   };
   
-  // Handle trip submission
+  // Handle trip submission/saving
   const handleSubmit = async () => {
+    if (!trip) return;
+    
     try {
-      if (!trip) return;
-      
       const tripStore = app.stores["trip"];
       const Form = tripStore.getCollection("Form");
+      const finalStatus = isOffline ? "Not Submitted" : "submitted";
       
-      if (isOffline) {
-        // If offline, save with 'Not Submitted' status and go to offline confirmation
-        await Form.update({
+      await Form.update(
+        {
           id: trip.id,
-          status: "Not Submitted"
-        });
-        console.log("Offline confirmation");
-        navigate("/offline-confirm");
-      } else {
-        // If online, save with 'submitted' status and go to online confirmation
-        await Form.update({
-          id: trip.id,
-          status: "submitted"
-        });
-        navigate("/online-confirm");
-      }
+          status: finalStatus,
+          step: 4
+        }
+      );
+      
+      navigate(isOffline ? "/offline-confirm" : "/online-confirm");
     } catch (error) {
       console.error("Error submitting trip:", error);
     }
   };
 
+  // Determine Footer properties based on trip status and offline state
+  const getFooterProps = () => {
+    if (!trip) return { showBackButton: false, showNextButton: false };
+
+    let backPath = "/";
+    let backNavState = {};
+    let showBackButton = true;
+    let showNextButton = true;
+    let nextLabel = "Submit";
+    let onNextClick = handleSubmit;
+    let nextButtonProps = {};
+
+    if (trip.status === "submitted") {
+      backPath = "/";
+      showNextButton = false;
+    } else {
+      backPath = `/end`;
+      backNavState = { state: { tripId: tripId } };
+      if (isOffline) {
+        nextLabel = "Save";
+      } else {
+        nextLabel = "Submit";
+        nextButtonProps = { className: "usa-button--success" };
+      }
+    }
+
+    return { 
+      backPath, 
+      backNavState, 
+      showBackButton, 
+      showNextButton, 
+      nextLabel, 
+      onNextClick, 
+      nextButtonProps 
+    };
+  };
+
   if (loading) {
-    return <div className="page-content">Loading trip data...</div>;
+    return <div className="page-content">Loading review data...</div>;
   }
 
   if (error) {
     return <div className="page-content">Error: {error}</div>;
   }
+
+  if (!trip) {
+    return <div className="page-content">Trip data not available.</div>;
+  }
+
+  const footerProps = getFooterProps();
 
   return (
     <>
@@ -236,12 +270,12 @@ function ReviewSubmit() {
       </div>
       
       <Footer 
-        backPath="/end" 
-        nextLabel={isOffline ? "Save" : "Submit"} 
-        nextButtonProps={{
-          className: isOffline ? undefined : "usa-button--success"
-        }}
-        onNextClick={handleSubmit} 
+        showBackButton={footerProps.showBackButton}
+        backButtonProps={{ onClick: () => navigate(footerProps.backPath, footerProps.backNavState) }}
+        showNextButton={footerProps.showNextButton}
+        nextLabel={footerProps.nextLabel}
+        nextButtonProps={footerProps.nextButtonProps}
+        onNextClick={footerProps.onNextClick}
       />
     </>
   );

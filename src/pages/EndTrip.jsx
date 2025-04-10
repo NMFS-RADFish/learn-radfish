@@ -1,6 +1,6 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Form,
   FormGroup,
@@ -19,8 +19,10 @@ const FIELD_END_TIME = "End time";
 
 function EndTrip() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const tripId = location.state?.tripId;
   const app = useApplication();
-  const [timeKey, setTimeKey] = useState(0); // Add key for TimePicker remounting
+  const [timeKey, setTimeKey] = useState(0);
 
   // Form state - naming to match schema field names
   const [formData, setFormData] = useState({
@@ -28,47 +30,47 @@ function EndTrip() {
     endTime: "",
   });
 
-  const [tripId, setTripId] = useState(null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load existing trip data
+  // Load existing trip data based on state tripId
   useEffect(() => {
     const loadExistingTrip = async () => {
+      setIsLoading(true);
+      if (!app || !tripId) {
+        console.warn("App or Trip ID not available in state, cannot load end trip data.");
+        navigate("/");
+        return;
+      }
+      
       try {
-        if (!app) return;
-
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        const trips = await Form.find({ id: tripId });
 
-        // Get in-progress trips
-        const existingTrips = await Form.find({ status: "in-progress" });
-
-        if (existingTrips.length === 0) {
-          console.warn("No in-progress trips found, redirecting to start trip page");
-          navigate("/start");
+        if (trips.length === 0) {
+          console.warn(`Trip with ID ${tripId} not found, redirecting to home.`);
+          navigate("/");
           return;
         }
 
-        // Use the first in-progress trip
-        const currentTrip = existingTrips[0];
-        setTripId(currentTrip.id);
-
-        // Set form data from existing trip - using field names matching schema
+        const currentTrip = trips[0];
         setFormData({
           endWeather: currentTrip.endWeather || "",
           endTime: currentTrip.endTime || "",
         });
-        
-        // Force remount of time picker to show saved value
         setTimeKey(prevKey => prevKey + 1);
       } catch (error) {
         console.error("Error loading trip data:", error);
+        navigate("/");
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadExistingTrip();
-  }, [app, navigate]);
+  }, [app, tripId, navigate]);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -138,47 +140,34 @@ function EndTrip() {
     const newErrors = validateForm();
     setErrors(newErrors);
 
-    // If no errors, save data and navigate to next page
     if (Object.keys(newErrors).length === 0 && tripId) {
       try {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
 
-        // Retrieve the trip to update
-        const trips = await Form.find({ id: tripId });
-
-        if (!trips || trips.length === 0) {
-          console.error("Trip not found with ID:", tripId);
-          return;
-        }
-
-        const tripToUpdate = trips[0];
-
-        // Prepare update data and update trip
-        // Set status to "in-progress" while the trip is being reviewed
-        const updateData = {
-          endWeather: formData.endWeather,
-          endTime: formData.endTime,
-          status: "in-progress",
-          step: 4,
-        };
-        // Update trip
         await Form.update(
           {
-            id: tripToUpdate.id,
-            ...updateData
+            id: tripId,
+            endWeather: formData.endWeather,
+            endTime: formData.endTime,
+            status: "in-progress",
+            step: 4,
           }
         );
-        navigate("/review");
+        navigate(`/review`, { state: { tripId: tripId } });
       } catch (error) {
         console.error("Error saving end trip data:", error);
       }
     } else {
       console.warn(
-        "Not proceeding with update due to errors or missing trip ID",
+        "Not proceeding with update due to errors or missing trip ID in state",
       );
     }
   };
+
+  if (isLoading) {
+    return <div className="page-content">Loading trip end details...</div>;
+  }
 
   return (
     <>
@@ -266,7 +255,11 @@ function EndTrip() {
         </div>
       </div>
 
-      <Footer backPath="/catch" nextPath="/review" onNextClick={handleSubmit} />
+      <Footer 
+        backPath="/catch"
+        onNextClick={handleSubmit}
+        backButtonProps={{ onClick: () => navigate('/catch', { state: { tripId: tripId } }) }}
+      />
     </>
   );
 }

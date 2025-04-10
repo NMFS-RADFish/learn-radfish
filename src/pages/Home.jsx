@@ -1,14 +1,17 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
-import { useApplication } from "@nmfs-radfish/react-radfish";
+import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const app = useApplication();
+  const { isOffline } = useOfflineStatus();
   const [trips, setTrips] = useState([]);
   const [tripStats, setTripStats] = useState({});
+  const navigate = useNavigate();
   
-  // Load trips on component mount
+  // Initial load
   useEffect(() => {
     // Load all trips and their catch data
     const loadTripsAndCatches = async () => {
@@ -65,9 +68,9 @@ function HomePage() {
         console.error("Error loading trips and catches:", error);
       }
     };
-
+    
     loadTripsAndCatches();
-  }, [app]);
+  }, [app, isOffline]); // Re-added isOffline dependency
 
   // Format date from ISO string
   const formatDate = (dateString) => {
@@ -88,7 +91,27 @@ function HomePage() {
     if (trip.status === "in-progress") return "trip-header-in-progress";
     return "trip-header-not-submitted";
   };
-
+  
+  // Handle trip card click
+  const handleTripClick = (trip) => {
+    const destinationState = { state: { tripId: trip.id } };
+    
+    if (trip.status === "submitted" || trip.status === "Not Submitted") {
+      navigate(`/review`, destinationState);
+    } else if (trip.status === "in-progress") {
+      // Navigate to the correct step
+      switch (trip.step) {
+        case 2: navigate(`/catch`, destinationState); break;
+        case 3: navigate(`/end`, destinationState); break;
+        case 4: navigate(`/review`, destinationState); break;
+        default: navigate(`/start`, destinationState); // Should ideally not happen, default to start
+      }
+    } else {
+      // For 'draft' or other statuses, go to start page
+      navigate(`/start`, destinationState);
+    }
+  };
+  
   return (
     <>
       <div className="page-content">
@@ -101,7 +124,11 @@ function HomePage() {
         ) : (
           <div className="trip-card-list">
             {trips.map((trip) => (
-              <div key={trip.id} className="trip-card-modern">
+              <div 
+                key={trip.id} 
+                className="trip-card-modern"
+                onClick={() => handleTripClick(trip)} // Add onClick handler
+              >
                 <div className={`trip-card-header-modern ${getHeaderClass(trip)}`}>
                   <div className="trip-card-header-date">
                     {formatDate(trip.tripDate)}
@@ -110,6 +137,7 @@ function HomePage() {
                     {getStatusLabel(trip)}
                   </div>
                 </div>
+                
                 <div className="trip-card-content">
                   <div className="trip-stats-container">
                     <div className="trip-stat-item">

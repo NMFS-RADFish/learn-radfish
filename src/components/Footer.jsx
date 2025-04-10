@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
  * @param {boolean} [props.showBackButton=true] - Whether to show the back button
  * @param {boolean} [props.showNextButton=true] - Whether to show the next button
  * @param {Object} [props.nextButtonProps={}] - Additional props for the next button
+ * @param {Object} [props.backButtonProps={}] - Additional props for the back button
  */
 function Footer({ 
   backPath = "/", 
@@ -22,16 +23,21 @@ function Footer({
   onNextClick, 
   showBackButton = true,
   showNextButton = true,
-  nextButtonProps = {}
+  nextButtonProps = {},
+  backButtonProps = {}
 }) {
   const navigate = useNavigate();
 
   const handleNextClick = (e) => {
     if (onNextClick) {
       onNextClick(e);
-    } else {
+    } else if (nextPath) {
       navigate(nextPath);
     }
+  };
+
+  const handleBackClick = () => {
+    navigate(backPath);
   };
 
   return (
@@ -42,7 +48,8 @@ function Footer({
             outline 
             type="button" 
             className="back-button" 
-            onClick={() => navigate(backPath)}
+            onClick={backButtonProps.onClick || handleBackClick}
+            {...backButtonProps}
           >
             {backButtonLabel}
           </Button>

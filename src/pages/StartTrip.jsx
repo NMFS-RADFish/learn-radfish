@@ -1,6 +1,6 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Form,
   FormGroup,
@@ -21,20 +21,23 @@ const FIELD_START_TIME = "Start time";
 
 function StartTrip() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const tripIdFromState = location.state?.tripId;
   const app = useApplication();
-  const [timeKey, setTimeKey] = useState(0); // Add key for TimePicker remounting
-  const [dateKey, setDateKey] = useState(0); // Add key for DatePicker remounting
+  const [timeKey, setTimeKey] = useState(0);
+  const [dateKey, setDateKey] = useState(0);
 
-  // Form state with RADFish IndexedDB Storage
+  // Form state
   const [formData, setFormData] = useState({
     tripDate: "",
     weather: "",
     startTime: "",
   });
 
-  const [tripId, setTripId] = useState(null);
+  const [currentTripId, setCurrentTripId] = useState(tripIdFromState || null);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!tripIdFromState);
 
   // Handle input changes
   const handleInputChange = (e) => {
@@ -117,51 +120,45 @@ function StartTrip() {
     return newErrors;
   };
 
-  // Load existing trip data
+  // Load existing trip data if tripId is present in location state
   useEffect(() => {
     const loadExistingTrip = async () => {
+      if (!app || !tripIdFromState) {
+        setIsLoading(false);
+        return;
+      }
+      
+      setIsLoading(true);
       try {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        const trips = await Form.find({ id: tripIdFromState });
 
-        // Get all trips in "in-progress" status
-        const existingTrips = await Form.find({ status: "in-progress" });
-
-        // If an in-progress trip exists, use it
-        if (existingTrips.length > 0) {
-          const currentTrip = existingTrips[0];
-          setTripId(currentTrip.id);
-          
-          // Format the date properly if it exists
-          let formattedDate = "";
-          if (currentTrip.tripDate) {
-            const date = new Date(currentTrip.tripDate);
-            if (!isNaN(date.getTime())) {
-              // Format as YYYY-MM-DD for the DatePicker
-              formattedDate = date.toISOString().split('T')[0];
-            }
-          }
-          
-          // Set form data with properly formatted date
+        if (trips.length > 0) {
+          const currentTrip = trips[0];
+          setCurrentTripId(currentTrip.id);
           setFormData({
-            tripDate: formattedDate,
+            tripDate: currentTrip.tripDate || "",
             weather: currentTrip.weather || "",
             startTime: currentTrip.startTime || "",
           });
-          
-          // Force remount of pickers to refresh with new values
-          setDateKey(prev => prev + 1);
-          setTimeKey(prev => prev + 1);
+          setDateKey(prevKey => prevKey + 1);
+          setTimeKey(prevKey => prevKey + 1);
+        } else {
+          console.warn(`Trip with ID ${tripIdFromState} not found in state. Starting new trip form.`);
+          setCurrentTripId(null);
+          setFormData({ tripDate: "", weather: "", startTime: "" });
         }
       } catch (error) {
         console.error("Error loading trip data:", error);
+        setCurrentTripId(null);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (app) {
-      loadExistingTrip();
-    }
-  }, [app]);
+    loadExistingTrip();
+  }, [app, tripIdFromState]);
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -171,21 +168,24 @@ function StartTrip() {
     const newErrors = validateForm();
     setErrors(newErrors);
 
-    // If no errors, save data and navigate to next page
     if (Object.keys(newErrors).length === 0) {
       try {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        let navigateToId = currentTripId;
 
-        if (tripId) {
+        if (currentTripId) {
           // Update existing trip
-          await Form.update({
-            id: tripId,
-            tripDate: formData.tripDate,
-            weather: formData.weather,
-            startTime: formData.startTime,
-            status: "in-progress",
-          });
+          await Form.update(
+            {
+              id: currentTripId,
+              tripDate: formData.tripDate,
+              weather: formData.weather,
+              startTime: formData.startTime,
+              status: "in-progress",
+              step: 2
+            }
+          );
         } else {
           // Create new trip
           const newTripId = crypto.randomUUID();
@@ -194,20 +194,24 @@ function StartTrip() {
             tripDate: formData.tripDate,
             weather: formData.weather,
             startTime: formData.startTime,
-            step: 1,
+            step: 2, 
             status: "in-progress",
             endWeather: "",
             endTime: "",
           });
-          setTripId(newTripId);
+          navigateToId = newTripId;
+          setCurrentTripId(newTripId); 
         }
-
-        navigate("/catch");
+        navigate(`/catch`, { state: { tripId: navigateToId } });
       } catch (error) {
-        console.error("Error saving trip data:", error, "Trip ID:", tripId);
+        console.error("Error saving trip data:", error, "Trip ID:", currentTripId);
       }
     }
   };
+
+  if (isLoading) {
+    return <div className="page-content">Loading trip...</div>;
+  }
 
   return (
     <>
@@ -328,7 +332,7 @@ function StartTrip() {
         </div>
       </div>
 
-      <Footer backPath="/" nextPath="/catch" onNextClick={handleSubmit} />
+      <Footer backPath="/" onNextClick={handleSubmit} />
     </>
   );
 }

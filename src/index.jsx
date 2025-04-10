@@ -31,7 +31,7 @@ const app = new Application({
               step: {
                 type: "number",
                 required: true,
-                minimum: 1,
+                default: 1 // Track the current step (1: Start, 2: Catch, 3: End, 4: Review)
               },
               tripDate: {
                 type: "string",

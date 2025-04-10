@@ -1,6 +1,6 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Form,
   Label,
@@ -100,9 +100,10 @@ const validateLongitude = (value) => {
 
 function CatchLog() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const tripId = location.state?.tripId;
   const app = useApplication();
   const [timeKey, setTimeKey] = useState(0);
-  const [tripId, setTripId] = useState(null);
 
   // Form data for the current catch being entered
   const [currentCatch, setCurrentCatch] = useState({
@@ -123,48 +124,45 @@ function CatchLog() {
   // Form validation errors
   const [errors, setErrors] = useState({});
   
-  // Load existing trip and catches
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Load existing trip and catches based on state tripId
   useEffect(() => {
     const loadTripAndCatches = async () => {
+      setIsLoading(true);
+      if (!app || !tripId) { 
+        console.warn("App or Trip ID not available in state, cannot load catch data.");
+        navigate("/"); 
+        return;
+      }
+      
       try {
-        if (!app) return;
-        
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
-        
-        // Get in-progress trips
-        const existingTrips = await Form.find({ status: "in-progress" });
+        const existingTrips = await Form.find({ id: tripId });
         
         if (existingTrips.length === 0) {
-          console.warn("No in-progress trips found, redirecting to start trip page");
-          navigate("/start");
+          console.warn(`Trip with ID ${tripId} not found, redirecting to home.`);
+          navigate("/");
           return;
         }
         
-        // Use the first in-progress trip
-        const currentTrip = existingTrips[0];
-        setTripId(currentTrip.id);
-        
-        // Get catches for this trip
         const Catch = tripStore.getCollection("Catch");
-        const existingCatches = await Catch.find({ tripId: currentTrip.id });
+        const existingCatches = await Catch.find({ tripId: tripId });
         
         if (existingCatches.length > 0) {
-           // Ensure lat/lon are empty strings if null/undefined to prevent uncontrolled inputs
-           const formattedCatches = existingCatches.map(catchData => ({
-            ...catchData,
-            latitude: catchData.latitude ?? "", 
-            longitude: catchData.longitude ?? "",
-          }));
-          setCatches(formattedCatches); 
+          setCatches(existingCatches.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
         }
       } catch (error) {
         console.error("Error loading trip data:", error);
+        navigate("/"); // Navigate away on error
+      } finally {
+        setIsLoading(false);
       }
     };
     
     loadTripAndCatches();
-  }, [app, navigate]);
+  }, [app, tripId, navigate]);
 
   // Handle input changes for text fields and selects
   const handleInputChange = (e) => {
@@ -272,7 +270,7 @@ function CatchLog() {
     return newErrors;
   };
 
-  // Handle adding a new catch
+  // Handle adding a new catch - ensure tripId from state is used
   const handleAddCatch = async (e) => {
     e.preventDefault();
     setSubmitted(true);
@@ -280,41 +278,26 @@ function CatchLog() {
     const newErrors = validateForm();
     setErrors(newErrors);
 
-    // If no errors, add catch to IndexedDB
     if (Object.keys(newErrors).length === 0 && tripId) {
       try {
         const tripStore = app.stores["trip"];
         const Catch = tripStore.getCollection("Catch");
         
-        // Create new catch with UUID and tripId
         const newCatchData = {
           ...currentCatch,
           id: crypto.randomUUID(),
           tripId: tripId,
-          // Convert string values to numbers for required fields
           weight: Number(currentCatch.weight),
           length: Number(currentCatch.length),
-          // Convert coordinates to numbers only if provided, otherwise undefined
-          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : undefined,
-          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : undefined
+          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : null,
+          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : null,
+          createdAt: new Date().toISOString()
         };
         
-        // Save to IndexedDB
         await Catch.create(newCatchData);
-        
-        // Add to local state at the beginning of the array (top of the list)
         setCatches([newCatchData, ...catches]);
-
-        // Reset form
-        setCurrentCatch({
-          species: "",
-          weight: "",
-          length: "",
-          latitude: "",
-          longitude: "",
-          time: "",
-        });
-        setTimeKey((prevKey) => prevKey + 1); // Increment the key to force remount
+        setCurrentCatch({ species: "", weight: "", length: "", latitude: "", longitude: "", time: "" });
+        setTimeKey((prevKey) => prevKey + 1);
         setSubmitted(false);
       } catch (error) {
         console.error("Error adding catch:", error);
@@ -412,24 +395,23 @@ function CatchLog() {
 
     if (tripId) {
       try {
-        const tripStore = app.stores["trip"];
-        const Form = tripStore.getCollection("Form");
-        
-        // Update trip step
-        await Form.update(
-          {
-            id: tripId,
-            step: 3
-          }
-        );
-        navigate("/end");
+        const Form = app.stores["trip"].getCollection("Form"); 
+        await Form.update({
+          id: tripId,
+          step: 3
+        });
+        navigate(`/end`, { state: { tripId: tripId } });
       } catch (error) {
         console.error("Error updating trip step:", error, "Trip ID:", tripId);
       }
     } else {
-      console.error("No trip ID available");
+      console.error("No trip ID available in state");
     }
   };
+
+  if (isLoading) {
+    return <div className="page-content">Loading catches...</div>;
+  }
 
   return (
     <>
@@ -893,7 +875,11 @@ function CatchLog() {
         </div>
       </div>
 
-      <Footer backPath="/start" nextPath="/end" onNextClick={handleSubmit} />
+      <Footer 
+        backPath="/start"
+        onNextClick={handleSubmit}
+        backButtonProps={{ onClick: () => navigate('/start', { state: { tripId: tripId } }) }}
+      />
     </>
   );
 }
