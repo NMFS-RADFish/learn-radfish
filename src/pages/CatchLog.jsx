@@ -25,6 +25,10 @@ const FIELD_LATITUDE = "Latitude";
 const FIELD_LONGITUDE = "Longitude";
 const FIELD_TIME = "Catch time";
 
+// Input length limits
+const MAX_WEIGHT_LENGTH = 4;
+const MAX_LENGTH_LENGTH = 3;
+
 // Species options
 const SPECIES_OPTIONS = ["Yellowfin", "Bluefin", "Salmon", "Halibut"];
 
@@ -38,7 +42,7 @@ const validateRequired = (value, fieldName) => {
 };
 
 // Validates that a number is within a specified range
-const validateNumberRange = (value, min, max, fieldName) => {
+const validateNumberRange = (value, min, max, fieldName, allowZero = true) => {
   if (value === "" || value === null || value === undefined) {
     return null; // Empty validation is handled by validateRequired
   }
@@ -49,12 +53,18 @@ const validateNumberRange = (value, min, max, fieldName) => {
     return `${fieldName} must be a valid number`;
   }
 
-  if (numValue < min) {
+  // Check if the value must be strictly greater than min
+  if (!allowZero && numValue <= min) {
+      return `${fieldName} must be greater than ${min}`;
+  } 
+  // Check if the value is less than min (when zero is allowed)
+  else if (allowZero && numValue < min) {
     return `${fieldName} must be at least ${min}`;
   }
 
   if (numValue > max) {
-    return `${fieldName} is too large`;
+    const minOperator = allowZero ? '>=' : '>';
+    return `${fieldName} must be ${minOperator} ${min} and <= ${max}`;
   }
 
   return null;
@@ -166,7 +176,19 @@ function CatchLog() {
   // Handle input changes for text fields and selects
   const handleInputChange = (e) => {
     if (e && e.target) {
-      const { name, value } = e.target;
+      let { name, value } = e.target;
+
+      // Prevent negative sign for weight and length
+      if ((name === "weight" || name === "length") && value.includes('-')) {
+        value = value.replace('-', ''); // Remove the negative sign
+      }
+
+      // Enforce max length for weight and length
+      if (name === "weight" && value.length > MAX_WEIGHT_LENGTH) {
+        value = value.slice(0, MAX_WEIGHT_LENGTH); // Truncate
+      } else if (name === "length" && value.length > MAX_LENGTH_LENGTH) {
+        value = value.slice(0, MAX_LENGTH_LENGTH); // Truncate
+      }
 
       // For latitude and longitude, apply input processing
       if (name === "latitude" || name === "longitude") {
@@ -185,7 +207,7 @@ function CatchLog() {
           [name]: processedValue,
         });
       } else {
-        // For other inputs, update normally
+        // For other inputs (including processed weight/length), update normally
         setCurrentCatch({
           ...currentCatch,
           [name]: value,
@@ -232,8 +254,9 @@ function CatchLog() {
       weightError = validateNumberRange(
         currentCatch.weight,
         0,
-        2000,
+        1000,
         FIELD_WEIGHT,
+        false
       );
     }
     if (weightError) newErrors.weight = weightError;
@@ -244,8 +267,9 @@ function CatchLog() {
       lengthError = validateNumberRange(
         currentCatch.length,
         0,
-        240,
+        500,
         FIELD_LENGTH,
+        false
       );
     }
     if (lengthError) newErrors.length = lengthError;
