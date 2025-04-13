@@ -14,6 +14,31 @@ import { useApplication } from "@nmfs-radfish/react-radfish";
 import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
+// Utility to format a date string to YYYY-MM-DD
+const formatToYYYYMMDD = (dateString) => {
+  if (!dateString || typeof dateString !== 'string') {
+    return ''; // Return empty for invalid input
+  }
+
+  try {
+    const date = new Date(dateString);
+    // Check if the date object is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid date string could not be parsed: ${dateString}`);
+      return '';
+    }
+    // Format the valid date
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    // Catch unexpected errors during Date processing
+    console.error(`Error formatting date string: ${dateString}`, error);
+    return '';
+  }
+};
+
 // Field name constants
 const FIELD_DATE = "Trip date";
 const FIELD_WEATHER = "Weather condition";
@@ -24,8 +49,6 @@ function StartTrip() {
   const location = useLocation();
   const tripIdFromState = location.state?.tripId;
   const app = useApplication();
-  const [timeKey, setTimeKey] = useState(0);
-  const [dateKey, setDateKey] = useState(0);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -137,13 +160,12 @@ function StartTrip() {
         if (trips.length > 0) {
           const currentTrip = trips[0];
           setCurrentTripId(currentTrip.id);
+          const formattedDate = formatToYYYYMMDD(currentTrip.tripDate || "");
           setFormData({
-            tripDate: currentTrip.tripDate || "",
+            tripDate: formattedDate,
             weather: currentTrip.weather || "",
             startTime: currentTrip.startTime || "",
           });
-          setDateKey(prevKey => prevKey + 1);
-          setTimeKey(prevKey => prevKey + 1);
         } else {
           console.warn(`Trip with ID ${tripIdFromState} not found in state. Starting new trip form.`);
           setCurrentTripId(null);
@@ -232,7 +254,7 @@ function StartTrip() {
                 mm/dd/yyyy
               </div>
               <DatePicker
-                key={dateKey}
+              
                 id="tripDate"
                 name="tripDate"
                 defaultValue={formData.tripDate}
@@ -262,7 +284,6 @@ function StartTrip() {
                 Time<span className="text-secondary-vivid">*</span>
               </Label>
               <TimePicker
-                key={timeKey}
                 id="time"
                 name="time"
                 defaultValue={formData.startTime}

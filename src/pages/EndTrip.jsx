@@ -22,7 +22,6 @@ function EndTrip() {
   const location = useLocation();
   const tripId = location.state?.tripId;
   const app = useApplication();
-  const [timeKey, setTimeKey] = useState(0);
 
   // Form state - naming to match schema field names
   const [formData, setFormData] = useState({
@@ -60,7 +59,6 @@ function EndTrip() {
           endWeather: currentTrip.endWeather || "",
           endTime: currentTrip.endTime || "",
         });
-        setTimeKey(prevKey => prevKey + 1);
       } catch (error) {
         console.error("Error loading trip data:", error);
         navigate("/");
@@ -185,7 +183,6 @@ function EndTrip() {
                 Time<span className="text-secondary-vivid">*</span>
               </Label>
               <TimePicker
-                key={timeKey}
                 id="time"
                 name="time"
                 defaultValue={formData.endTime}

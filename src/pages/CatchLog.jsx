@@ -103,7 +103,6 @@ function CatchLog() {
   const location = useLocation();
   const tripId = location.state?.tripId;
   const app = useApplication();
-  const [timeKey, setTimeKey] = useState(0);
 
   // Form data for the current catch being entered
   const [currentCatch, setCurrentCatch] = useState({
@@ -297,7 +296,6 @@ function CatchLog() {
         await Catch.create(newCatchData);
         setCatches([newCatchData, ...catches]);
         setCurrentCatch({ species: "", weight: "", length: "", latitude: "", longitude: "", time: "" });
-        setTimeKey((prevKey) => prevKey + 1);
         setSubmitted(false);
       } catch (error) {
         console.error("Error adding catch:", error);
@@ -545,7 +543,6 @@ function CatchLog() {
                   Time<span className="text-secondary-vivid">*</span>
                 </Label>
                 <TimePicker
-                  key={timeKey}
                   id="catchTime"
                   name="time"
                   defaultValue={currentCatch.time}
