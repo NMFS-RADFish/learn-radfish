@@ -9,9 +9,9 @@ import {
   Select,
   Label,
   DatePicker,
+  Button
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
-import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
 // Utility to format a date string to YYYY-MM-DD
@@ -353,7 +353,26 @@ function StartTrip() {
         </div>
       </div>
 
-      <Footer backPath="/" onNextClick={handleSubmit} />
+      {/* Inline Footer */}
+      <footer className="sticky-footer">
+        <div className="footer-content">
+          <Button
+            outline 
+            type="button" 
+            className="back-button" 
+            onClick={() => navigate("/")}
+          >
+            Back
+          </Button>
+          <Button 
+            type="submit" // Use submit to trigger form's onSubmit
+            className="next-button"
+            onClick={handleSubmit} // Call handleSubmit directly 
+          >
+            Next
+          </Button>
+        </div>
+      </footer>
     </>
   );
 }

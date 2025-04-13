@@ -1,8 +1,8 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
-import Footer from "../components/Footer";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@trussworks/react-uswds";
 
 function HomePage() {
   const app = useApplication();
@@ -162,7 +162,17 @@ function HomePage() {
         )}
       </div>
       
-      <Footer nextPath="/start" nextLabel="Start New Trip" showBackButton={false} />
+      {/* Inline Footer */}
+      <footer className="sticky-footer">
+        <div className="footer-content">
+          <Button 
+            type="button" 
+            onClick={() => navigate("/start")}
+          >
+            Start New Trip
+          </Button>
+        </div>
+      </footer>
     </>
   );
 }

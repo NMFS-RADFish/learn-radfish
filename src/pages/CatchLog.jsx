@@ -13,7 +13,6 @@ import {
   Icon,
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
-import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 import { processCoordinateInput } from "../utils/inputProcessing";
 
@@ -113,6 +112,7 @@ function CatchLog() {
   const location = useLocation();
   const tripId = location.state?.tripId;
   const app = useApplication();
+  const [catchTimeKey, setCatchTimeKey] = useState(0);
 
   // Form data for the current catch being entered
   const [currentCatch, setCurrentCatch] = useState({
@@ -312,14 +312,15 @@ function CatchLog() {
           tripId: tripId,
           weight: Number(currentCatch.weight),
           length: Number(currentCatch.length),
-          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : null,
-          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : null,
+          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : undefined,
+          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : undefined,
           createdAt: new Date().toISOString()
         };
         
         await Catch.create(newCatchData);
         setCatches([newCatchData, ...catches]);
         setCurrentCatch({ species: "", weight: "", length: "", latitude: "", longitude: "", time: "" });
+        setCatchTimeKey(prevKey => prevKey + 1);
         setSubmitted(false);
       } catch (error) {
         console.error("Error adding catch:", error);
@@ -567,6 +568,7 @@ function CatchLog() {
                   Time<span className="text-secondary-vivid">*</span>
                 </Label>
                 <TimePicker
+                  key={catchTimeKey}
                   id="catchTime"
                   name="time"
                   defaultValue={currentCatch.time}
@@ -831,7 +833,7 @@ function CatchLog() {
                               id={`recorded-latitude-${index}`}
                               name="latitude"
                               type="number"
-                              value={catchItem.latitude}
+                              value={catchItem.latitude ?? ''}
                               onChange={(e) => {
                                 const { processedValue, skipUpdate } =
                                   processCoordinateInput(
@@ -866,7 +868,7 @@ function CatchLog() {
                               id={`recorded-longitude-${index}`}
                               name="longitude"
                               type="number"
-                              value={catchItem.longitude}
+                              value={catchItem.longitude ?? ''}
                               onChange={(e) => {
                                 const { processedValue, skipUpdate } =
                                   processCoordinateInput(
@@ -896,11 +898,26 @@ function CatchLog() {
         </div>
       </div>
 
-      <Footer 
-        backPath="/start"
-        onNextClick={handleSubmit}
-        backButtonProps={{ onClick: () => navigate('/start', { state: { tripId: tripId } }) }}
-      />
+      {/* Inline Footer */}
+      <footer className="sticky-footer">
+        <div className="footer-content">
+          <Button
+            outline 
+            type="button" 
+            className="back-button" 
+            onClick={() => navigate('/start', { state: { tripId: tripId } })}
+          >
+            Back
+          </Button>
+          <Button 
+            type="button" // Changed from submit as it doesn't relate to the main form
+            className="next-button"
+            onClick={handleSubmit} // Call handleSubmit to navigate
+          >
+            Next
+          </Button>
+        </div>
+      </footer>
     </>
   );
 }

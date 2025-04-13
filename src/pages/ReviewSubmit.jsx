@@ -2,7 +2,7 @@ import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useApplication, Table, useOfflineStatus } from "@nmfs-radfish/react-radfish";
-import Footer from "../components/Footer";
+import { Button } from "@trussworks/react-uswds";
 import StepIndicator from "../components/StepIndicator";
 
 function ReviewSubmit() {
@@ -269,14 +269,30 @@ function ReviewSubmit() {
         </div>
       </div>
       
-      <Footer 
-        showBackButton={footerProps.showBackButton}
-        backButtonProps={{ onClick: () => navigate(footerProps.backPath, footerProps.backNavState) }}
-        showNextButton={footerProps.showNextButton}
-        nextLabel={footerProps.nextLabel}
-        nextButtonProps={footerProps.nextButtonProps}
-        onNextClick={footerProps.onNextClick}
-      />
+      {/* Inline Footer */}
+      <footer className="sticky-footer">
+        <div className="footer-content">
+          {footerProps.showBackButton && (
+            <Button
+              outline 
+              type="button" 
+              className="back-button" 
+              onClick={() => navigate(footerProps.backPath, footerProps.backNavState)}
+            >
+              Back
+            </Button>
+          )}
+          {footerProps.showNextButton && (
+            <Button 
+              type="button"
+              className={`${footerProps.showBackButton ? "next-button" : ""} ${footerProps.nextButtonProps.className || ""}`}
+              onClick={footerProps.onNextClick}
+            >
+              {footerProps.nextLabel}
+            </Button>
+          )}
+        </div>
+      </footer>
     </>
   );
 }

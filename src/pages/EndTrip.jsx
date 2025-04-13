@@ -8,9 +8,9 @@ import {
   TimePicker,
   Select,
   Label,
+  Button
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
-import Footer from "../components/Footer";
 import StepIndicator from "../components/StepIndicator";
 
 // Field name constants
@@ -252,11 +252,26 @@ function EndTrip() {
         </div>
       </div>
 
-      <Footer 
-        backPath="/catch"
-        onNextClick={handleSubmit}
-        backButtonProps={{ onClick: () => navigate('/catch', { state: { tripId: tripId } }) }}
-      />
+      {/* Inline Footer */}
+      <footer className="sticky-footer">
+        <div className="footer-content">
+          <Button
+            outline 
+            type="button" 
+            className="back-button" 
+            onClick={() => navigate('/catch', { state: { tripId: tripId } })}
+          >
+            Back
+          </Button>
+          <Button 
+            type="submit" // Use submit to trigger form's onSubmit
+            className="next-button"
+            onClick={handleSubmit} // Call handleSubmit directly
+          >
+            Next
+          </Button>
+        </div>
+      </footer>
     </>
   );
 }
