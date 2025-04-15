@@ -13,10 +13,13 @@ function OnlineConfirmation() {
           <p>Your trip has been successfully submitted!</p>
         </div>
       </div>
-      <footer className="sticky-footer">
-        <div className="footer-content">
-          <Button 
-            type="button" 
+
+      {/* Inline Footer */}
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
+          <Button
+            type="button"
+            className="width-full"
             onClick={() => navigate("/")}
           >
             Home

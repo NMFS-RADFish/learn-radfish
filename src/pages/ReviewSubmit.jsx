@@ -1,7 +1,11 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useApplication, Table, useOfflineStatus } from "@nmfs-radfish/react-radfish";
+import {
+  useApplication,
+  Table,
+  useOfflineStatus,
+} from "@nmfs-radfish/react-radfish";
 import { Button } from "@trussworks/react-uswds";
 import StepIndicator from "../components/StepIndicator";
 
@@ -21,31 +25,32 @@ function ReviewSubmit() {
     const loadTripData = async () => {
       setLoading(true);
       if (!app || !tripId) {
-        console.warn("App or Trip ID not available in state, cannot load review data.");
+        console.warn(
+          "App or Trip ID not available in state, cannot load review data.",
+        );
         navigate("/");
         return;
       }
-      
+
       try {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
         const trips = await Form.find({ id: tripId });
-        
+
         if (trips.length === 0) {
           setError(`Trip with ID ${tripId} not found`);
           setLoading(false);
           return;
         }
-        
+
         const selectedTrip = trips[0];
         setTrip(selectedTrip);
-        
+
         const Catch = tripStore.getCollection("Catch");
         const tripCatches = await Catch.find({ tripId: selectedTrip.id });
-        
+
         const aggregatedData = aggregateCatchesBySpecies(tripCatches);
         setAggregatedCatches(aggregatedData);
-        
       } catch (err) {
         console.error("Error loading trip data:", err);
         setError("Failed to load trip data");
@@ -54,68 +59,67 @@ function ReviewSubmit() {
         setLoading(false);
       }
     };
-    
+
     loadTripData();
   }, [app, tripId, navigate]);
-  
+
   // Aggregate catches by species, calculating total weight and average length
   const aggregateCatchesBySpecies = (catchData) => {
     const speciesMap = {};
-    
+
     // Group catches by species
-    catchData.forEach(catchItem => {
+    catchData.forEach((catchItem) => {
       if (!speciesMap[catchItem.species]) {
         speciesMap[catchItem.species] = {
           species: catchItem.species,
           weights: [],
           lengths: [],
-          count: 0
+          count: 0,
         };
       }
-      
+
       speciesMap[catchItem.species].weights.push(catchItem.weight);
       speciesMap[catchItem.species].lengths.push(catchItem.length);
       speciesMap[catchItem.species].count++;
     });
-    
+
     // Calculate totals and averages
-    return Object.values(speciesMap).map(item => {
+    return Object.values(speciesMap).map((item) => {
       const totalWeight = item.weights.reduce((sum, val) => sum + val, 0);
-      const avgLength = item.lengths.reduce((sum, val) => sum + val, 0) / item.count;
-      
+      const avgLength =
+        item.lengths.reduce((sum, val) => sum + val, 0) / item.count;
+
       return {
         species: item.species,
         totalWeight: totalWeight.toFixed(2),
         avgLength: avgLength.toFixed(2),
-        count: item.count
+        count: item.count,
       };
     });
   };
-  
+
   // Format date from ISO string
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
-  
+
   // Handle trip submission/saving
   const handleSubmit = async () => {
     if (!trip) return;
-    
+
     try {
       const tripStore = app.stores["trip"];
       const Form = tripStore.getCollection("Form");
       const finalStatus = isOffline ? "Not Submitted" : "submitted";
-      
-      await Form.update(
-        {
-          id: trip.id,
-          status: finalStatus,
-          step: 4
-        }
-      );
-      
+
+      await Form.update({
+        id: trip.id,
+        status: finalStatus,
+        step: 4,
+      });
+
       navigate(isOffline ? "/offline-confirm" : "/online-confirm");
     } catch (error) {
       console.error("Error submitting trip:", error);
@@ -148,14 +152,14 @@ function ReviewSubmit() {
       }
     }
 
-    return { 
-      backPath, 
-      backNavState, 
-      showBackButton, 
-      showNextButton, 
-      nextLabel, 
-      onNextClick, 
-      nextButtonProps 
+    return {
+      backPath,
+      backNavState,
+      showBackButton,
+      showNextButton,
+      nextLabel,
+      onNextClick,
+      nextButtonProps,
     };
   };
 
@@ -175,10 +179,10 @@ function ReviewSubmit() {
 
   return (
     <>
-      <div className="page-content">
-        <div className="content-container">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+        <div className="width-full maxw-mobile-lg">
           <StepIndicator />
-          
+
           {/* Trip cards side-by-side */}
           <div className="trip-cards-container">
             {/* Start Trip Info Box */}
@@ -190,28 +194,22 @@ function ReviewSubmit() {
                   </div>
                   <div className="trip-card-body">
                     <div className="trip-info-row">
-                      <div className="icon-container">
-                        Date
-                      </div>
+                      <div className="icon-container">Date</div>
                       <span>{formatDate(trip.tripDate)}</span>
                     </div>
                     <div className="trip-info-row">
-                      <div className="icon-container">
-                        Weather
-                      </div>
+                      <div className="icon-container">Weather</div>
                       <span>{trip.weather}</span>
                     </div>
                     <div className="trip-info-row">
-                      <div className="icon-container">
-                        Time
-                      </div>
+                      <div className="icon-container">Time</div>
                       <span>{trip.startTime}</span>
                     </div>
                   </div>
                 </>
               )}
             </div>
-            
+
             {/* End Trip Info Box */}
             <div className="trip-card end-trip-card">
               {trip && (
@@ -221,15 +219,11 @@ function ReviewSubmit() {
                   </div>
                   <div className="trip-card-body">
                     <div className="trip-info-row">
-                      <div className="icon-container">
-                        Weather
-                      </div>
+                      <div className="icon-container">Weather</div>
                       <span>{trip.endWeather}</span>
                     </div>
                     <div className="trip-info-row">
-                      <div className="icon-container">
-                        Time
-                      </div>
+                      <div className="icon-container">Time</div>
                       <span>{trip.endTime}</span>
                     </div>
                   </div>
@@ -237,7 +231,7 @@ function ReviewSubmit() {
               )}
             </div>
           </div>
-          
+
           {/* Aggregated Catch Data Box */}
           <div className="trip-card catch-summary-card">
             <div className="trip-card-header">
@@ -251,15 +245,18 @@ function ReviewSubmit() {
                     species: item.species,
                     count: item.count,
                     totalWeight: `${item.totalWeight} lbs`,
-                    avgLength: `${item.avgLength} in`
+                    avgLength: `${item.avgLength} in`,
                   }))}
                   columns={[
                     { key: "species", label: "Species", sortable: true },
                     { key: "count", label: "Count", sortable: true },
-                    { key: "totalWeight", label: "Total Weight", sortable: true },
-                    { key: "avgLength", label: "Avg. Length", sortable: true }
+                    {
+                      key: "totalWeight",
+                      label: "Total Weight",
+                      sortable: true,
+                    },
+                    { key: "avgLength", label: "Avg. Length", sortable: true },
                   ]}
-
                 />
               ) : (
                 <p>No catches recorded for this trip.</p>
@@ -268,24 +265,26 @@ function ReviewSubmit() {
           </div>
         </div>
       </div>
-      
+
       {/* Inline Footer */}
-      <footer className="position-fixed bottom-0 width-full bg-white padding-x-2 padding-bottom-2 shadow-1 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-2">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
           {footerProps.showBackButton && (
             <Button
-              outline 
-              type="button" 
-              className="back-button" 
-              onClick={() => navigate(footerProps.backPath, footerProps.backNavState)}
+              outline
+              type="button"
+              className={footerProps.showNextButton ? "width-card-lg bg-white" : "width-full bg-white"}
+              onClick={() =>
+                navigate(footerProps.backPath, footerProps.backNavState)
+              }
             >
               Back
             </Button>
           )}
           {footerProps.showNextButton && (
-            <Button 
+            <Button
               type="button"
-              className={`${footerProps.showBackButton ? "next-button" : ""} ${footerProps.nextButtonProps.className || ""}`}
+              className={`${footerProps.showBackButton ? "width-full margin-left-2" : ""} ${footerProps.nextButtonProps.className || ""}`}
               onClick={footerProps.onNextClick}
             >
               {footerProps.nextLabel}

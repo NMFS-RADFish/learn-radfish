@@ -248,9 +248,7 @@ CATCH LOG PAGE STYLES
   margin-bottom: 2rem;
 }
 
-.add-catch-button {
-  min-width: 150px;
-}
+
 
 /* Recorded Catches Styles */
 .recorded-catches-container {
@@ -544,22 +542,6 @@ RECENT TRIPS STYLES
 */
 .bg-secondary-dark {
   background-color: #4D8055; /* green for submitted */
-}
-
-.bg-warning {
-  background-color: #FA9441; /* orange for in progress */
-}
-
-.bg-primary {
-  background-color: #005EA2; /* blue for ready to submit */
-}
-
-.bg-base-dark {
-  background-color: #71767a; /* gray for not started */
-}
-
-.bg-red-dark {
-  background-color: #D83933; /* red for not submitted */
 }
 
 /* Vertical dividers for grid statistics */

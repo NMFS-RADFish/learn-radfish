@@ -150,11 +150,11 @@ function HomePage() {
    * @return {string} CSS class name
    */
   const getHeaderClass = (trip) => {
-    if (!trip || !trip.status) return "bg-red-dark";
+    if (!trip || !trip.status) return "bg-secondary";
     
     if (trip.status === STATUS_SUBMITTED) return "bg-secondary-dark"; // Green
-    if (trip.status === STATUS_IN_PROGRESS) return "bg-warning"; // Orange
-    if (trip.status === STATUS_NOT_SUBMITTED) return "bg-primary"; // Blue
+    if (trip.status === STATUS_IN_PROGRESS) return "bg-accent-warm"; // Orange
+    if (trip.status === STATUS_NOT_SUBMITTED) return "bg-primary-darker"; // Blue
     
     // Default to orange for any other status
     return "bg-red-dark";
@@ -206,7 +206,7 @@ function HomePage() {
 
   return (
     <>
-      <div className="page-content padding-y-2">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
         <h1 className="font-heading-xl text-center margin-0">
           Welcome Captain
         </h1>
@@ -263,12 +263,12 @@ function HomePage() {
       </div>
 
       {/* Sticky footer with "Start New Trip" button */}
-      <footer className="position-fixed bottom-0 width-full bg-base-lighter padding-x-2 padding-bottom-2 shadow-1 z-top">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
             type="button"
             onClick={() => navigate("/start")}
-            className="bg-accent-cool-darker hover:bg-accent-cool-dark width-full"
+            className="bg-primary hover:bg-primary-darker width-full"
           >
             Start New Trip
           </Button>

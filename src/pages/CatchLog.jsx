@@ -54,15 +54,15 @@ const validateNumberRange = (value, min, max, fieldName, allowZero = true) => {
 
   // Check if the value must be strictly greater than min
   if (!allowZero && numValue <= min) {
-      return `${fieldName} must be greater than ${min}`;
-  } 
+    return `${fieldName} must be greater than ${min}`;
+  }
   // Check if the value is less than min (when zero is allowed)
   else if (allowZero && numValue < min) {
     return `${fieldName} must be at least ${min}`;
   }
 
   if (numValue > max) {
-    const minOperator = allowZero ? '>=' : '>';
+    const minOperator = allowZero ? ">=" : ">";
     return `${fieldName} must be ${minOperator} ${min} and <= ${max}`;
   }
 
@@ -132,35 +132,43 @@ function CatchLog() {
 
   // Form validation errors
   const [errors, setErrors] = useState({});
-  
+
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Load existing trip and catches based on state tripId
   useEffect(() => {
     const loadTripAndCatches = async () => {
       setIsLoading(true);
-      if (!app || !tripId) { 
-        console.warn("App or Trip ID not available in state, cannot load catch data.");
-        navigate("/"); 
+      if (!app || !tripId) {
+        console.warn(
+          "App or Trip ID not available in state, cannot load catch data.",
+        );
+        navigate("/");
         return;
       }
-      
+
       try {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
         const existingTrips = await Form.find({ id: tripId });
-        
+
         if (existingTrips.length === 0) {
-          console.warn(`Trip with ID ${tripId} not found, redirecting to home.`);
+          console.warn(
+            `Trip with ID ${tripId} not found, redirecting to home.`,
+          );
           navigate("/");
           return;
         }
-        
+
         const Catch = tripStore.getCollection("Catch");
         const existingCatches = await Catch.find({ tripId: tripId });
-        
+
         if (existingCatches.length > 0) {
-          setCatches(existingCatches.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+          setCatches(
+            existingCatches.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+            ),
+          );
         }
       } catch (error) {
         console.error("Error loading trip data:", error);
@@ -169,7 +177,7 @@ function CatchLog() {
         setIsLoading(false);
       }
     };
-    
+
     loadTripAndCatches();
   }, [app, tripId, navigate]);
 
@@ -179,8 +187,8 @@ function CatchLog() {
       let { name, value } = e.target;
 
       // Prevent negative sign for weight and length
-      if ((name === "weight" || name === "length") && value.includes('-')) {
-        value = value.replace('-', ''); // Remove the negative sign
+      if ((name === "weight" || name === "length") && value.includes("-")) {
+        value = value.replace("-", ""); // Remove the negative sign
       }
 
       // Enforce max length for weight and length
@@ -256,7 +264,7 @@ function CatchLog() {
         0,
         1000,
         FIELD_WEIGHT,
-        false
+        false,
       );
     }
     if (weightError) newErrors.weight = weightError;
@@ -269,7 +277,7 @@ function CatchLog() {
         0,
         500,
         FIELD_LENGTH,
-        false
+        false,
       );
     }
     if (lengthError) newErrors.length = lengthError;
@@ -305,22 +313,33 @@ function CatchLog() {
       try {
         const tripStore = app.stores["trip"];
         const Catch = tripStore.getCollection("Catch");
-        
+
         const newCatchData = {
           ...currentCatch,
           id: crypto.randomUUID(),
           tripId: tripId,
           weight: Number(currentCatch.weight),
           length: Number(currentCatch.length),
-          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : undefined,
-          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : undefined,
-          createdAt: new Date().toISOString()
+          latitude: currentCatch.latitude
+            ? Number(currentCatch.latitude)
+            : undefined,
+          longitude: currentCatch.longitude
+            ? Number(currentCatch.longitude)
+            : undefined,
+          createdAt: new Date().toISOString(),
         };
-        
+
         await Catch.create(newCatchData);
         setCatches([newCatchData, ...catches]);
-        setCurrentCatch({ species: "", weight: "", length: "", latitude: "", longitude: "", time: "" });
-        setCatchTimeKey(prevKey => prevKey + 1);
+        setCurrentCatch({
+          species: "",
+          weight: "",
+          length: "",
+          latitude: "",
+          longitude: "",
+          time: "",
+        });
+        setCatchTimeKey((prevKey) => prevKey + 1);
         setSubmitted(false);
       } catch (error) {
         console.error("Error adding catch:", error);
@@ -332,33 +351,41 @@ function CatchLog() {
   const handleRecordedCatchChange = async (index, field, value) => {
     const updatedCatches = [...catches];
     const catchToUpdate = updatedCatches[index];
-    
+
     // Update local state
     updatedCatches[index] = {
       ...catchToUpdate,
       [field]: value,
     };
     setCatches(updatedCatches);
-    
+
     try {
       const tripStore = app.stores["trip"];
       const Catch = tripStore.getCollection("Catch");
-      
+
       // Prepare updated data with type conversion if needed
       const updateData = { [field]: value };
-      if (field === 'weight' || field === 'length' || field === 'latitude' || field === 'longitude') {
+      if (
+        field === "weight" ||
+        field === "length" ||
+        field === "latitude" ||
+        field === "longitude"
+      ) {
         updateData[field] = Number(value);
       }
-      
+
       // Update catch field
-      await Catch.update(
-        {
-          id: catchToUpdate.id,
-          ...updateData
-        }
-      );
+      await Catch.update({
+        id: catchToUpdate.id,
+        ...updateData,
+      });
     } catch (error) {
-      console.error("Error updating catch:", error, "Catch ID:", catchToUpdate.id);
+      console.error(
+        "Error updating catch:",
+        error,
+        "Catch ID:",
+        catchToUpdate.id,
+      );
     }
   };
 
@@ -366,27 +393,30 @@ function CatchLog() {
   const handleRecordedTimeChange = async (index, time) => {
     const updatedCatches = [...catches];
     const catchToUpdate = updatedCatches[index];
-    
+
     // Update local state
     updatedCatches[index] = {
       ...catchToUpdate,
       time: time,
     };
     setCatches(updatedCatches);
-    
+
     try {
       const tripStore = app.stores["trip"];
       const Catch = tripStore.getCollection("Catch");
-      
+
       // Update catch time
-      await Catch.update(
-        {
-          id: catchToUpdate.id,
-          time
-        }
-      );
+      await Catch.update({
+        id: catchToUpdate.id,
+        time,
+      });
     } catch (error) {
-      console.error("Error updating catch time:", error, "Catch ID:", catchToUpdate.id);
+      console.error(
+        "Error updating catch time:",
+        error,
+        "Catch ID:",
+        catchToUpdate.id,
+      );
     }
   };
 
@@ -395,13 +425,13 @@ function CatchLog() {
     if (window.confirm("Are you sure you want to delete this catch?")) {
       try {
         const catchToDelete = catches[index];
-        
+
         const tripStore = app.stores["trip"];
         const Catch = tripStore.getCollection("Catch");
-        
+
         // Delete from IndexedDB
         await Catch.remove(catchToDelete.id);
-        
+
         // Update local state
         const updatedCatches = [...catches];
         updatedCatches.splice(index, 1);
@@ -418,10 +448,10 @@ function CatchLog() {
 
     if (tripId) {
       try {
-        const Form = app.stores["trip"].getCollection("Form"); 
+        const Form = app.stores["trip"].getCollection("Form");
         await Form.update({
           id: tripId,
-          step: 3
+          step: 3,
         });
         navigate(`/end`, { state: { tripId: tripId } });
       } catch (error) {
@@ -438,8 +468,8 @@ function CatchLog() {
 
   return (
     <>
-      <div className="page-content">
-        <div className="content-container">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+        <div className="width-full maxw-mobile-lg">
           <StepIndicator />
 
           {/* Catch entry form */}
@@ -672,7 +702,7 @@ function CatchLog() {
               <div className="catch-form-actions">
                 <Button
                   type="submit"
-                  className="add-catch-button"
+                  className="width-full color-white"
                   accentStyle="cool"
                 >
                   Add Catch
@@ -833,7 +863,7 @@ function CatchLog() {
                               id={`recorded-latitude-${index}`}
                               name="latitude"
                               type="number"
-                              value={catchItem.latitude ?? ''}
+                              value={catchItem.latitude ?? ""}
                               onChange={(e) => {
                                 const { processedValue, skipUpdate } =
                                   processCoordinateInput(
@@ -868,7 +898,7 @@ function CatchLog() {
                               id={`recorded-longitude-${index}`}
                               name="longitude"
                               type="number"
-                              value={catchItem.longitude ?? ''}
+                              value={catchItem.longitude ?? ""}
                               onChange={(e) => {
                                 const { processedValue, skipUpdate } =
                                   processCoordinateInput(
@@ -899,19 +929,19 @@ function CatchLog() {
       </div>
 
       {/* Inline Footer */}
-      <footer className="sticky-footer">
-        <div className="footer-content">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
           <Button
-            outline 
-            type="button" 
-            className="back-button" 
-            onClick={() => navigate('/start', { state: { tripId: tripId } })}
+            outline
+            type="button"
+            className="width-card-lg bg-white"
+            onClick={() => navigate("/start", { state: { tripId: tripId } })}
           >
             Back
           </Button>
-          <Button 
+          <Button
             type="button" // Changed from submit as it doesn't relate to the main form
-            className="next-button"
+            className="width-full margin-left-2"
             onClick={handleSubmit} // Call handleSubmit to navigate
           >
             Next

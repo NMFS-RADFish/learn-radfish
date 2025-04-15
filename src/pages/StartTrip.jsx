@@ -237,8 +237,8 @@ function StartTrip() {
 
   return (
     <>
-      <div className="page-content">
-        <div className="content-container">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+        <div className="width-full maxw-mobile-lg">
           <StepIndicator />
           <Form onSubmit={handleSubmit} large className="form">
             {/* Trip Date */}
@@ -354,20 +354,20 @@ function StartTrip() {
       </div>
 
       {/* Inline Footer */}
-      <footer className="sticky-footer">
-        <div className="footer-content">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
           <Button
             outline 
             type="button" 
-            className="back-button" 
+            className="width-card-lg bg-white" 
             onClick={() => navigate("/")}
           >
             Back
           </Button>
           <Button 
-            type="submit" // Use submit to trigger form's onSubmit
-            className="next-button"
-            onClick={handleSubmit} // Call handleSubmit directly 
+            type="submit"
+            className="width-full margin-left-2"
+            onClick={handleSubmit}
           >
             Next
           </Button>

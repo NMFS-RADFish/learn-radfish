@@ -8,7 +8,7 @@ import {
   TimePicker,
   Select,
   Label,
-  Button
+  Button,
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
 import StepIndicator from "../components/StepIndicator";
@@ -38,18 +38,22 @@ function EndTrip() {
     const loadExistingTrip = async () => {
       setIsLoading(true);
       if (!app || !tripId) {
-        console.warn("App or Trip ID not available in state, cannot load end trip data.");
+        console.warn(
+          "App or Trip ID not available in state, cannot load end trip data.",
+        );
         navigate("/");
         return;
       }
-      
+
       try {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
         const trips = await Form.find({ id: tripId });
 
         if (trips.length === 0) {
-          console.warn(`Trip with ID ${tripId} not found, redirecting to home.`);
+          console.warn(
+            `Trip with ID ${tripId} not found, redirecting to home.`,
+          );
           navigate("/");
           return;
         }
@@ -143,15 +147,13 @@ function EndTrip() {
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
 
-        await Form.update(
-          {
-            id: tripId,
-            endWeather: formData.endWeather,
-            endTime: formData.endTime,
-            status: "in-progress",
-            step: 4,
-          }
-        );
+        await Form.update({
+          id: tripId,
+          endWeather: formData.endWeather,
+          endTime: formData.endTime,
+          status: "in-progress",
+          step: 4,
+        });
         navigate(`/review`, { state: { tripId: tripId } });
       } catch (error) {
         console.error("Error saving end trip data:", error);
@@ -169,8 +171,8 @@ function EndTrip() {
 
   return (
     <>
-      <div className="page-content">
-        <div className="content-container">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+        <div className="width-full maxw-mobile-lg">
           <StepIndicator />
           <Form onSubmit={handleSubmit} large className="form">
             {/* Trip End Time */}
@@ -253,20 +255,20 @@ function EndTrip() {
       </div>
 
       {/* Inline Footer */}
-      <footer className="sticky-footer">
-        <div className="footer-content">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
           <Button
-            outline 
-            type="button" 
-            className="back-button" 
-            onClick={() => navigate('/catch', { state: { tripId: tripId } })}
+            outline
+            type="button"
+            className="width-card-lg bg-white"
+            onClick={() => navigate("/catch", { state: { tripId: tripId } })}
           >
             Back
           </Button>
-          <Button 
-            type="submit" // Use submit to trigger form's onSubmit
-            className="next-button"
-            onClick={handleSubmit} // Call handleSubmit directly
+          <Button
+            type="submit"
+            className="width-full margin-left-2"
+            onClick={handleSubmit}
           >
             Next
           </Button>
