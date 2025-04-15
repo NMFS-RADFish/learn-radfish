@@ -80,18 +80,13 @@ LAYOUT STYLES
 USWDS COMPONENT OVERRIDES
 =========================================
 */
-.usa-nav-container {
-  padding: 2rem 0 0.5rem 0;
-}
 
-.usa-logo a {
-  color: white;
+.usa-navbar {
+  border-bottom: none;
 }
 
 .usa-button {
   margin-right: 0;
-  width: 100%;
-  max-width: none;
 }
 
 .usa-form-group > #time-label {
@@ -104,11 +99,6 @@ USWDS COMPONENT OVERRIDES
 
 .usa-hint {
   text-align: left;
-}
-
-/* Mobile-first navbar styles */
-.usa-navbar {
-  border-bottom: none;
 }
 
 /* 
@@ -178,8 +168,7 @@ FOOTER STYLES
 .footer-content {
   display: flex;
   justify-content: space-between;
-  max-width: none;
-  gap: 1rem;
+  max-width: 30rem;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -349,9 +338,9 @@ RESPONSIVE STYLES
     max-width: 30rem;
   }
 
-  .usa-button {
+  /* .usa-button {
     max-width: 30rem;
-  }
+  } */
 }
 
 /* 
@@ -533,130 +522,57 @@ REVIEW SUBMIT PAGE STYLES
   background-color: #3d6644; /* Darker shade of #4D8055 */
 }
 
+.add-trip-button {
+  background-color: #0076a8;
+  border-color: #0076a8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.add-trip-button:hover {
+  background-color: #005d85;
+  border-color: #005d85;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
 /* 
 =========================================
 RECENT TRIPS STYLES
 =========================================
 */
-
-/* Trip cards on home page */
-.trip-card-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
-  max-width: 32rem;
-  margin: 0 auto;
+.bg-secondary-dark {
+  background-color: #4D8055; /* green for submitted */
 }
 
-.trip-card-modern {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  border-radius: 8px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+.bg-warning {
+  background-color: #FA9441; /* orange for in progress */
 }
 
-.trip-card-header-modern {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  color: white;
+.bg-primary {
+  background-color: #005EA2; /* blue for ready to submit */
 }
 
-.trip-header-submitted {
-  background-color: #4D8055;
+.bg-base-dark {
+  background-color: #71767a; /* gray for not started */
 }
 
-.trip-header-not-submitted {
-  background-color: #162E51;
+.bg-red-dark {
+  background-color: #D83933; /* red for not submitted */
 }
 
-.trip-header-in-progress {
-  background-color: #FA9441;
+/* Vertical dividers for grid statistics */
+.stat-grid-column {
+  position: relative;
 }
 
-.trip-card-header-date {
-  /* background-color: rgba(255, 255, 255, 0.2); */
-  padding: 6px 12px;
-  border-radius: 5px;
-  font-weight: 700;
-  font-size: 16px;
+.stat-grid-column:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background-color: #dfe1e2;
 }
-
-.trip-status-indicator {
-  font-weight: 700;
-  font-size: 16px;
-}
-
-.trip-card-content {
-  padding: 16px;
-}
-
-.trip-stat-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.trip-stat-row:last-child {
-  border-bottom: none;
-}
-
-.trip-stat-label {
-  font-weight: 500;
-  color: #555;
-}
-
-.trip-stat-value {
-  font-weight: 600;
-}
-
-.start-trip-button {
-  background-color: #0076a8; /* NOAA blue */
-  color: white;
-  font-weight: 500;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
-  width: 100%;
-  max-width: 30rem;
-  margin: 2rem auto 0;
-  text-align: center;
-  display: block;
-  transition: background-color 0.2s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.start-trip-button:hover {
-  background-color: #00557a;
-}
-
-.trip-stats-container {
-  display: flex;
-  justify-content: space-between;
-  padding: 16px 0;
-}
-
-.trip-stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.trip-stat-value {
-  font-weight: 600;
-  font-size: 18px;
-}
-
-.trip-stat-label {
-  font-weight: 500;
-  color: #555;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-

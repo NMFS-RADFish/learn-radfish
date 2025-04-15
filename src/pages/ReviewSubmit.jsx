@@ -270,8 +270,8 @@ function ReviewSubmit() {
       </div>
       
       {/* Inline Footer */}
-      <footer className="sticky-footer">
-        <div className="footer-content">
+      <footer className="position-fixed bottom-0 width-full bg-white padding-x-2 padding-bottom-2 shadow-1 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-2">
           {footerProps.showBackButton && (
             <Button
               outline 

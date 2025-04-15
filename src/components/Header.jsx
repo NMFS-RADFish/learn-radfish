@@ -21,7 +21,7 @@ function Header({ isExpanded, setExpanded }) {
       showMobileOverlay={isExpanded}
       className="header-container"
     >
-      <div className="usa-nav-container">
+      <div className="usa-nav-container maxw-mobile-lg margin-x-auto padding-y-2 padding-x-0">
         <div className="usa-navbar">
           <Title className="header-title">
             <Link to="/" onClick={handleNavLinkClick} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none' }}>
