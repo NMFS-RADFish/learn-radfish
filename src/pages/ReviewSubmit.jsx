@@ -105,6 +105,25 @@ function ReviewSubmit() {
     return date.toLocaleDateString();
   };
 
+  // Format time from 24-hour format to 12-hour format with AM/PM
+  const format24HourTo12Hour = (timeString) => {
+    if (!timeString) return "";
+    
+    // Parse hours and minutes
+    const [hoursStr, minutesStr] = timeString.split(":");
+    let hours = parseInt(hoursStr, 10);
+    const minutes = minutesStr;
+    
+    // Determine AM/PM
+    const period = hours >= 12 ? "PM" : "AM";
+    
+    // Convert hours to 12-hour format
+    hours = hours % 12;
+    hours = hours === 0 ? 12 : hours; // Convert 0 to 12 for 12 AM
+    
+    return `${hours}:${minutes} ${period}`;
+  };
+
   // Handle trip submission/saving
   const handleSubmit = async () => {
     if (!trip) return;
@@ -203,7 +222,7 @@ function ReviewSubmit() {
                     </div>
                     <div className="trip-info-row">
                       <div className="icon-container">Time</div>
-                      <span>{trip.startTime}</span>
+                      <span>{format24HourTo12Hour(trip.startTime)}</span>
                     </div>
                   </div>
                 </>
@@ -224,7 +243,7 @@ function ReviewSubmit() {
                     </div>
                     <div className="trip-info-row">
                       <div className="icon-container">Time</div>
-                      <span>{trip.endTime}</span>
+                      <span>{format24HourTo12Hour(trip.endTime)}</span>
                     </div>
                   </div>
                 </>

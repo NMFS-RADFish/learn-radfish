@@ -138,7 +138,12 @@ function HomePage() {
     if (!trip || !trip.status) return LABEL_NOT_STARTED;
     
     if (trip.status === STATUS_SUBMITTED) return LABEL_SUBMITTED;
-    if (trip.status === STATUS_IN_PROGRESS) return LABEL_IN_PROGRESS;
+    if (trip.status === STATUS_IN_PROGRESS) {
+      if (trip.step) {
+        return `${LABEL_IN_PROGRESS}: ${trip.step}/4`;
+      }
+      return LABEL_IN_PROGRESS;
+    }
     if (trip.status === STATUS_NOT_SUBMITTED) return LABEL_READY_TO_SUBMIT;
     
     return LABEL_NOT_STARTED;
@@ -171,7 +176,17 @@ function HomePage() {
     if (trip.status === STATUS_SUBMITTED) {
       navigate(`/review`, destinationState);
     } else if (trip.status === STATUS_IN_PROGRESS) {
-      navigate(`/catch`, destinationState);
+      // Navigate based on the step for in-progress trips
+      if (trip.step === 2) {
+        navigate(`/catch`, destinationState);
+      } else if (trip.step === 3) {
+        navigate(`/end`, destinationState);
+      } else if (trip.step === 4) {
+        navigate(`/review`, destinationState);
+      } else {
+        // Default to start if step is missing or invalid
+        navigate(`/start`, destinationState);
+      }
     } else if (trip.status === STATUS_NOT_SUBMITTED) {
       navigate(`/review`, destinationState);
     } else {
