@@ -77,13 +77,29 @@ LAYOUT STYLES
 
 /* 
 =========================================
+RECENT TRIPS STYLES
+=========================================
+
+/* Vertical dividers for grid statistics */
+.stat-grid-column {
+  position: relative;
+}
+
+.stat-grid-column:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background-color: #dfe1e2;
+}
+
+/* 
+=========================================
 USWDS COMPONENT OVERRIDES
 =========================================
 */
-
-.usa-navbar {
-  border-bottom: none;
-}
 
 .usa-button {
   margin-right: 0;
@@ -369,7 +385,6 @@ REVIEW SUBMIT PAGE STYLES
   margin-bottom: 1.5rem;
   display: flex;
   flex-direction: column;
-  width: 48%; /* Make cards take up roughly half the width */
 }
 
 /* Cards container for side-by-side layout */
@@ -535,26 +550,3 @@ REVIEW SUBMIT PAGE STYLES
   transform: translateY(-1px);
 }
 
-/* 
-=========================================
-RECENT TRIPS STYLES
-=========================================
-*/
-.bg-secondary-dark {
-  background-color: #4D8055; /* green for submitted */
-}
-
-/* Vertical dividers for grid statistics */
-.stat-grid-column {
-  position: relative;
-}
-
-.stat-grid-column:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 25%;
-  bottom: 25%;
-  width: 1px;
-  background-color: #dfe1e2;
-}

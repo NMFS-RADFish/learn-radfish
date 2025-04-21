@@ -157,12 +157,12 @@ function HomePage() {
   const getHeaderClass = (trip) => {
     if (!trip || !trip.status) return "bg-secondary";
     
-    if (trip.status === STATUS_SUBMITTED) return "bg-secondary-dark"; // Green
+    if (trip.status === STATUS_SUBMITTED) return "bg-green"; // Green
     if (trip.status === STATUS_IN_PROGRESS) return "bg-accent-warm"; // Orange
     if (trip.status === STATUS_NOT_SUBMITTED) return "bg-primary-darker"; // Blue
     
     // Default to orange for any other status
-    return "bg-red-dark";
+    return "bg-accent-warm";
   };
 
   /**
@@ -223,7 +223,7 @@ function HomePage() {
     <>
       <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
         <h1 className="font-heading-xl text-center margin-0">
-          Welcome Captain
+          Hi, Captain
         </h1>
 
         <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">

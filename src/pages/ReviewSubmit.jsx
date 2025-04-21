@@ -202,52 +202,32 @@ function ReviewSubmit() {
         <div className="width-full maxw-mobile-lg">
           <StepIndicator />
 
-          {/* Trip cards side-by-side */}
-          <div className="trip-cards-container">
-            {/* Start Trip Info Box */}
-            <div className="trip-card start-trip-card">
-              {trip && (
-                <>
-                  <div className="trip-card-header">
-                    <h3>Start Trip</h3>
-                  </div>
-                  <div className="trip-card-body">
-                    <div className="trip-info-row">
-                      <div className="icon-container">Date</div>
-                      <span>{formatDate(trip.tripDate)}</span>
-                    </div>
-                    <div className="trip-info-row">
-                      <div className="icon-container">Weather</div>
-                      <span>{trip.weather}</span>
-                    </div>
-                    <div className="trip-info-row">
-                      <div className="icon-container">Time</div>
-                      <span>{format24HourTo12Hour(trip.startTime)}</span>
-                    </div>
-                  </div>
-                </>
-              )}
+          {/* Trip info card - consolidated from start and end trip */}
+          <div className="trip-card width-full margin-top-4 maxw-full">
+            <div className="trip-card-header width-full">
+              <h3>Trip Summary</h3>
             </div>
-
-            {/* End Trip Info Box */}
-            <div className="trip-card end-trip-card">
-              {trip && (
-                <>
-                  <div className="trip-card-header">
-                    <h3>End Trip</h3>
-                  </div>
-                  <div className="trip-card-body">
-                    <div className="trip-info-row">
-                      <div className="icon-container">Weather</div>
-                      <span>{trip.endWeather}</span>
-                    </div>
-                    <div className="trip-info-row">
-                      <div className="icon-container">Time</div>
-                      <span>{format24HourTo12Hour(trip.endTime)}</span>
-                    </div>
-                  </div>
-                </>
-              )}
+            <div className="trip-card-body">
+              <div className="trip-info-row">
+                <div className="icon-container">Date</div>
+                <span>{formatDate(trip.tripDate)}</span>
+              </div>
+              <div className="trip-info-row">
+                <div className="icon-container">Weather</div>
+                <div className="display-flex flex-align-center">
+                  <span>{trip.weather}</span>
+                  <span className="margin-x-1 text-base-dark">→</span>
+                  <span>{trip.endWeather}</span>
+                </div>
+              </div>
+              <div className="trip-info-row">
+                <div className="icon-container">Time</div>
+                <div className="display-flex flex-align-center">
+                  <span>{format24HourTo12Hour(trip.startTime)}</span>
+                  <span className="margin-x-1 text-base-dark">→</span>
+                  <span>{format24HourTo12Hour(trip.endTime)}</span>
+                </div>
+              </div>
             </div>
           </div>
 

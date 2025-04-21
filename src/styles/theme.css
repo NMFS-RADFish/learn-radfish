@@ -35,3 +35,7 @@ body {
 .header-logo {
   width: 72px;
 }
+
+.usa-navbar {
+  border-bottom: none !important;
+}
