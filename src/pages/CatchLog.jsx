@@ -14,9 +14,8 @@ import {
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
 import StepIndicator from "../components/StepIndicator";
-import { processCoordinateInput } from "../utils/inputProcessing";
 
-// Field name constants
+// Constants for field names used in validation messages
 const FIELD_SPECIES = "Species";
 const FIELD_WEIGHT = "Weight";
 const FIELD_LENGTH = "Length";
@@ -24,15 +23,10 @@ const FIELD_LATITUDE = "Latitude";
 const FIELD_LONGITUDE = "Longitude";
 const FIELD_TIME = "Catch time";
 
-// Input length limits
-const MAX_WEIGHT_LENGTH = 4;
-const MAX_LENGTH_LENGTH = 3;
-
-// Species options
+// Predefined species options for the dropdown
 const SPECIES_OPTIONS = ["Yellowfin", "Bluefin", "Salmon", "Halibut"];
 
-// Validation functions
-// Validates that a field is not empty
+// --- Validation Helper Functions ---
 const validateRequired = (value, fieldName) => {
   if (!value && value !== 0) {
     return `${fieldName} is required`;
@@ -40,565 +34,367 @@ const validateRequired = (value, fieldName) => {
   return null;
 };
 
-// Validates that a number is within a specified range
 const validateNumberRange = (value, min, max, fieldName, allowZero = true) => {
-  if (value === "" || value === null || value === undefined) {
-    return null; // Empty validation is handled by validateRequired
-  }
-
+  if (value === "" || value === null || value === undefined) return null;
   const numValue = Number(value);
-
-  if (isNaN(numValue)) {
-    return `${fieldName} must be a valid number`;
-  }
-
-  // Check if the value must be strictly greater than min
-  if (!allowZero && numValue <= min) {
-    return `${fieldName} must be greater than ${min}`;
-  }
-  // Check if the value is less than min (when zero is allowed)
-  else if (allowZero && numValue < min) {
-    return `${fieldName} must be at least ${min}`;
-  }
-
+  if (isNaN(numValue)) return `${fieldName} must be a valid number`;
+  if (!allowZero && numValue <= min) return `${fieldName} must be greater than ${min}`;
+  if (allowZero && numValue < min) return `${fieldName} must be at least ${min}`;
   if (numValue > max) {
     const minOperator = allowZero ? ">=" : ">";
     return `${fieldName} must be ${minOperator} ${min} and <= ${max}`;
   }
-
   return null;
 };
 
-// Validates latitude is between -90 and 90
 const validateLatitude = (value) => {
-  if (value === "" || value === null || value === undefined) {
-    return null; // Empty validation is handled by validateRequired
-  }
-
+  if (value === "" || value === null || value === undefined) return null;
   const numValue = Number(value);
-
-  if (isNaN(numValue)) {
-    return `${FIELD_LATITUDE} must be a valid number`;
-  }
-
-  if (numValue < -90 || numValue > 90) {
-    return `${FIELD_LATITUDE} must be between -90 and 90`;
-  }
-
+  if (isNaN(numValue)) return `${FIELD_LATITUDE} must be a valid number`;
+  if (numValue < -90 || numValue > 90) return `${FIELD_LATITUDE} must be between -90 and 90`;
   return null;
 };
 
-// Validates longitude is between -180 and 180
 const validateLongitude = (value) => {
-  if (value === "" || value === null || value === undefined) {
-    return null; // Empty validation is handled by validateRequired
-  }
-
+  if (value === "" || value === null || value === undefined) return null;
   const numValue = Number(value);
-
-  if (isNaN(numValue)) {
-    return `${FIELD_LONGITUDE} must be a valid number`;
-  }
-
-  if (numValue < -180 || numValue > 180) {
-    return `${FIELD_LONGITUDE} must be between -180 and 180`;
-  }
-
+  if (isNaN(numValue)) return `${FIELD_LONGITUDE} must be a valid number`;
+  if (numValue < -180 || numValue > 180) return `${FIELD_LONGITUDE} must be between -180 and 180`;
   return null;
 };
 
+/**
+ * CatchLog Component
+ *
+ * This component handles the second step of logging a fishing trip:
+ * entering details for individual catches and managing a list of recorded catches.
+ * It demonstrates:
+ *  - Complex form state management (current catch + list of catches).
+ *  - Adding, updating, and deleting items stored in RADFish IndexedDB.
+ *  - Input validation for various field types.
+ *  - Rendering a dynamic list of editable forms.
+ *  - Using React Router and RADFish hooks.
+ */
 function CatchLog() {
+  // React Router hooks
   const navigate = useNavigate();
   const location = useLocation();
-  const tripId = location.state?.tripId;
+  // RADFish hook
   const app = useApplication();
+  
+  // --- State Management ---
+  // Get tripId from navigation state (essential for associating catches)
+  const tripId = location.state?.tripId;
+  // Key for TimePicker to force re-render when resetting the form
   const [catchTimeKey, setCatchTimeKey] = useState(0);
-
-  // Form data for the current catch being entered
+  // State for the *new* catch currently being entered in the top form
   const [currentCatch, setCurrentCatch] = useState({
-    species: "",
-    weight: "",
-    length: "",
-    latitude: "",
-    longitude: "",
-    time: "",
+    species: "", weight: "", length: "", latitude: "", longitude: "", time: "",
   });
-
-  // List of saved catches
+  // State for the list of catches already recorded for this trip
   const [catches, setCatches] = useState([]);
-
-  // Track if form has been submitted for validation display
+  // State to track if the *new catch form* has been submitted
   const [submitted, setSubmitted] = useState(false);
-
-  // Form validation errors
+  // State for validation errors in the *new catch form*
   const [errors, setErrors] = useState({});
-
+  // State for loading indicator while fetching data
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load existing trip and catches based on state tripId
+  // --- Data Loading ---
+  // useEffect to load the trip (to ensure it exists) and its existing catches
   useEffect(() => {
     const loadTripAndCatches = async () => {
       setIsLoading(true);
+      // Critical check: Need app instance and tripId to proceed
       if (!app || !tripId) {
-        console.warn(
-          "App or Trip ID not available in state, cannot load catch data.",
-        );
-        navigate("/");
+        console.warn("App or Trip ID not available in state, cannot load catch data.");
+        navigate("/"); // Redirect home if essential data is missing
         return;
       }
-
       try {
+        // Access RADFish collections
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        const Catch = tripStore.getCollection("Catch");
+        
+        // Verify the trip exists
         const existingTrips = await Form.find({ id: tripId });
-
         if (existingTrips.length === 0) {
-          console.warn(
-            `Trip with ID ${tripId} not found, redirecting to home.`,
-          );
+          console.warn(`Trip with ID ${tripId} not found, redirecting.`);
           navigate("/");
           return;
         }
-
-        const Catch = tripStore.getCollection("Catch");
+        
+        // Fetch catches associated with this tripId
         const existingCatches = await Catch.find({ tripId: tripId });
-
         if (existingCatches.length > 0) {
-          setCatches(
-            existingCatches.sort(
-              (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-            ),
-          );
+          // Sort catches by creation date (most recent first)
+          setCatches(existingCatches.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
         }
       } catch (error) {
-        console.error("Error loading trip data:", error);
-        navigate("/"); // Navigate away on error
+        console.error("Error loading trip/catch data:", error);
+        navigate("/"); // Redirect home on error
       } finally {
         setIsLoading(false);
       }
     };
-
     loadTripAndCatches();
-  }, [app, tripId, navigate]);
+  }, [app, tripId, navigate]); // Dependencies: re-run if app or tripId changes
 
-  // Handle input changes for text fields and selects
+  // --- Event Handlers for New Catch Form ---
   const handleInputChange = (e) => {
-    if (e && e.target) {
-      let { name, value } = e.target;
+    if (!e?.target) return;
+    let { name, value } = e.target;
 
-      // Prevent negative sign for weight and length
-      if ((name === "weight" || name === "length") && value.includes("-")) {
-        value = value.replace("-", ""); // Remove the negative sign
-      }
+    setCurrentCatch((prev) => ({ ...prev, [name]: value }));
 
-      // Enforce max length for weight and length
-      if (name === "weight" && value.length > MAX_WEIGHT_LENGTH) {
-        value = value.slice(0, MAX_WEIGHT_LENGTH); // Truncate
-      } else if (name === "length" && value.length > MAX_LENGTH_LENGTH) {
-        value = value.slice(0, MAX_LENGTH_LENGTH); // Truncate
-      }
-
-      // For latitude and longitude, apply input processing
-      if (name === "latitude" || name === "longitude") {
-        const { processedValue, skipUpdate } = processCoordinateInput(
-          value,
-          name,
-          e.target,
-        );
-
-        if (skipUpdate) {
-          return; // Skip update if validation says so
-        }
-
-        setCurrentCatch({
-          ...currentCatch,
-          [name]: processedValue,
-        });
-      } else {
-        // For other inputs (including processed weight/length), update normally
-        setCurrentCatch({
-          ...currentCatch,
-          [name]: value,
-        });
-      }
-
-      // Clear error when user starts typing
-      if (errors[name]) {
-        setErrors({
-          ...errors,
-          [name]: undefined,
-        });
-      }
+    // Clear validation error on input change
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
-  // Handle time picker changes
   const handleTimeChange = (time) => {
-    setCurrentCatch({
-      ...currentCatch,
-      time: time,
-    });
-
-    // Clear error when user selects time
+    setCurrentCatch((prev) => ({ ...prev, time: time }));
     if (errors.time) {
-      setErrors({
-        ...errors,
-        time: undefined,
-      });
+      setErrors((prev) => ({ ...prev, time: undefined }));
     }
   };
 
-  // Validate form data
+  // --- Validation for New Catch Form ---
   const validateForm = () => {
     const newErrors = {};
-
-    // Validate species (required)
-    const speciesError = validateRequired(currentCatch.species, FIELD_SPECIES);
-    if (speciesError) newErrors.species = speciesError;
-
-    // Validate weight (required and reasonable range)
-    let weightError = validateRequired(currentCatch.weight, FIELD_WEIGHT);
-    if (!weightError && currentCatch.weight) {
-      weightError = validateNumberRange(
-        currentCatch.weight,
-        0,
-        1000,
-        FIELD_WEIGHT,
-        false,
-      );
+    // Validate required fields
+    newErrors.species = validateRequired(currentCatch.species, FIELD_SPECIES);
+    newErrors.weight = validateRequired(currentCatch.weight, FIELD_WEIGHT);
+    newErrors.length = validateRequired(currentCatch.length, FIELD_LENGTH);
+    newErrors.time = validateRequired(currentCatch.time, FIELD_TIME);
+    // Validate ranges if value exists and required check passed
+    if (!newErrors.weight && currentCatch.weight) {
+      newErrors.weight = validateNumberRange(currentCatch.weight, 0, 1000, FIELD_WEIGHT, false);
     }
-    if (weightError) newErrors.weight = weightError;
-
-    // Validate length (required and reasonable range)
-    let lengthError = validateRequired(currentCatch.length, FIELD_LENGTH);
-    if (!lengthError && currentCatch.length) {
-      lengthError = validateNumberRange(
-        currentCatch.length,
-        0,
-        500,
-        FIELD_LENGTH,
-        false,
-      );
+    if (!newErrors.length && currentCatch.length) {
+      newErrors.length = validateNumberRange(currentCatch.length, 0, 500, FIELD_LENGTH, false);
     }
-    if (lengthError) newErrors.length = lengthError;
-
-    // Validate latitude (optional but must be valid if provided)
+    // Validate coordinates if entered
     if (currentCatch.latitude) {
-      const latitudeError = validateLatitude(currentCatch.latitude);
-      if (latitudeError) newErrors.latitude = latitudeError;
+      newErrors.latitude = validateLatitude(currentCatch.latitude);
     }
-
-    // Validate longitude (optional but must be valid if provided)
     if (currentCatch.longitude) {
-      const longitudeError = validateLongitude(currentCatch.longitude);
-      if (longitudeError) newErrors.longitude = longitudeError;
+      newErrors.longitude = validateLongitude(currentCatch.longitude);
     }
-
-    // Validate time (required)
-    const timeError = validateRequired(currentCatch.time, FIELD_TIME);
-    if (timeError) newErrors.time = timeError;
-
-    return newErrors;
+    // Filter out null/undefined errors
+    return Object.entries(newErrors).reduce((acc, [key, value]) => {
+      if (value) acc[key] = value;
+      return acc;
+    }, {});
   };
 
-  // Handle adding a new catch - ensure tripId from state is used
+  // --- Form Submission Handlers ---
+  // Handles adding the *new* catch from the top form
   const handleAddCatch = async (e) => {
     e.preventDefault();
     setSubmitted(true);
+    const formErrors = validateForm();
+    setErrors(formErrors);
 
-    const newErrors = validateForm();
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0 && tripId) {
+    // Proceed only if no errors and tripId exists
+    if (Object.keys(formErrors).length === 0 && tripId) {
       try {
-        const tripStore = app.stores["trip"];
-        const Catch = tripStore.getCollection("Catch");
-
+        const Catch = app.stores["trip"].getCollection("Catch");
         const newCatchData = {
           ...currentCatch,
           id: crypto.randomUUID(),
           tripId: tripId,
+          // Ensure numeric types are stored correctly
           weight: Number(currentCatch.weight),
           length: Number(currentCatch.length),
-          latitude: currentCatch.latitude
-            ? Number(currentCatch.latitude)
-            : undefined,
-          longitude: currentCatch.longitude
-            ? Number(currentCatch.longitude)
-            : undefined,
-          createdAt: new Date().toISOString(),
+          latitude: currentCatch.latitude ? Number(currentCatch.latitude) : undefined,
+          longitude: currentCatch.longitude ? Number(currentCatch.longitude) : undefined,
+          createdAt: new Date().toISOString()
         };
-
+        // Create record in RADFish/IndexedDB
         await Catch.create(newCatchData);
-        setCatches([newCatchData, ...catches]);
-        setCurrentCatch({
-          species: "",
-          weight: "",
-          length: "",
-          latitude: "",
-          longitude: "",
-          time: "",
-        });
-        setCatchTimeKey((prevKey) => prevKey + 1);
-        setSubmitted(false);
+        // Add to the top of the displayed list
+        setCatches(prev => [newCatchData, ...prev]);
+        // Reset the form
+        setCurrentCatch({ species: "", weight: "", length: "", latitude: "", longitude: "", time: "" });
+        setCatchTimeKey(prevKey => prevKey + 1); // Reset TimePicker
+        setSubmitted(false); // Reset submission status
+        setErrors({}); // Clear errors
       } catch (error) {
         console.error("Error adding catch:", error);
+        // Add user feedback here
       }
     }
   };
 
-  // Handle catch input change for recorded catches
-  const handleRecordedCatchChange = async (index, field, value) => {
-    const updatedCatches = [...catches];
-    const catchToUpdate = updatedCatches[index];
-
-    // Update local state
-    updatedCatches[index] = {
-      ...catchToUpdate,
-      [field]: value,
-    };
-    setCatches(updatedCatches);
-
-    try {
-      const tripStore = app.stores["trip"];
-      const Catch = tripStore.getCollection("Catch");
-
-      // Prepare updated data with type conversion if needed
-      const updateData = { [field]: value };
-      if (
-        field === "weight" ||
-        field === "length" ||
-        field === "latitude" ||
-        field === "longitude"
-      ) {
-        updateData[field] = Number(value);
-      }
-
-      // Update catch field
-      await Catch.update({
-        id: catchToUpdate.id,
-        ...updateData,
-      });
-    } catch (error) {
-      console.error(
-        "Error updating catch:",
-        error,
-        "Catch ID:",
-        catchToUpdate.id,
-      );
-    }
-  };
-
-  // Handle time change for recorded catches
-  const handleRecordedTimeChange = async (index, time) => {
-    const updatedCatches = [...catches];
-    const catchToUpdate = updatedCatches[index];
-
-    // Update local state
-    updatedCatches[index] = {
-      ...catchToUpdate,
-      time: time,
-    };
-    setCatches(updatedCatches);
-
-    try {
-      const tripStore = app.stores["trip"];
-      const Catch = tripStore.getCollection("Catch");
-
-      // Update catch time
-      await Catch.update({
-        id: catchToUpdate.id,
-        time,
-      });
-    } catch (error) {
-      console.error(
-        "Error updating catch time:",
-        error,
-        "Catch ID:",
-        catchToUpdate.id,
-      );
-    }
-  };
-
-  // Handle deleting a catch
-  const handleDeleteCatch = async (index) => {
-    if (window.confirm("Are you sure you want to delete this catch?")) {
-      try {
-        const catchToDelete = catches[index];
-
-        const tripStore = app.stores["trip"];
-        const Catch = tripStore.getCollection("Catch");
-
-        // Delete from IndexedDB
-        await Catch.remove(catchToDelete.id);
-
-        // Update local state
-        const updatedCatches = [...catches];
-        updatedCatches.splice(index, 1);
-        setCatches(updatedCatches);
-      } catch (error) {
-        console.error("Error deleting catch:", error);
-      }
-    }
-  };
-
-  // Handle form submission for navigating to next page
+  // Handles submitting the entire page (navigating to the next step)
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (tripId) {
       try {
         const Form = app.stores["trip"].getCollection("Form");
-        await Form.update({
-          id: tripId,
-          step: 3,
-        });
+        // Update the trip's step in RADFish/IndexedDB
+        await Form.update({ id: tripId, step: 3 });
+        // Navigate to the EndTrip page, passing tripId
         navigate(`/end`, { state: { tripId: tripId } });
       } catch (error) {
         console.error("Error updating trip step:", error, "Trip ID:", tripId);
+        // Add user feedback here
       }
     } else {
-      console.error("No trip ID available in state");
+      console.error("No trip ID available to proceed.");
+      // Add user feedback here
     }
   };
 
+  // --- Event Handlers for Recorded Catches List ---
+  // Handles input changes within the list of existing catches
+  const handleRecordedCatchChange = async (index, field, value) => {
+    const updatedCatches = [...catches];
+    const catchToUpdate = { ...updatedCatches[index], [field]: value };
+    updatedCatches[index] = catchToUpdate;
+    setCatches(updatedCatches); // Optimistic UI update
+
+    try {
+      const Catch = app.stores["trip"].getCollection("Catch");
+      // Prepare data for update (ensure correct types)
+      const updateData = { [field]: value };
+      // Convert to number if it's a numeric field, handle empty string
+      if (field === 'weight' || field === 'length' || field === 'latitude' || field === 'longitude') {
+        updateData[field] = value === "" ? undefined : Number(value);
+      }
+      // Update the specific field in RADFish/IndexedDB
+      await Catch.update({ id: catchToUpdate.id, ...updateData });
+    } catch (error) {
+      console.error("Error updating recorded catch:", error, "Catch ID:", catchToUpdate.id);
+    }
+  };
+
+  // Handles time changes within the list of existing catches
+  const handleRecordedTimeChange = async (index, time) => {
+    const updatedCatches = [...catches];
+    const catchToUpdate = { ...updatedCatches[index], time: time };
+    updatedCatches[index] = catchToUpdate;
+    setCatches(updatedCatches); // Optimistic UI update
+
+    try {
+      const Catch = app.stores["trip"].getCollection("Catch");
+      // Update time field in RADFish/IndexedDB
+      await Catch.update({ id: catchToUpdate.id, time });
+    } catch (error) {
+      console.error("Error updating recorded catch time:", error, "Catch ID:", catchToUpdate.id);
+    }
+  };
+
+  // Handles deleting a catch from the list
+  const handleDeleteCatch = async (index) => {
+    if (window.confirm("Are you sure you want to delete this catch?")) {
+      const catchToDelete = catches[index];
+      try {
+        const Catch = app.stores["trip"].getCollection("Catch");
+        // Remove from RADFish/IndexedDB
+        await Catch.remove(catchToDelete.id);
+        // Update local state to remove from UI
+        setCatches(prev => prev.filter((_, i) => i !== index));
+      } catch (error) {
+        console.error("Error deleting catch:", error, "Catch ID:", catchToDelete.id);
+      }
+    }
+  };
+
+  // --- Render Logic ---
   if (isLoading) {
-    return <div className="page-content">Loading catches...</div>;
+    return <div className="padding-5 text-center">Loading catches...</div>;
   }
 
   return (
     <>
       <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
-        <div className="width-full maxw-mobile-lg">
+        <div className="width-full maxw-mobile-lg text-left">
           <StepIndicator />
 
-          {/* Catch entry form */}
-          <div className="catch-form-container">
-            <Form onSubmit={handleAddCatch} large>
-              {/* Species dropdown */}
+          {/* New Catch Entry Form Section */}
+          <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
+            <Form onSubmit={handleAddCatch} large className="margin-top-3 width-full">
+              
+              {/* Species Dropdown */}
               <FormGroup error={submitted && errors.species}>
-                <Label
-                  htmlFor="species"
-                  error={submitted && errors.species}
-                  className="form-label"
-                >
-                  Species<span className="text-secondary-vivid">*</span>
+                <Label htmlFor="species" error={submitted && errors.species}>
+                  Species<span className="text-secondary-vivid margin-left-05">*</span>
                 </Label>
                 <Select
                   id="species"
                   name="species"
                   value={currentCatch.species}
                   onChange={handleInputChange}
-                  validationStatus={
-                    submitted && errors.species ? "error" : undefined
-                  }
-                  aria-describedby={
-                    submitted && errors.species
-                      ? "species-error-message"
-                      : undefined
-                  }
+                  validationStatus={submitted && errors.species ? "error" : undefined}
+                  aria-describedby={submitted && errors.species ? "species-error-message" : undefined}
                 >
                   <option value="">-Select-</option>
                   {SPECIES_OPTIONS.map((species) => (
-                    <option key={species} value={species}>
-                      {species}
-                    </option>
+                    <option key={species} value={species}>{species}</option>
                   ))}
                 </Select>
-                <ErrorMessage
-                  id="species-error-message"
-                  className="error-message"
-                >
-                  {(submitted && errors.species && errors.species) || "\u00A0"}
+                <ErrorMessage id="species-error-message">
+                  {(submitted && errors.species) || "\u00A0"}
                 </ErrorMessage>
               </FormGroup>
 
-              {/* Weight and Length on same row */}
-              <div className="measurement-inputs">
-                {/* Weight Input */}
-                <div className="measurement-input">
+              {/* Weight & Length Inputs Row */}
+              <div className="display-flex gap-2 width-full">
+                {/* Weight Input*/}
+                <div className="flex-1">
                   <FormGroup error={submitted && errors.weight}>
-                    <Label
-                      htmlFor="weight"
-                      error={submitted && errors.weight}
-                      className="form-label"
-                    >
-                      Weight<span className="text-secondary-vivid">*</span>
+                    <Label htmlFor="weight" error={submitted && errors.weight}>
+                      Weight<span className="text-secondary-vivid margin-left-05">*</span>
                     </Label>
-                    <span className="usa-hint form-hint">lbs</span>
+                    <span className="usa-hint display-block text-left">lbs</span>
                     <TextInput
                       id="weight"
                       name="weight"
                       type="number"
                       value={currentCatch.weight}
                       onChange={handleInputChange}
-                      validationStatus={
-                        submitted && errors.weight ? "error" : undefined
-                      }
-                      aria-describedby={
-                        submitted && errors.weight
-                          ? "weight-error-message"
-                          : undefined
-                      }
+                      validationStatus={submitted && errors.weight ? "error" : undefined}
+                      aria-describedby={submitted && errors.weight ? "weight-error-message" : undefined}
                     />
-                    <ErrorMessage
-                      id="weight-error-message"
-                      className="error-message"
-                    >
-                      {(submitted && errors.weight && errors.weight) ||
-                        "\u00A0"}
+                    <ErrorMessage id="weight-error-message">
+                      {(submitted && errors.weight) || "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
-
                 {/* Length Input */}
-                <div className="measurement-input">
+                <div className="flex-1">
                   <FormGroup error={submitted && errors.length}>
-                    <Label
-                      htmlFor="length"
-                      error={submitted && errors.length}
-                      className="form-label"
-                    >
-                      Length<span className="text-secondary-vivid">*</span>
+                    <Label htmlFor="length" error={submitted && errors.length}>
+                      Length<span className="text-secondary-vivid margin-left-05">*</span>
                     </Label>
-                    <span className="usa-hint form-hint">inches</span>
+                    <span className="usa-hint display-block text-left">inches</span>
                     <TextInput
                       id="length"
                       name="length"
                       type="number"
                       value={currentCatch.length}
                       onChange={handleInputChange}
-                      validationStatus={
-                        submitted && errors.length ? "error" : undefined
-                      }
-                      aria-describedby={
-                        submitted && errors.length
-                          ? "length-error-message"
-                          : undefined
-                      }
+                      validationStatus={submitted && errors.length ? "error" : undefined}
+                      aria-describedby={submitted && errors.length ? "length-error-message" : undefined}
                     />
-                    <ErrorMessage
-                      id="length-error-message"
-                      className="error-message"
-                    >
-                      {(submitted && errors.length && errors.length) ||
-                        "\u00A0"}
+                    <ErrorMessage id="length-error-message">
+                      {(submitted && errors.length) || "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
               </div>
 
-              {/* Catch Time */}
+              {/* Catch Time Input */}
               <FormGroup error={submitted && errors.time}>
-                <Label
-                  htmlFor="catchTime"
-                  error={submitted && errors.time}
-                  className="form-label time-label"
-                >
-                  Time<span className="text-secondary-vivid">*</span>
+                <Label htmlFor="catchTime" error={submitted && errors.time}>
+                  Time<span className="text-secondary-vivid margin-left-05">*</span>
                 </Label>
                 <TimePicker
-                  key={catchTimeKey}
+                  key={catchTimeKey} // Use key to force re-render on reset
                   id="catchTime"
                   name="time"
                   defaultValue={currentCatch.time}
@@ -606,331 +402,214 @@ function CatchLog() {
                   minTime="00:00"
                   maxTime="23:30"
                   step={15}
-                  validationStatus={
-                    submitted && errors.time ? "error" : undefined
-                  }
-                  className={
-                    submitted && errors.time
-                      ? "usa-input--error error-input-field"
-                      : ""
-                  }
-                  aria-describedby={
-                    submitted && errors.time ? "time-error-message" : undefined
-                  }
+                  validationStatus={submitted && errors.time ? "error" : undefined}
+                  className={submitted && errors.time ? "usa-input--error" : ""}
+                  aria-describedby={submitted && errors.time ? "time-error-message" : undefined}
                 />
-                <ErrorMessage id="time-error-message" className="error-message">
-                  {(submitted && errors.time && errors.time) || "\u00A0"}
+                <ErrorMessage id="time-error-message">
+                  {(submitted && errors.time) || "\u00A0"}
                 </ErrorMessage>
               </FormGroup>
 
-              {/* Latitude and Longitude on same row */}
-              <div className="coordinate-inputs">
+              {/* Coordinate Inputs Row */}
+              <div className="display-flex gap-2 width-full">
                 {/* Latitude Input */}
-                <div className="coordinate-input">
+                <div className="flex-1">
                   <FormGroup error={submitted && errors.latitude}>
-                    <Label
-                      htmlFor="latitude"
-                      error={submitted && errors.latitude}
-                      className="form-label"
-                    >
-                      Latitude
-                    </Label>
-                    <span className="usa-hint form-hint">DD</span>
+                    <Label htmlFor="latitude" error={submitted && errors.latitude}>Latitude</Label>
+                    <span className="usa-hint display-block text-left">DD</span>
                     <TextInput
                       id="latitude"
                       name="latitude"
                       type="number"
                       value={currentCatch.latitude}
                       onChange={handleInputChange}
-                      validationStatus={
-                        submitted && errors.latitude ? "error" : undefined
-                      }
-                      aria-describedby={
-                        submitted && errors.latitude
-                          ? "latitude-error-message"
-                          : undefined
-                      }
+                      validationStatus={submitted && errors.latitude ? "error" : undefined}
+                      aria-describedby={submitted && errors.latitude ? "latitude-error-message" : undefined}
                     />
-                    <ErrorMessage
-                      id="latitude-error-message"
-                      className="error-message"
-                    >
-                      {(submitted && errors.latitude && errors.latitude) ||
-                        "\u00A0"}
+                    <ErrorMessage id="latitude-error-message">
+                      {(submitted && errors.latitude) || "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
-
                 {/* Longitude Input */}
-                <div className="coordinate-input">
+                <div className="flex-1">
                   <FormGroup error={submitted && errors.longitude}>
-                    <Label
-                      htmlFor="longitude"
-                      error={submitted && errors.longitude}
-                      className="form-label"
-                    >
-                      Longitude
-                    </Label>
-                    <span className="usa-hint form-hint">DD</span>
+                    <Label htmlFor="longitude" error={submitted && errors.longitude}>Longitude</Label>
+                    <span className="usa-hint display-block text-left">DD</span>
                     <TextInput
                       id="longitude"
                       name="longitude"
                       type="number"
                       value={currentCatch.longitude}
                       onChange={handleInputChange}
-                      validationStatus={
-                        submitted && errors.longitude ? "error" : undefined
-                      }
-                      aria-describedby={
-                        submitted && errors.longitude
-                          ? "longitude-error-message"
-                          : undefined
-                      }
+                      validationStatus={submitted && errors.longitude ? "error" : undefined}
+                      aria-describedby={submitted && errors.longitude ? "longitude-error-message" : undefined}
                     />
-                    <ErrorMessage
-                      id="longitude-error-message"
-                      className="error-message"
-                    >
-                      {(submitted && errors.longitude && errors.longitude) ||
-                        "\u00A0"}
+                    <ErrorMessage id="longitude-error-message">
+                      {(submitted && errors.longitude) || "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
                 </div>
               </div>
 
-              {/* Add Catch Button */}
-              <div className="catch-form-actions">
-                <Button
-                  type="submit"
-                  className="width-full color-white"
-                  accentStyle="cool"
-                >
+              {/* Add Catch Button Area */}
+              <div className="display-flex flex-justify-start margin-top-1 margin-bottom-2">
+                <Button type="submit" className="width-full" accentStyle="cool">
                   Add Catch
                 </Button>
               </div>
             </Form>
           </div>
 
-          {/* Recorded Catches List */}
+          {/* Recorded Catches Section */}
           {catches.length > 0 && (
-            <div className="recorded-catches-container">
-              <h2 className="usa-prose">Recorded Catches</h2>
-              <div className="recorded-catches-list">
-                {catches.map((catchItem, index) => (
-                  <div key={index} className="recorded-catch-item">
-                    <div className="recorded-catch-form">
-                      {/* Delete Button */}
-                      <div className="recorded-catch-actions">
-                        <Button
-                          type="button"
-                          unstyled
-                          onClick={() => handleDeleteCatch(index)}
-                          className="delete-catch-button"
-                          aria-label="Delete this catch"
-                        >
-                          Delete <Icon.Delete size={3} aria-hidden="true" />
-                        </Button>
-                      </div>
-
-                      {/* Species dropdown */}
-                      <FormGroup>
-                        <Label
-                          htmlFor={`recorded-species-${index}`}
-                          className="form-label"
-                        >
-                          Species<span className="text-secondary-vivid">*</span>
-                        </Label>
-                        <Select
-                          id={`recorded-species-${index}`}
-                          name="species"
-                          value={catchItem.species}
-                          onChange={(e) =>
-                            handleRecordedCatchChange(
-                              index,
-                              "species",
-                              e.target.value,
-                            )
-                          }
-                        >
-                          <option value="">-Select-</option>
-                          {SPECIES_OPTIONS.map((species) => (
-                            <option key={species} value={species}>
-                              {species}
-                            </option>
-                          ))}
-                        </Select>
-                      </FormGroup>
-
-                      {/* Weight and Length on same row */}
-                      <div className="measurement-inputs">
-                        {/* Weight Input */}
-                        <div className="measurement-input">
-                          <FormGroup>
-                            <Label
-                              htmlFor={`recorded-weight-${index}`}
-                              className="form-label"
-                            >
-                              Weight
-                              <span className="text-secondary-vivid">*</span>
-                            </Label>
-                            <span className="usa-hint form-hint">lbs</span>
-                            <TextInput
-                              id={`recorded-weight-${index}`}
-                              name="weight"
-                              type="number"
-                              value={catchItem.weight}
-                              onChange={(e) =>
-                                handleRecordedCatchChange(
-                                  index,
-                                  "weight",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </FormGroup>
+            <>
+              {/* Container for the recorded catches section */}
+              <div className="width-full border-top border-base-lighter padding-top-105 margin-top-105">
+                <h2 className="font-heading-lg margin-bottom-1">Recorded Catches</h2>
+                {/* List container for individual catch items */}
+                <div className="display-flex flex-column width-full">
+                  {catches.map((catchItem, index) => (
+                    // Container for a single recorded catch item
+                    <div key={catchItem.id || index} className="padding-y-1 border-bottom border-base-lighter">
+                      {/* Wrapper for the recorded catch form elements */}
+                      <div className="position-relative width-full">
+                        {/* Delete button positioned absolutely */}
+                        <div className="position-absolute top-neg-105 right-0">
+                          <Button
+                            type="button"
+                            unstyled // Use unstyled to allow custom styling with utilities
+                            onClick={() => handleDeleteCatch(index)}
+                            className="text-secondary hover:bg-base-lightest border-radius-sm padding-05 display-flex flex-align-center"
+                            aria-label="Delete this catch"
+                          >
+                            Delete <Icon.Delete size={3} aria-hidden="true" />
+                          </Button>
                         </div>
 
-                        {/* Length Input */}
-                        <div className="measurement-input">
-                          <FormGroup>
-                            <Label
-                              htmlFor={`recorded-length-${index}`}
-                              className="form-label"
-                            >
-                              Length
-                              <span className="text-secondary-vivid">*</span>
-                            </Label>
-                            <span className="usa-hint form-hint">inches</span>
-                            <TextInput
-                              id={`recorded-length-${index}`}
-                              name="length"
-                              type="number"
-                              value={catchItem.length}
-                              onChange={(e) =>
-                                handleRecordedCatchChange(
-                                  index,
-                                  "length",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </FormGroup>
-                        </div>
-                      </div>
+                        {/* Recorded Catch Form Fields */}
+                        <FormGroup className="margin-y-1">
+                          <Label htmlFor={`recorded-species-${index}`}>
+                            Species<span className="text-secondary-vivid margin-left-05">*</span>
+                          </Label>
+                          <Select
+                            id={`recorded-species-${index}`}
+                            name="species"
+                            value={catchItem.species}
+                            className="margin-top-05 margin-bottom-0"
+                            onChange={(e) => handleRecordedCatchChange(index, "species", e.target.value)}
+                          >
+                            <option value="">-Select-</option>
+                            {SPECIES_OPTIONS.map((species) => (
+                              <option key={species} value={species}>{species}</option>
+                            ))}
+                          </Select>
+                        </FormGroup>
 
-                      {/* Catch Time */}
-                      <FormGroup>
-                        <Label
-                          htmlFor={`recorded-time-${index}`}
-                          className="form-label time-label"
-                        >
-                          Time<span className="text-secondary-vivid">*</span>
-                        </Label>
-                        <TimePicker
-                          id={`recorded-time-${index}`}
-                          name="time"
-                          defaultValue={catchItem.time}
-                          onChange={(time) =>
-                            handleRecordedTimeChange(index, time)
-                          }
-                          validationStatus={
-                            submitted && errors.time ? "error" : undefined
-                          }
-                          className={
-                            submitted && errors.time
-                              ? "usa-input--error error-input-field"
-                              : ""
-                          }
-                          minTime="00:00"
-                          maxTime="23:30"
-                          step={15}
-                        />
-                      </FormGroup>
-
-                      {/* Latitude and Longitude on same row */}
-                      <div className="coordinate-inputs">
-                        {/* Latitude Input */}
-                        <div className="coordinate-input">
-                          <FormGroup>
-                            <Label
-                              htmlFor={`recorded-latitude-${index}`}
-                              className="form-label"
-                            >
-                              Latitude
-                            </Label>
-                            <span className="usa-hint form-hint">DD</span>
-                            <TextInput
-                              id={`recorded-latitude-${index}`}
-                              name="latitude"
-                              type="number"
-                              value={catchItem.latitude ?? ""}
-                              onChange={(e) => {
-                                const { processedValue, skipUpdate } =
-                                  processCoordinateInput(
-                                    e.target.value,
-                                    "latitude",
-                                    e.target,
-                                  );
-
-                                if (!skipUpdate) {
-                                  handleRecordedCatchChange(
-                                    index,
-                                    "latitude",
-                                    processedValue,
-                                  );
-                                }
-                              }}
-                            />
-                          </FormGroup>
+                        {/* Recorded Weight/Length Row */}
+                        <div className="display-flex gap-2 width-full">
+                          {/* Recorded Weight */}
+                          <div className="flex-1">
+                            <FormGroup className="margin-y-1">
+                              <Label htmlFor={`recorded-weight-${index}`}>
+                                Weight<span className="text-secondary-vivid margin-left-05">*</span>
+                              </Label>
+                              <span className="usa-hint display-block text-left">lbs</span>
+                              <TextInput
+                                id={`recorded-weight-${index}`}
+                                name="weight"
+                                type="number"
+                                value={catchItem.weight}
+                                onChange={(e) => handleRecordedCatchChange(index, "weight", e.target.value)}
+                              />
+                            </FormGroup>
+                          </div>
+                          {/* Recorded Length */}
+                          <div className="flex-1">
+                            <FormGroup className="margin-y-1">
+                              <Label htmlFor={`recorded-length-${index}`}>
+                                Length<span className="text-secondary-vivid margin-left-05">*</span>
+                              </Label>
+                              <span className="usa-hint display-block text-left">inches</span>
+                              <TextInput
+                                id={`recorded-length-${index}`}
+                                name="length"
+                                type="number"
+                                value={catchItem.length}
+                                onChange={(e) => handleRecordedCatchChange(index, "length", e.target.value)}
+                              />
+                            </FormGroup>
+                          </div>
                         </div>
 
-                        {/* Longitude Input */}
-                        <div className="coordinate-input">
-                          <FormGroup>
-                            <Label
-                              htmlFor={`recorded-longitude-${index}`}
-                              className="form-label"
-                            >
-                              Longitude
-                            </Label>
-                            <span className="usa-hint form-hint">DD</span>
-                            <TextInput
-                              id={`recorded-longitude-${index}`}
-                              name="longitude"
-                              type="number"
-                              value={catchItem.longitude ?? ""}
-                              onChange={(e) => {
-                                const { processedValue, skipUpdate } =
-                                  processCoordinateInput(
-                                    e.target.value,
-                                    "longitude",
-                                    e.target,
-                                  );
+                        {/* Recorded Time */}
+                        <FormGroup className="margin-y-1">
+                          <Label htmlFor={`recorded-time-${index}`}>
+                            Time<span className="text-secondary-vivid margin-left-05">*</span>
+                          </Label>
+                          <TimePicker
+                            id={`recorded-time-${index}`}
+                            name="time"
+                            className="margin-top-05 margin-bottom-0"
+                            defaultValue={catchItem.time}
+                            onChange={(time) => handleRecordedTimeChange(index, time)}
+                            minTime="00:00"
+                            maxTime="23:30"
+                            step={15}
+                          />
+                        </FormGroup>
 
-                                if (!skipUpdate) {
-                                  handleRecordedCatchChange(
-                                    index,
-                                    "longitude",
-                                    processedValue,
-                                  );
-                                }
-                              }}
-                            />
-                          </FormGroup>
+                        {/* Recorded Coordinates Row */}
+                        <div className="display-flex gap-2 width-full">
+                          {/* Recorded Latitude */}
+                          <div className="flex-1">
+                            <FormGroup className="margin-y-1">
+                              <Label htmlFor={`recorded-latitude-${index}`}>Latitude</Label>
+                              <span className="usa-hint display-block text-left">DD</span>
+                              <TextInput
+                                id={`recorded-latitude-${index}`}
+                                name="latitude"
+                                type="number"
+                                className="margin-top-05 margin-bottom-0"
+                                value={catchItem.latitude ?? ""}
+                                onChange={(e) => {
+                                  handleRecordedCatchChange(index, "latitude", e.target.value);
+                                }}
+                              />
+                            </FormGroup>
+                          </div>
+                          {/* Recorded Longitude */}
+                          <div className="flex-1">
+                            <FormGroup className="margin-y-1">
+                              <Label htmlFor={`recorded-longitude-${index}`}>Longitude</Label>
+                              <span className="usa-hint display-block text-left">DD</span>
+                              <TextInput
+                                id={`recorded-longitude-${index}`}
+                                name="longitude"
+                                type="number"
+                                className="margin-top-05 margin-bottom-0"
+                                value={catchItem.longitude ?? ""}
+                                onChange={(e) => {
+                                  handleRecordedCatchChange(index, "longitude", e.target.value);
+                                }}
+                              />
+                            </FormGroup>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* Inline Footer */}
+      {/* Footer uses USWDS utilities */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
           <Button
             outline
             type="button"
@@ -940,9 +619,9 @@ function CatchLog() {
             Back
           </Button>
           <Button
-            type="button" // Changed from submit as it doesn't relate to the main form
+            type="button"
             className="width-full margin-left-2"
-            onClick={handleSubmit} // Call handleSubmit to navigate
+            onClick={handleSubmit}
           >
             Next
           </Button>
