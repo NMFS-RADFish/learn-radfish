@@ -7,20 +7,12 @@ function OfflineConfirmation() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="page-content">
-        <div className="content-container">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+        <div className="width-full maxw-mobile-lg">
           <h1>Saved Offline</h1>
           <p>Your trip has been saved locally.</p>
 
-          <div
-            style={{
-              backgroundColor: "#f9f9f9",
-              border: "1px solid #dfe1e2",
-              borderRadius: "4px",
-              padding: "15px",
-              marginTop: "20px",
-            }}
-          >
+          <div className="bg-base-lightest border border-base-lighter radius-md padding-105 margin-top-2 text-left">
             <h3>What happens next?</h3>
             <p>
               When your device reconnects to the internet, please return to the
@@ -31,9 +23,8 @@ function OfflineConfirmation() {
         </div>
       </div>
       
-      {/* Inline Footer */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
           <Button
             type="button"
             className="width-full"

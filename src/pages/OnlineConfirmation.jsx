@@ -7,16 +7,15 @@ function OnlineConfirmation() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="page-content">
-        <div className="content-container">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+        <div className="width-full maxw-mobile-lg">
           <h1>Success!</h1>
           <p>Your trip has been successfully submitted!</p>
         </div>
       </div>
 
-      {/* Inline Footer */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
           <Button
             type="button"
             className="width-full"

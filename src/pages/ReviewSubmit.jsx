@@ -9,66 +9,113 @@ import {
 import { Button } from "@trussworks/react-uswds";
 import StepIndicator from "../components/StepIndicator";
 
+/**
+ * ReviewSubmit Component
+ *
+ * This component represents the final step (Step 4) in the trip logging process.
+ * It displays a summary of the entire trip, including:
+ *  - Start/End date, time, and weather.
+ *  - Aggregated catch data (total count, total weight, average length per species).
+ * It allows the user to review all entered information before submitting the trip.
+ * The submission behavior adapts based on the user's online/offline status.
+ *
+ * Demonstrates:
+ *  - Fetching related data (trip details and associated catches) from RADFish stores.
+ *  - Data aggregation and formatting for display.
+ *  - Conditional logic based on offline status (`useOfflineStatus`).
+ *  - Updating a record's status in RADFish (`Form.update`).
+ *  - Navigating to different confirmation pages based on submission outcome.
+ *  - Using the RADFish `Table` component.
+ */
 function ReviewSubmit() {
+
   const navigate = useNavigate();
   const location = useLocation();
-  const tripId = location.state?.tripId;
   const app = useApplication();
   const { isOffline } = useOfflineStatus();
+
+  // --- State ---
+  // Stores the ID of the trip being reviewed, passed from the previous step
+  const tripId = location.state?.tripId;
+  // Stores the fetched trip data object
   const [trip, setTrip] = useState(null);
+  // Stores the aggregated catch data (grouped by species) for display in the table
   const [aggregatedCatches, setAggregatedCatches] = useState([]);
+  // Loading state while fetching data
   const [loading, setLoading] = useState(true);
+  // Error state for data fetching issues
   const [error, setError] = useState(null);
 
-  // Load trip and catch data based on state tripId
+  // --- Data Loading Effect ---
+  // useEffect to load the trip data and associated catches when the component mounts
+  // or when app instance or tripId changes.
   useEffect(() => {
     const loadTripData = async () => {
       setLoading(true);
+      setError(null); // Reset error state on new load attempt
+
+      // Guard clause: Ensure app and tripId are available before proceeding
       if (!app || !tripId) {
         console.warn(
           "App or Trip ID not available in state, cannot load review data.",
         );
-        navigate("/");
+        navigate("/"); // Redirect home if essential data is missing
         return;
       }
 
       try {
+        // Access RADFish collections
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        const Catch = tripStore.getCollection("Catch");
+
+        // Fetch the trip details
         const trips = await Form.find({ id: tripId });
 
+        // Handle trip not found
         if (trips.length === 0) {
           setError(`Trip with ID ${tripId} not found`);
-          setLoading(false);
+          navigate("/"); // Redirect home if trip doesn't exist
           return;
         }
 
         const selectedTrip = trips[0];
-        setTrip(selectedTrip);
+        setTrip(selectedTrip); // Store fetched trip data in state
 
-        const Catch = tripStore.getCollection("Catch");
+        // Fetch all catches associated with this trip
         const tripCatches = await Catch.find({ tripId: selectedTrip.id });
 
+        // Aggregate catch data for the summary table
         const aggregatedData = aggregateCatchesBySpecies(tripCatches);
         setAggregatedCatches(aggregatedData);
       } catch (err) {
+        // Handle errors during data fetching
         console.error("Error loading trip data:", err);
         setError("Failed to load trip data");
-        navigate("/");
+        navigate("/"); // Redirect home on critical error
       } finally {
+        // Ensure loading state is turned off regardless of outcome
         setLoading(false);
       }
     };
 
     loadTripData();
-  }, [app, tripId, navigate]);
+  }, [app, tripId, navigate]); // Dependencies for the effect
 
-  // Aggregate catches by species, calculating total weight and average length
+  // --- Helper Functions ---
+
+  /**
+   * Aggregates raw catch data by species.
+   * Calculates total count, total weight, and average length for each species.
+   * @param {Array} catchData - An array of catch objects from the RADFish store.
+   * @returns {Array} An array of objects, each representing aggregated data for one species.
+   */
   const aggregateCatchesBySpecies = (catchData) => {
+    // Use a map to group catches by species
     const speciesMap = {};
 
-    // Group catches by species
     catchData.forEach((catchItem) => {
+      // Initialize species entry if it doesn't exist
       if (!speciesMap[catchItem.species]) {
         speciesMap[catchItem.species] = {
           species: catchItem.species,
@@ -77,201 +124,272 @@ function ReviewSubmit() {
           count: 0,
         };
       }
-
-      speciesMap[catchItem.species].weights.push(catchItem.weight);
-      speciesMap[catchItem.species].lengths.push(catchItem.length);
+      // Add weight and length to arrays for calculation, increment count
+      speciesMap[catchItem.species].weights.push(catchItem.weight || 0); // Default to 0 if null/undefined
+      speciesMap[catchItem.species].lengths.push(catchItem.length || 0); // Default to 0 if null/undefined
       speciesMap[catchItem.species].count++;
     });
 
-    // Calculate totals and averages
+    // Calculate totals and averages for each species
     return Object.values(speciesMap).map((item) => {
       const totalWeight = item.weights.reduce((sum, val) => sum + val, 0);
-      const avgLength =
-        item.lengths.reduce((sum, val) => sum + val, 0) / item.count;
+      const totalLength = item.lengths.reduce((sum, val) => sum + val, 0);
+      const avgLength = item.count > 0 ? totalLength / item.count : 0;
 
       return {
         species: item.species,
-        totalWeight: totalWeight.toFixed(2),
-        avgLength: avgLength.toFixed(2),
+        totalWeight: totalWeight.toFixed(1), // Format to one decimal place
+        avgLength: avgLength.toFixed(1), // Format to one decimal place
         count: item.count,
       };
     });
   };
 
-  // Format date from ISO string
+  /**
+   * Formats an ISO date string (or Date object) into MM/DD/YYYY format.
+   * @param {string | Date} dateString - The date string or object to format.
+   * @returns {string} The formatted date string, or "" if input is invalid.
+   */
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+    try {
+      const date = new Date(dateString);
+      // Check if the date is valid after parsing
+      if (isNaN(date.getTime())) {
+        return "";
+      }
+      return date.toLocaleDateString(); // Uses browser's locale
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return ""; // Return empty string on formatting error
+    }
   };
 
-  // Format time from 24-hour format to 12-hour format with AM/PM
+  /**
+   * Formats a time string (HH:MM) from 24-hour format to 12-hour format with AM/PM.
+   * @param {string} timeString - The time string in HH:MM format.
+   * @returns {string} The formatted time string (e.g., "1:30 PM"), or "" if input is invalid.
+   */
   const format24HourTo12Hour = (timeString) => {
-    if (!timeString) return "";
-    
-    // Parse hours and minutes
-    const [hoursStr, minutesStr] = timeString.split(":");
-    let hours = parseInt(hoursStr, 10);
-    const minutes = minutesStr;
-    
-    // Determine AM/PM
-    const period = hours >= 12 ? "PM" : "AM";
-    
-    // Convert hours to 12-hour format
-    hours = hours % 12;
-    hours = hours === 0 ? 12 : hours; // Convert 0 to 12 for 12 AM
-    
-    return `${hours}:${minutes} ${period}`;
+    if (!timeString || typeof timeString !== 'string' || !timeString.includes(':')) return "";
+
+    try {
+      // Parse hours and minutes
+      const [hoursStr, minutesStr] = timeString.split(":");
+      let hours = parseInt(hoursStr, 10);
+      const minutes = minutesStr.padStart(2, '0'); // Ensure minutes are two digits
+
+      // Validate parsed values
+      if (isNaN(hours) || hours < 0 || hours > 23) return "";
+
+      // Determine AM/PM
+      const period = hours >= 12 ? "PM" : "AM";
+
+      // Convert hours to 12-hour format
+      hours = hours % 12;
+      hours = hours === 0 ? 12 : hours; // Convert 0 to 12 for 12 AM/PM
+
+      return `${hours}:${minutes} ${period}`;
+    } catch (e) {
+      console.error("Error formatting time:", e);
+      return ""; // Return empty string on formatting error
+    }
   };
 
-  // Handle trip submission/saving
+  // --- Event Handlers ---
+
+  /**
+   * Handles the final submission of the trip.
+   * Updates the trip status in RADFish based on online/offline state.
+   * Navigates to the appropriate confirmation page.
+   */
   const handleSubmit = async () => {
-    if (!trip) return;
+    if (!trip) return; // Guard clause if trip data isn't loaded
 
     try {
       const tripStore = app.stores["trip"];
       const Form = tripStore.getCollection("Form");
+      // Determine final status: "submitted" if online, "Not Submitted" if offline
       const finalStatus = isOffline ? "Not Submitted" : "submitted";
 
+      // Update the trip record in RADFish/IndexedDB
       await Form.update({
         id: trip.id,
         status: finalStatus,
-        step: 4,
+        step: 4, // Mark as completed step 4 (review)
       });
 
+      // Navigate to the relevant confirmation screen
       navigate(isOffline ? "/offline-confirm" : "/online-confirm");
     } catch (error) {
       console.error("Error submitting trip:", error);
+      // Consider adding user feedback here (e.g., using a toast notification)
+      setError("Failed to submit trip. Please try again.");
     }
   };
 
-  // Determine Footer properties based on trip status and offline state
+  // --- Dynamic Footer Logic ---
+
+  /**
+   * Determines the properties for the footer buttons (Back, Next/Submit/Save)
+   * based on the current trip status and online/offline state.
+   * @returns {object} An object containing props for the footer buttons.
+   */
   const getFooterProps = () => {
-    if (!trip) return { showBackButton: false, showNextButton: false };
+    // Default props
+    const defaultProps = {
+      showBackButton: true,
+      showNextButton: true,
+      backPath: "/",
+      backNavState: {},
+      nextLabel: "Submit",
+      onNextClick: handleSubmit,
+      nextButtonProps: {},
+    };
 
-    let backPath = "/";
-    let backNavState = {};
-    let showBackButton = true;
-    let showNextButton = true;
-    let nextLabel = "Submit";
-    let onNextClick = handleSubmit;
-    let nextButtonProps = {};
-
-    if (trip.status === "submitted") {
-      backPath = "/";
-      showNextButton = false;
-    } else {
-      backPath = `/end`;
-      backNavState = { state: { tripId: tripId } };
-      if (isOffline) {
-        nextLabel = "Save";
-      } else {
-        nextLabel = "Submit";
-        nextButtonProps = { className: "usa-button--success" };
-      }
+    if (!trip) {
+      // If trip data hasn't loaded, hide buttons
+      return { ...defaultProps, showBackButton: false, showNextButton: false };
     }
 
-    return {
-      backPath,
-      backNavState,
-      showBackButton,
-      showNextButton,
-      nextLabel,
-      onNextClick,
-      nextButtonProps,
-    };
+    // Customize based on trip status
+    if (trip.status === "submitted") {
+      // If already submitted, only show Back button navigating to Home
+      return {
+        ...defaultProps,
+        backPath: "/",
+        showNextButton: false,
+      };
+    } else {
+      // If not submitted yet
+      defaultProps.backPath = `/end`; // Back goes to EndTrip page
+      defaultProps.backNavState = { state: { tripId: tripId } }; // Pass tripId back
+
+      if (isOffline) {
+        // If offline, label the button "Save"
+        defaultProps.nextLabel = "Save";
+        // Keep default button style
+      } else {
+        // If online, label the button "Submit" and use success style
+        defaultProps.nextLabel = "Submit";
+        // Apply the custom success style defined in index.css
+        defaultProps.nextButtonProps = { className: "usa-button--success" };
+      }
+      return defaultProps;
+    }
   };
 
+  // --- Render Logic ---
+
+  // Display loading indicator
   if (loading) {
-    return <div className="page-content">Loading review data...</div>;
+    return <div className="padding-5 text-center">Loading review data...</div>;
   }
 
+  // Display error message if fetching failed
   if (error) {
-    return <div className="page-content">Error: {error}</div>;
+    return <div className="padding-5 text-center text-error">Error: {error}</div>;
   }
 
+  // Display message if trip data is unexpectedly missing after loading
   if (!trip) {
-    return <div className="page-content">Trip data not available.</div>;
+    return <div className="padding-5 text-center">Trip data not available.</div>;
   }
 
+  // Get dynamic footer button properties
   const footerProps = getFooterProps();
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
-        <div className="width-full maxw-mobile-lg">
+      {/* Main content area */}
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
+        {/* Constrain content width */}
+        <div className="width-full maxw-mobile-lg text-left">
           <StepIndicator />
 
           {/* Trip info card - consolidated from start and end trip */}
-          <div className="trip-card width-full margin-top-4 maxw-full">
-            <div className="trip-card-header width-full">
-              <h3>Trip Summary</h3>
+          {/* Using USWDS utility classes for card styling */}
+          <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+            {/* Card Header */}
+            <div className="bg-primary-darker padding-y-1 padding-x-2 display-flex flex-align-center">
+              <h3 className="margin-0 font-sans-lg text-semibold text-white">Trip Summary</h3>
             </div>
-            <div className="trip-card-body">
-              <div className="trip-info-row">
-                <div className="icon-container">Date</div>
-                <span>{formatDate(trip.tripDate)}</span>
+            {/* Card Body */}
+            <div className="padding-2 display-flex flex-column gap-2">
+              {/* Date Row */}
+              <div className="display-flex flex-align-center gap-1">
+                <div className="width-10 text-bold font-sans-xs">Date</div>
+                <span className="text-base-dark font-sans-sm">{formatDate(trip.tripDate)}</span>
               </div>
-              <div className="trip-info-row">
-                <div className="icon-container">Weather</div>
+              {/* Weather Row */}
+              <div className="display-flex flex-align-center gap-1">
+                <div className="width-10 text-bold font-sans-xs">Weather</div>
                 <div className="display-flex flex-align-center">
-                  <span>{trip.weather}</span>
+                  <span className="text-base-dark font-sans-sm">{trip.weather}</span>
                   <span className="margin-x-1 text-base-dark">→</span>
-                  <span>{trip.endWeather}</span>
+                  <span className="text-base-dark font-sans-sm">{trip.endWeather}</span>
                 </div>
               </div>
-              <div className="trip-info-row">
-                <div className="icon-container">Time</div>
+              {/* Time Row */}
+              <div className="display-flex flex-align-center gap-1">
+                <div className="width-10 text-bold font-sans-xs">Time</div>
                 <div className="display-flex flex-align-center">
-                  <span>{format24HourTo12Hour(trip.startTime)}</span>
+                  <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.startTime)}</span>
                   <span className="margin-x-1 text-base-dark">→</span>
-                  <span>{format24HourTo12Hour(trip.endTime)}</span>
+                  <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.endTime)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Aggregated Catch Data Box */}
-          <div className="trip-card catch-summary-card">
-            <div className="trip-card-header">
-              <h3>Aggregate Catches</h3>
+          {/* Aggregated Catch Data Card */}
+          {/* Using USWDS utility classes for card styling */}
+          <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+             {/* Card Header */}
+            <div className="bg-primary-darker padding-y-1 padding-x-2 display-flex flex-align-center">
+              <h3 className="margin-0 font-sans-lg text-semibold text-white">Aggregate Catches</h3>
             </div>
-            <div className="trip-card-body">
+             {/* Card Body - No padding needed as Table handles its own */}
+            <div className="padding-0">
               {aggregatedCatches.length > 0 ? (
+                // RADFish Table component for displaying aggregated catches
                 <Table
+                  // Map aggregated data to the format expected by the Table component
                   data={aggregatedCatches.map((item, index) => ({
-                    id: index,
+                    id: index, // Use index as ID for the table row
                     species: item.species,
                     count: item.count,
-                    totalWeight: `${item.totalWeight} lbs`,
-                    avgLength: `${item.avgLength} in`,
+                    totalWeight: `${item.totalWeight} lbs`, // Add units
+                    avgLength: `${item.avgLength} in`, // Add units
                   }))}
+                  // Define table columns: key corresponds to data keys, label is header text
                   columns={[
                     { key: "species", label: "Species", sortable: true },
                     { key: "count", label: "Count", sortable: true },
-                    {
-                      key: "totalWeight",
-                      label: "Total Weight",
-                      sortable: true,
-                    },
+                    { key: "totalWeight", label: "Total Weight", sortable: true },
                     { key: "avgLength", label: "Avg. Length", sortable: true },
                   ]}
+                  // Enable striped rows for better readability
+                  striped
                 />
               ) : (
-                <p>No catches recorded for this trip.</p>
+                // Display message if no catches were recorded
+                <p className="padding-2 text-base-dark">No catches recorded for this trip.</p>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Inline Footer */}
+      {/* Sticky Footer with dynamic buttons */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
+          {/* Conditionally render Back button */}
           {footerProps.showBackButton && (
             <Button
               outline
               type="button"
+              // Adjust width based on whether the Next button is also shown
               className={footerProps.showNextButton ? "width-card-lg bg-white" : "width-full bg-white"}
               onClick={() =>
                 navigate(footerProps.backPath, footerProps.backNavState)
@@ -280,10 +398,12 @@ function ReviewSubmit() {
               Back
             </Button>
           )}
+          {/* Conditionally render Next/Submit/Save button */}
           {footerProps.showNextButton && (
             <Button
               type="button"
-              className={`${footerProps.showBackButton ? "width-full margin-left-2" : ""} ${footerProps.nextButtonProps.className || ""}`}
+              // Apply conditional width/margin and any specific button styles (like success)
+              className={`${footerProps.showBackButton ? "width-full margin-left-2" : "width-full"} ${footerProps.nextButtonProps.className || ""}`}
               onClick={footerProps.onNextClick}
             >
               {footerProps.nextLabel}
@@ -296,3 +416,5 @@ function ReviewSubmit() {
 }
 
 export default ReviewSubmit;
+
+
