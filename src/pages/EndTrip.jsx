@@ -17,6 +17,12 @@ import StepIndicator from "../components/StepIndicator";
 const FIELD_WEATHER = "Weather condition";
 const FIELD_END_TIME = "End time";
 
+/**
+ * EndTrip Component
+ *
+ * Handles the third step of logging a fishing trip:
+ * entering the end time and weather conditions.
+ */
 function EndTrip() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -166,23 +172,19 @@ function EndTrip() {
   };
 
   if (isLoading) {
-    return <div className="page-content">Loading trip end details...</div>;
+    return <div className="padding-5 text-center">Loading trip end details...</div>;
   }
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-left">
         <div className="width-full maxw-mobile-lg">
           <StepIndicator />
-          <Form onSubmit={handleSubmit} large className="form">
+          <Form onSubmit={handleSubmit} large className="margin-top-3">
             {/* Trip End Time */}
             <FormGroup error={submitted && errors.endTime}>
-              <Label
-                htmlFor="endTime"
-                error={submitted && errors.endTime}
-                className="form-label"
-              >
-                Time<span className="text-secondary-vivid">*</span>
+              <Label htmlFor="endTime" error={submitted && errors.endTime}>
+                Time<span className="text-secondary-vivid margin-left-05">*</span>
               </Label>
               <TimePicker
                 id="time"
@@ -192,71 +194,43 @@ function EndTrip() {
                 minTime="00:00"
                 maxTime="23:30"
                 step={15}
-                validationStatus={
-                  submitted && errors.endTime ? "error" : undefined
-                }
-                className={
-                  submitted && errors.endTime
-                    ? "usa-input--error error-input-field"
-                    : ""
-                }
-                aria-describedby={
-                  submitted && errors.endTime
-                    ? "endTime-error-message"
-                    : undefined
-                }
+                validationStatus={submitted && errors.endTime ? "error" : undefined}
+                className={submitted && errors.endTime ? "usa-input--error" : ""}
+                aria-describedby="endTime-error-message"
               />
-              <ErrorMessage
-                id="endTime-error-message"
-                className="error-message"
-              >
-                {(submitted && errors.endTime && errors.endTime) || "\u00A0"}
+              <ErrorMessage id="endTime-error-message">
+                {(submitted && errors.endTime) || "\u00A0"}
               </ErrorMessage>
             </FormGroup>
 
             {/* Weather Conditions Select */}
             <FormGroup error={submitted && errors.endWeather}>
-              <Label
-                htmlFor="endWeather"
-                error={submitted && errors.endWeather}
-                className="form-label"
-              >
-                Weather<span className="text-secondary-vivid">*</span>
+              <Label htmlFor="endWeather" error={submitted && errors.endWeather}>
+                Weather<span className="text-secondary-vivid margin-left-05">*</span>
               </Label>
               <Select
                 id="endWeather"
                 name="endWeather"
                 value={formData.endWeather}
                 onChange={handleInputChange}
-                validationStatus={
-                  submitted && errors.endWeather ? "error" : undefined
-                }
-                aria-describedby={
-                  submitted && errors.endWeather
-                    ? "endWeather-error-message"
-                    : undefined
-                }
+                validationStatus={submitted && errors.endWeather ? "error" : undefined}
+                aria-describedby="endWeather-error-message"
               >
                 <option value="">-Select-</option>
                 <option value="Sunny">Sunny</option>
                 <option value="Cloudy">Cloudy</option>
                 <option value="Rainy">Rainy</option>
               </Select>
-              <ErrorMessage
-                id="endWeather-error-message"
-                className="error-message"
-              >
-                {(submitted && errors.endWeather && errors.endWeather) ||
-                  "\u00A0"}
+              <ErrorMessage id="endWeather-error-message">
+                {(submitted && errors.endWeather) || "\u00A0"}
               </ErrorMessage>
             </FormGroup>
           </Form>
         </div>
       </div>
 
-      {/* Inline Footer */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
           <Button
             outline
             type="button"
