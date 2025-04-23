@@ -136,7 +136,7 @@ function HomePage() {
    */
   const getStatusLabel = (trip) => {
     if (!trip || !trip.status) return LABEL_NOT_STARTED;
-    
+
     if (trip.status === STATUS_SUBMITTED) return LABEL_SUBMITTED;
     if (trip.status === STATUS_IN_PROGRESS) {
       if (trip.step) {
@@ -145,7 +145,7 @@ function HomePage() {
       return LABEL_IN_PROGRESS;
     }
     if (trip.status === STATUS_NOT_SUBMITTED) return LABEL_READY_TO_SUBMIT;
-    
+
     return LABEL_NOT_STARTED;
   };
 
@@ -156,11 +156,11 @@ function HomePage() {
    */
   const getHeaderClass = (trip) => {
     if (!trip || !trip.status) return "bg-secondary";
-    
+
     if (trip.status === STATUS_SUBMITTED) return "bg-green"; // Green
     if (trip.status === STATUS_IN_PROGRESS) return "bg-accent-warm"; // Orange
     if (trip.status === STATUS_NOT_SUBMITTED) return "bg-primary-darker"; // Blue
-    
+
     // Default to orange for any other status
     return "bg-accent-warm";
   };
@@ -172,7 +172,7 @@ function HomePage() {
   const handleTripClick = (trip) => {
     // Pass tripId via React Router state (not URL parameters)
     const destinationState = { state: { tripId: trip.id } };
-    
+
     if (trip.status === STATUS_SUBMITTED) {
       navigate(`/review`, destinationState);
     } else if (trip.status === STATUS_IN_PROGRESS) {
@@ -222,9 +222,7 @@ function HomePage() {
   return (
     <>
       <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
-        <h1 className="font-heading-xl text-center margin-0">
-          Hi, Captain
-        </h1>
+        <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
 
         <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
           Recent Trips
@@ -258,16 +256,28 @@ function HomePage() {
                 <div className="padding-2 bg-white radius-bottom-md">
                   <div className="grid-row">
                     <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">Fish Count</div>
-                      <div className="font-ui-lg text-bold">{tripStats[trip.id]?.totalCount || 0}</div>
+                      <div className="font-ui-xs text-base-dark margin-bottom-1">
+                        Fish Count
+                      </div>
+                      <div className="font-ui-lg text-bold">
+                        {tripStats[trip.id]?.totalCount || 0}
+                      </div>
                     </div>
                     <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">Total Weight</div>
-                      <div className="font-ui-lg text-bold">{tripStats[trip.id]?.totalWeight || 0} lbs</div>
+                      <div className="font-ui-xs text-base-dark margin-bottom-1">
+                        Total Weight
+                      </div>
+                      <div className="font-ui-lg text-bold">
+                        {tripStats[trip.id]?.totalWeight || 0} lbs
+                      </div>
                     </div>
                     <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">Avg. Length</div>
-                      <div className="font-ui-lg text-bold">{tripStats[trip.id]?.avgLength || 0} in</div>
+                      <div className="font-ui-xs text-base-dark margin-bottom-1">
+                        Avg. Length
+                      </div>
+                      <div className="font-ui-lg text-bold">
+                        {tripStats[trip.id]?.avgLength || 0} in
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -278,7 +288,7 @@ function HomePage() {
       </div>
 
       {/* Sticky footer with "Start New Trip" button */}
-      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 shadow-1 z-top">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
             type="button"

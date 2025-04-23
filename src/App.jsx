@@ -19,11 +19,10 @@ function App({ application }) {
         Skip to main content
       </a>
       <BrowserRouter>
-        <div className="app-container">
           <header className="sticky-header">
             <Header isExpanded={isExpanded} setExpanded={setExpanded} />
           </header>
-          <main id="main-content" className="main-content">
+          <main id="main-content" className="padding-bottom-15">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/start" element={<StartTrip />} />
@@ -37,7 +36,6 @@ function App({ application }) {
               />
             </Routes>
           </main>
-        </div>
       </BrowserRouter>
     </Application>
   );

@@ -6,8 +6,12 @@ import {
   Table,
   useOfflineStatus,
 } from "@nmfs-radfish/react-radfish";
-import { Button } from "@trussworks/react-uswds";
-import StepIndicator from "../components/StepIndicator";
+import { 
+  Button, 
+  // Import USWDS StepIndicator components directly
+  StepIndicator,
+  StepIndicatorStep,
+} from "@trussworks/react-uswds";
 
 /**
  * ReviewSubmit Component
@@ -273,7 +277,7 @@ function ReviewSubmit() {
         // If online, label the button "Submit" and use success style
         defaultProps.nextLabel = "Submit";
         // Apply the custom success style defined in index.css
-        defaultProps.nextButtonProps = { className: "usa-button--success" };
+        defaultProps.nextButtonProps = { className: "bg-green hover:bg-green" };
       }
       return defaultProps;
     }
@@ -305,14 +309,29 @@ function ReviewSubmit() {
       <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
         {/* Constrain content width */}
         <div className="width-full maxw-mobile-lg text-left">
-          <StepIndicator />
+          
+          {/* --- Embedded Step Indicator --- */}
+          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+            <StepIndicator 
+              headingLevel="h4" 
+              ofText="of" 
+              stepText="Step"
+              className="usa-step-indicator margin-bottom-0"
+              showLabels={false}
+            >
+              <StepIndicatorStep label="Start Trip" status="complete" />
+              <StepIndicatorStep label="Log Catch" status="complete" />
+              <StepIndicatorStep label="End Trip" status="complete" />
+              <StepIndicatorStep label="Review and Submit" status="current" />
+            </StepIndicator>
+          </div>
 
           {/* Trip info card - consolidated from start and end trip */}
           {/* Using USWDS utility classes for card styling */}
           <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
             {/* Card Header */}
-            <div className="bg-primary-darker padding-y-1 padding-x-2 display-flex flex-align-center">
-              <h3 className="margin-0 font-sans-lg text-semibold text-white">Trip Summary</h3>
+            <div className="bg-primary-darker padding-y-1 padding-x-2">
+              <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Trip Summary</h3>
             </div>
             {/* Card Body */}
             <div className="padding-2 display-flex flex-column gap-2">
@@ -346,10 +365,9 @@ function ReviewSubmit() {
           {/* Using USWDS utility classes for card styling */}
           <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
              {/* Card Header */}
-            <div className="bg-primary-darker padding-y-1 padding-x-2 display-flex flex-align-center">
-              <h3 className="margin-0 font-sans-lg text-semibold text-white">Aggregate Catches</h3>
+            <div className="bg-primary-darker padding-y-1 padding-x-2">
+              <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Aggregate Catches</h3>
             </div>
-             {/* Card Body - No padding needed as Table handles its own */}
             <div className="padding-0">
               {aggregatedCatches.length > 0 ? (
                 // RADFish Table component for displaying aggregated catches
@@ -382,8 +400,8 @@ function ReviewSubmit() {
       </div>
 
       {/* Sticky Footer with dynamic buttons */}
-      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           {/* Conditionally render Back button */}
           {footerProps.showBackButton && (
             <Button

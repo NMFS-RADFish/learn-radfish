@@ -11,9 +11,10 @@ import {
   Select,
   Button,
   Icon,
+  StepIndicator,
+  StepIndicatorStep,
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
-import StepIndicator from "../components/StepIndicator";
 
 // Constants for field names used in validation messages
 const FIELD_SPECIES = "Species";
@@ -361,9 +362,24 @@ function CatchLog() {
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
         <div className="width-full maxw-mobile-lg text-left">
-          <StepIndicator />
+
+          {/* --- Embedded Step Indicator --- */}
+          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+            <StepIndicator 
+              headingLevel="h4" 
+              ofText="of" 
+              stepText="Step"
+              className="usa-step-indicator margin-bottom-0"
+              showLabels={false}
+            >
+              <StepIndicatorStep label="Start Trip" status="complete" />
+              <StepIndicatorStep label="Log Catch" status="current" />
+              <StepIndicatorStep label="End Trip" />
+              <StepIndicatorStep label="Review and Submit" />
+            </StepIndicator>
+          </div>
 
           {/* New Catch Entry Form Section */}
           <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
@@ -705,8 +721,8 @@ function CatchLog() {
       </div>
 
       {/* Footer uses USWDS utilities */}
-      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
             outline
             type="button"

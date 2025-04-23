@@ -9,9 +9,10 @@ import {
   Select,
   Label,
   Button,
+  StepIndicator,
+  StepIndicatorStep,
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
-import StepIndicator from "../components/StepIndicator";
 
 // Field name constants
 const FIELD_WEATHER = "Weather condition";
@@ -171,15 +172,32 @@ function EndTrip() {
     }
   };
 
+  // --- Render Logic ---
   if (isLoading) {
     return <div className="padding-5 text-center">Loading trip end details...</div>;
   }
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-left">
-        <div className="width-full maxw-mobile-lg">
-          <StepIndicator />
+      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
+        <div className="width-full maxw-mobile-lg text-left">
+          
+          {/* --- Embedded Step Indicator --- */}
+          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+            <StepIndicator 
+              headingLevel="h4" 
+              ofText="of" 
+              stepText="Step"
+              className="usa-step-indicator margin-bottom-0"
+              showLabels={false}
+            >
+              <StepIndicatorStep label="Start Trip" status="complete" />
+              <StepIndicatorStep label="Log Catch" status="complete" />
+              <StepIndicatorStep label="End Trip" status="current" />
+              <StepIndicatorStep label="Review and Submit" />
+            </StepIndicator>
+          </div>
+
           <Form onSubmit={handleSubmit} large className="margin-top-3">
             {/* Trip End Time */}
             <FormGroup error={submitted && errors.endTime}>
@@ -229,8 +247,8 @@ function EndTrip() {
         </div>
       </div>
 
-      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
             outline
             type="button"

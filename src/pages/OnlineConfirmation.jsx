@@ -14,8 +14,8 @@ function OnlineConfirmation() {
         </div>
       </div>
 
-      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-y-4 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-x-2">
+      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
+        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
             type="button"
             className="width-full"
