@@ -40,49 +40,6 @@ body {
 
 /* 
 =========================================
-USWDS COMPONENT OVERRIDES
-=========================================
-*/
-
-.usa-button {
-  margin-right: 0;
-}
-
-.usa-form-group > #time-label {
-  margin-top: -1rem;
-}
-
-.usa-combo-box {
-  width: 100%;
-}
-
-.usa-table {
-  margin: 0;
-}
-
-.usa-logo {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-@media (min-width: 64em) {
-  .usa-nav__primary > .usa-nav__primary-item > a {
-    padding: 10px;
-  }
-
-  .usa-header--basic .usa-nav {
-    padding: 0;
-  }
-}
-
-@media (min-width: 480px) {
-  .usa-logo {
-      margin-left: 0;
-  }
-}
-
-/* 
-=========================================
 RECENT TRIPS STYLES
 =========================================
 
