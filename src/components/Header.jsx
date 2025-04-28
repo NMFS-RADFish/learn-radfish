@@ -24,9 +24,13 @@ function Header({ isExpanded, setExpanded }) {
       <div className="usa-nav-container maxw-mobile-lg margin-x-auto padding-y-2 padding-x-0">
         <div className="usa-navbar">
           <Title className="header-title">
-            <Link to="/" onClick={handleNavLinkClick} style={{ display: 'flex', alignItems: 'center', gap: '1rem', textDecoration: 'none' }}>
+            <Link 
+              to="/" 
+              onClick={handleNavLinkClick} 
+              className="display-flex"
+            >
               <img src="/icons/pelagix.svg" alt="Pelagix Logo" height="40" />
-              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '1.25rem' }}>Pelagix</span>
+              <span className="text-white font-sans-lg text-bold margin-left-1 flex-align-self-center">PELAGIX</span>
             </Link>
           </Title>
           <NavMenuButton
