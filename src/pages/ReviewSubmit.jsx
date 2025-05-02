@@ -69,6 +69,7 @@ function ReviewSubmit() {
 
       try {
         // Access RADFish collections
+        /* [Lesson 6.1:START] Access RADFish stores and fetch trip/catch data */
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
         const Catch = tripStore.getCollection("Catch");
@@ -88,10 +89,13 @@ function ReviewSubmit() {
 
         // Fetch all catches associated with this trip
         const tripCatches = await Catch.find({ tripId: selectedTrip.id });
+        /* [Lesson 6.1:END] */
 
         // Aggregate catch data for the summary table
+        /* [Lesson 6.2:START] Call the aggregation function */
         const aggregatedData = aggregateCatchesBySpecies(tripCatches);
         setAggregatedCatches(aggregatedData);
+        /* [Lesson 6.2:END] */
       } catch (err) {
         // Handle errors during data fetching
         console.error("Error loading trip data:", err);
@@ -265,7 +269,6 @@ function ReviewSubmit() {
         showNextButton: false,
       };
     } else {
-      // If not submitted yet
       defaultProps.backPath = `/end`; // Back goes to EndTrip page
       defaultProps.backNavState = { state: { tripId: tripId } }; // Pass tripId back
 
@@ -371,6 +374,7 @@ function ReviewSubmit() {
             <div className="padding-0">
               {aggregatedCatches.length > 0 ? (
                 // RADFish Table component for displaying aggregated catches
+                /* [Lesson 6.3:START] Use the RADFish Table component to display aggregated data */
                 <Table
                   // Map aggregated data to the format expected by the Table component
                   data={aggregatedCatches.map((item, index) => ({
@@ -390,6 +394,7 @@ function ReviewSubmit() {
                   // Enable striped rows for better readability
                   striped
                 />
+                /* [Lesson 6.3:END] */
               ) : (
                 // Display message if no catches were recorded
                 <p className="padding-2 text-base-dark">No catches recorded for this trip.</p>

@@ -190,14 +190,18 @@ function StartTrip() {
     setSubmitted(true); // Mark form as submitted to show errors
 
     const newErrors = validateForm();
+    /* [Lesson 5.1:START] Set validation errors */
     setErrors(newErrors);
+    /* [Lesson 5.1:END] */
 
     // Proceed only if validation passes
     if (Object.keys(newErrors).length === 0) {
       try {
         // Access RADFish store and collection
+        /* [Lesson 3.1:START] Declare the trip store and form collection */
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
+        /* [Lesson 3.1:END] */
         let navigateToId = currentTripId;
 
         // Prepare data to be saved
@@ -209,6 +213,7 @@ function StartTrip() {
           step: 2 // Update step number
         };
 
+        /* [Lesson 3.2:START] Update the form if it exists, else create a new form */
         if (currentTripId) {
           // --- Update existing trip ---
           // Merge existing ID with new data and update in IndexedDB
@@ -221,6 +226,7 @@ function StartTrip() {
           navigateToId = newTripId; // Store the new ID for navigation
           setCurrentTripId(newTripId); // Update state with the new ID
         }
+        /* [Lesson 3.2:END] */
         // Navigate to the next step (CatchLog), passing the tripId via state
         navigate(`/catch`, { state: { tripId: navigateToId } });
       } catch (error) {
@@ -263,6 +269,7 @@ function StartTrip() {
           <Form onSubmit={handleSubmit} large className="margin-top-3">
             {/* Trip Date - USWDS DatePicker */}
             {/* FormGroup adds spacing and connects label/input/error */}
+            {/* [Lesson 2.1:START] Add Date Picker Input */}
             <FormGroup error={submitted && errors.tripDate}>
               {/* Label with required indicator */}
               <Label htmlFor="tripDate" error={submitted && errors.tripDate}>
@@ -282,12 +289,16 @@ function StartTrip() {
                 className={submitted && errors.tripDate ? "usa-input--error" : ""}
               />
               {/* Error message displayed below input */}
+              {/* [Lesson 5.2:START] Display Trip Date Error */}
               <ErrorMessage id="tripDate-error-message">
                 {(submitted && errors.tripDate) || "\u00A0"} {/* Non-breaking space for layout */}
               </ErrorMessage>
+              {/* [Lesson 5.2:END] */}
             </FormGroup>
+            {/* [Lesson 2.1:END] */}
 
             {/* Trip Start Time - USWDS TimePicker */}
+            {/* [Lesson 2.2:START] Add Time Picker Input */}
             <FormGroup error={submitted && errors.startTime}>
               <Label htmlFor="startTime" error={submitted && errors.startTime}>
                 Time<span className="text-secondary-vivid margin-left-05">*</span>
@@ -304,12 +315,16 @@ function StartTrip() {
                 className={submitted && errors.startTime ? "usa-input--error" : ""}
                 aria-describedby="startTime-error-message"
               />
+              {/* [Lesson 5.3:START] Display Start Time Error */}
               <ErrorMessage id="startTime-error-message">
                 {(submitted && errors.startTime) || "\u00A0"}
               </ErrorMessage>
+              {/* [Lesson 5.3:END] */}
             </FormGroup>
+            {/* [Lesson 2.2:END] */}
 
             {/* Weather Conditions - USWDS Select */}
+            {/* [Lesson 2.3:START] Add Weather Select Input */}
             <FormGroup error={submitted && errors.weather}>
               <Label htmlFor="weather" error={submitted && errors.weather}>
                 Weather<span className="text-secondary-vivid margin-left-05">*</span>
@@ -327,10 +342,13 @@ function StartTrip() {
                 <option value="Cloudy">Cloudy</option>
                 <option value="Rainy">Rainy</option>
               </Select>
+              {/* [Lesson 5.4:START] Display Weather Error */}
               <ErrorMessage id="weather-error-message">
                 {(submitted && errors.weather) || "\u00A0"}
               </ErrorMessage>
+              {/* [Lesson 5.4:END] */}
             </FormGroup>
+            {/* [Lesson 2.3:END] */}
           </Form>
         </div>
       </div>
