@@ -147,9 +147,6 @@ function EndTrip() {
     setSubmitted(true);
 
     const newErrors = validateForm();
-    /* [Lesson 5.19:START] Set validation errors */
-    setErrors(newErrors);
-    /* [Lesson 5.19:END] */
 
     if (Object.keys(newErrors).length === 0 && tripId) {
       try {
@@ -218,11 +215,6 @@ function EndTrip() {
                 className={submitted && errors.endTime ? "usa-input--error" : ""}
                 aria-describedby="endTime-error-message"
               />
-              {/* [Lesson 5.20:START] Display End Time Error */}
-              <ErrorMessage id="endTime-error-message">
-                {(submitted && errors.endTime) || "\u00A0"}
-              </ErrorMessage>
-              {/* [Lesson 5.20:END] */}
             </FormGroup>
 
             {/* Weather Conditions Select */}
@@ -243,11 +235,6 @@ function EndTrip() {
                 <option value="Cloudy">Cloudy</option>
                 <option value="Rainy">Rainy</option>
               </Select>
-              {/* [Lesson 5.21:START] Display End Weather Error */}
-              <ErrorMessage id="endWeather-error-message">
-                {(submitted && errors.endWeather) || "\u00A0"}
-              </ErrorMessage>
-              {/* [Lesson 5.21:END] */}
             </FormGroup>
           </Form>
         </div>

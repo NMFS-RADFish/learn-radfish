@@ -20,31 +20,6 @@ export default defineConfig((env) => ({
         short_name: "RADFish",
         name: "RADFish React Boilerplate",
         icons: [
-       /* [Lesson 1.1:START] Add icon/radfish-N sizes 144x144, 64x64, 24x24, 16x16 */
-          {
-            src: "icons/radfish-144.ico",
-            sizes: "144x144 64x64 32x32 24x24 16x16",
-            type: "image/x-icon",
-          },
-          {
-            src: "icons/radfish-144.ico",
-            type: "image/icon",
-            sizes: "144x144",
-            purpose: "any",
-          },
-          {
-            src: "icons/radfish-192.ico",
-            type: "image/icon",
-            sizes: "192x192",
-            purpose: "any",
-          },
-          {
-            src: "icons/radfish-512.ico",
-            type: "image/icon",
-            sizes: "512x512",
-            purpose: "any",
-          },
-          /* [Lesson 1.1:END] */
           {
             src: "icons/144.png",
             type: "image/png",

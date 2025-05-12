@@ -292,9 +292,6 @@ function HomePage() {
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
             type="button"
-            /* [Lesson 1.2:START]: Navigate to /start route on click */
-            onClick={() => navigate("/start")}
-            /* [Lesson 1.2:END] */
             className="bg-primary hover:bg-primary-darker width-full"
           >
             Start New Trip

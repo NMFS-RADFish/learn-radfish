@@ -237,9 +237,6 @@ function CatchLog() {
     e.preventDefault();
     setSubmitted(true);
     const formErrors = validateForm();
-    /* [Lesson 5.5:START] Set validation errors for new catch */
-    setErrors(formErrors);
-    /* [Lesson 5.5:END] */
 
     // Proceed only if no errors and tripId exists
     if (Object.keys(formErrors).length === 0 && tripId) {
@@ -256,14 +253,7 @@ function CatchLog() {
           longitude: currentCatch.longitude ? Number(currentCatch.longitude) : undefined,
           createdAt: new Date().toISOString()
         };
-        /* [Lesson 4.1:START] Save new catch data to IndexedDB */
-        // Create record in RADFish/IndexedDB
-        await Catch.create(newCatchData);
-        /* [Lesson 4.1:END] */
-        /* [Lesson 4.2:START] Update catches state to re-render list */
-        // Add to the top of the displayed list
-        setCatches(prev => [newCatchData, ...prev]);
-        /* [Lesson 4.2:END] */
+
         // Reset the form
         setCurrentCatch({ species: "", weight: "", length: "", latitude: "", longitude: "", time: "" });
         setCatchTimeKey(prevKey => prevKey + 1); // Reset TimePicker
@@ -282,9 +272,6 @@ function CatchLog() {
     
     // Validate all recorded catches first
     const recordedErrors = validateRecordedCatches();
-    /* [Lesson 5.12:START] Set validation errors for recorded catches */
-    setRecordedCatchErrors(recordedErrors);
-    /* [Lesson 5.12:END] */
 
     // Only proceed if there are no errors in the recorded catches list
     if (Object.keys(recordedErrors).length === 0) {
@@ -411,11 +398,6 @@ function CatchLog() {
                     <option key={species} value={species}>{species}</option>
                   ))}
                 </Select>
-                {/* [Lesson 5.6:START] Display Species Error */}
-                <ErrorMessage id="species-error-message">
-                  {(submitted && errors.species) || "\u00A0"}
-                </ErrorMessage>
-                {/* [Lesson 5.6:END] */}
               </FormGroup>
 
               {/* Weight & Length Inputs Row */}
@@ -436,11 +418,6 @@ function CatchLog() {
                       validationStatus={submitted && errors.weight ? "error" : undefined}
                       aria-describedby={submitted && errors.weight ? "weight-error-message" : undefined}
                     />
-                    {/* [Lesson 5.7:START] Display Weight Error */}
-                    <ErrorMessage id="weight-error-message">
-                      {(submitted && errors.weight) || "\u00A0"}
-                    </ErrorMessage>
-                    {/* [Lesson 5.7:END] */}
                   </FormGroup>
                 </div>
                 {/* Length Input */}
@@ -459,11 +436,6 @@ function CatchLog() {
                       validationStatus={submitted && errors.length ? "error" : undefined}
                       aria-describedby={submitted && errors.length ? "length-error-message" : undefined}
                     />
-                    {/* [Lesson 5.8:START] Display Length Error */}
-                    <ErrorMessage id="length-error-message">
-                      {(submitted && errors.length) || "\u00A0"}
-                    </ErrorMessage>
-                    {/* [Lesson 5.8:END] */}
                   </FormGroup>
                 </div>
               </div>
@@ -486,11 +458,6 @@ function CatchLog() {
                   className={submitted && errors.time ? "usa-input--error" : ""}
                   aria-describedby={submitted && errors.time ? "time-error-message" : undefined}
                 />
-                {/* [Lesson 5.9:START] Display Time Error */}
-                <ErrorMessage id="time-error-message">
-                  {(submitted && errors.time) || "\u00A0"}
-                </ErrorMessage>
-                {/* [Lesson 5.9:END] */}
               </FormGroup>
 
               {/* Coordinate Inputs Row */}
@@ -509,11 +476,6 @@ function CatchLog() {
                       validationStatus={submitted && errors.latitude ? "error" : undefined}
                       aria-describedby={submitted && errors.latitude ? "latitude-error-message" : undefined}
                     />
-                    {/* [Lesson 5.10:START] Display Latitude Error */}
-                    <ErrorMessage id="latitude-error-message">
-                      {(submitted && errors.latitude) || "\u00A0"}
-                    </ErrorMessage>
-                    {/* [Lesson 5.10:END] */}
                   </FormGroup>
                 </div>
                 {/* Longitude Input */}
@@ -530,11 +492,6 @@ function CatchLog() {
                       validationStatus={submitted && errors.longitude ? "error" : undefined}
                       aria-describedby={submitted && errors.longitude ? "longitude-error-message" : undefined}
                     />
-                    {/* [Lesson 5.11:START] Display Longitude Error */}
-                    <ErrorMessage id="longitude-error-message">
-                      {(submitted && errors.longitude) || "\u00A0"}
-                    </ErrorMessage>
-                    {/* [Lesson 5.11:END] */}
                   </FormGroup>
                 </div>
               </div>
@@ -597,13 +554,6 @@ function CatchLog() {
                                 <option key={species} value={species}>{species}</option>
                               ))}
                             </Select>
-                            {/* [Lesson 5.13:START] Display Recorded Species Error */}
-                            {catchErrors.species && (
-                              <ErrorMessage id={`recorded-species-${index}-error-message`}>
-                                {catchErrors.species}
-                              </ErrorMessage>
-                            )}
-                            {/* [Lesson 5.13:END] */}
                           </FormGroup>
   
                           {/* Recorded Weight/Length Row */}
@@ -624,13 +574,6 @@ function CatchLog() {
                                   validationStatus={catchErrors.weight ? "error" : undefined}
                                   aria-describedby={catchErrors.weight ? `recorded-weight-${index}-error-message` : undefined}
                                 />
-                                {/* [Lesson 5.14:START] Display Recorded Weight Error */}
-                                {catchErrors.weight && (
-                                  <ErrorMessage id={`recorded-weight-${index}-error-message`}>
-                                    {catchErrors.weight}
-                                  </ErrorMessage>
-                                )}
-                                {/* [Lesson 5.14:END] */}
                               </FormGroup>
                             </div>
                             {/* Recorded Length */}
@@ -649,13 +592,6 @@ function CatchLog() {
                                   validationStatus={catchErrors.length ? "error" : undefined}
                                   aria-describedby={catchErrors.length ? `recorded-length-${index}-error-message` : undefined}
                                 />
-                                {/* [Lesson 5.15:START] Display Recorded Length Error */}
-                                {catchErrors.length && (
-                                  <ErrorMessage id={`recorded-length-${index}-error-message`}>
-                                    {catchErrors.length}
-                                  </ErrorMessage>
-                                )}
-                                {/* [Lesson 5.15:END] */}
                               </FormGroup>
                             </div>
                           </div>
@@ -677,13 +613,6 @@ function CatchLog() {
                               validationStatus={catchErrors.time ? "error" : undefined}
                               aria-describedby={catchErrors.time ? `recorded-time-${index}-error-message` : undefined}
                             />
-                            {/* [Lesson 5.16:START] Display Recorded Time Error */}
-                            {catchErrors.time && (
-                              <ErrorMessage id={`recorded-time-${index}-error-message`}>
-                                {catchErrors.time}
-                              </ErrorMessage>
-                            )}
-                            {/* [Lesson 5.16:END] */}
                           </FormGroup>
   
                           {/* Recorded Coordinates Row */}
@@ -705,13 +634,6 @@ function CatchLog() {
                                   validationStatus={catchErrors.latitude ? "error" : undefined}
                                   aria-describedby={catchErrors.latitude ? `recorded-latitude-${index}-error-message` : undefined}
                                 />
-                                {/* [Lesson 5.17:START] Display Recorded Latitude Error */}
-                                {catchErrors.latitude && (
-                                  <ErrorMessage id={`recorded-latitude-${index}-error-message`}>
-                                    {catchErrors.latitude}
-                                  </ErrorMessage>
-                                )}
-                                {/* [Lesson 5.17:END] */}
                               </FormGroup>
                             </div>
                             {/* Recorded Longitude */}
@@ -731,13 +653,6 @@ function CatchLog() {
                                   validationStatus={catchErrors.longitude ? "error" : undefined}
                                   aria-describedby={catchErrors.longitude ? `recorded-longitude-${index}-error-message` : undefined}
                                 />
-                                {/* [Lesson 5.18:START] Display Recorded Longitude Error */}
-                                {catchErrors.longitude && (
-                                  <ErrorMessage id={`recorded-longitude-${index}-error-message`}>
-                                    {catchErrors.longitude}
-                                  </ErrorMessage>
-                                )}
-                                {/* [Lesson 5.18:END] */}
                               </FormGroup>
                             </div>
                           </div>

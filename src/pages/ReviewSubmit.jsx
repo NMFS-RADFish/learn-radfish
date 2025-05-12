@@ -69,33 +69,6 @@ function ReviewSubmit() {
 
       try {
         // Access RADFish collections
-        /* [Lesson 6.1:START] Access RADFish stores and fetch trip/catch data */
-        const tripStore = app.stores["trip"];
-        const Form = tripStore.getCollection("Form");
-        const Catch = tripStore.getCollection("Catch");
-
-        // Fetch the trip details
-        const trips = await Form.find({ id: tripId });
-
-        // Handle trip not found
-        if (trips.length === 0) {
-          setError(`Trip with ID ${tripId} not found`);
-          navigate("/"); // Redirect home if trip doesn't exist
-          return;
-        }
-
-        const selectedTrip = trips[0];
-        setTrip(selectedTrip); // Store fetched trip data in state
-
-        // Fetch all catches associated with this trip
-        const tripCatches = await Catch.find({ tripId: selectedTrip.id });
-        /* [Lesson 6.1:END] */
-
-        // Aggregate catch data for the summary table
-        /* [Lesson 6.2:START] Call the aggregation function */
-        const aggregatedData = aggregateCatchesBySpecies(tripCatches);
-        setAggregatedCatches(aggregatedData);
-        /* [Lesson 6.2:END] */
       } catch (err) {
         // Handle errors during data fetching
         console.error("Error loading trip data:", err);
@@ -372,33 +345,6 @@ function ReviewSubmit() {
               <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Aggregate Catches</h3>
             </div>
             <div className="padding-0">
-              {aggregatedCatches.length > 0 ? (
-                // RADFish Table component for displaying aggregated catches
-                /* [Lesson 6.3:START] Use the RADFish Table component to display aggregated data */
-                <Table
-                  // Map aggregated data to the format expected by the Table component
-                  data={aggregatedCatches.map((item, index) => ({
-                    id: index, // Use index as ID for the table row
-                    species: item.species,
-                    count: item.count,
-                    totalWeight: `${item.totalWeight} lbs`, // Add units
-                    avgLength: `${item.avgLength} in`, // Add units
-                  }))}
-                  // Define table columns: key corresponds to data keys, label is header text
-                  columns={[
-                    { key: "species", label: "Species", sortable: true },
-                    { key: "count", label: "Count", sortable: true },
-                    { key: "totalWeight", label: "Total Weight", sortable: true },
-                    { key: "avgLength", label: "Avg. Length", sortable: true },
-                  ]}
-                  // Enable striped rows for better readability
-                  striped
-                />
-                /* [Lesson 6.3:END] */
-              ) : (
-                // Display message if no catches were recorded
-                <p className="padding-2 text-base-dark">No catches recorded for this trip.</p>
-              )}
             </div>
           </div>
         </div>
