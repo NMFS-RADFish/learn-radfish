@@ -1,7 +1,7 @@
 {
   "version": "0.11.1",
   "dependencies": {
-    "@nmfs-radfish/radfish": "^1.1.0-rc.1",
+    "@nmfs-radfish/radfish": "^1.1.0-rc.2",
     "@nmfs-radfish/react-radfish": "^1.0.0",
     "@testing-library/user-event": "^14.5.2",
     "@trussworks/react-uswds": "^9.0.0",
