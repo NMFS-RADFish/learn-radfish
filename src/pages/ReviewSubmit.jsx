@@ -210,25 +210,55 @@ function ReviewSubmit() {
   const handleSubmit = async () => {
     if (!trip) return; // Guard clause if trip data isn't loaded
 
-    try {
-      const tripStore = app.stores["trip"];
-      const Form = tripStore.getCollection("Form");
-      // Determine final status: "submitted" if online, "Not Submitted" if offline
-      const finalStatus = isOffline ? "Not Submitted" : "submitted";
+    const tripStore = app.stores["trip"];
+    const Form = tripStore.getCollection("Form");
 
-      // Update the trip record in RADFish/IndexedDB
-      await Form.update({
-        id: trip.id,
-        status: finalStatus,
-        step: 4, // Mark as completed step 4 (review)
-      });
+    if (isOffline) {
+      // Offline: Save status as "Not Submitted" locally
+      try {
+        await Form.update({
+          id: trip.id,
+          status: "Not Submitted",
+          step: 4, // Mark as completed step 4 (review)
+        });
+        navigate("/offline-confirm");
+      } catch (error) {
+        console.error("Error saving trip offline:", error);
+        setError("Failed to save trip for offline submission. Please try again.");
+      }
+    } else {
+      // Online: Attempt to submit to the backend
+      try {
+        const response = await fetch('/api/trips', { // Assuming '/api/trips' is your JSON server endpoint
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(trip), // Send the full trip object
+        });
 
-      // Navigate to the relevant confirmation screen
-      navigate(isOffline ? "/offline-confirm" : "/online-confirm");
-    } catch (error) {
-      console.error("Error submitting trip:", error);
-      // Consider adding user feedback here (e.g., using a toast notification)
-      setError("Failed to submit trip. Please try again.");
+        if (!response.ok) {
+          const status = response.status;
+          const statusText = response.statusText ? response.statusText.trim() : "";
+          const errorDetail = statusText ? `${status} ${statusText}` : `${status} Server error occurred`;
+          
+          console.error("Server submission failed:", errorDetail);
+          setError(`Server submission failed: ${errorDetail}`);
+          return;
+        }
+
+        // If server submission is successful, update local status to "submitted"
+        await Form.update({
+          id: trip.id,
+          status: "submitted",
+          step: 4,
+        });
+        navigate("/online-confirm");
+
+      } catch (error) { // Catch network errors or other issues with the fetch call
+        console.error("Error submitting trip online:", error);
+        setError("Failed to submit trip. Check your internet connection or try saving offline.");
+      }
     }
   };
 
