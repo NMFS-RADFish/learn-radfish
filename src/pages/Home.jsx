@@ -2,7 +2,7 @@ import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@trussworks/react-uswds";
+import { Button, GridContainer, Grid } from "@trussworks/react-uswds";
 
 // Status constants
 const STATUS_SUBMITTED = "submitted";
@@ -221,12 +221,14 @@ function HomePage() {
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
-        <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
+      <GridContainer className="padding-y-4 padding-x-2 text-center">
+        <Grid row>
+          <Grid col="full">
+            <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
 
-        <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
-          Recent Trips
-        </h2>
+            <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
+              Recent Trips
+            </h2>
 
         {trips.length === 0 ? (
           <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
@@ -253,39 +255,50 @@ function HomePage() {
                   </div>
                 </div>
 
-                <div className="padding-2 bg-white radius-bottom-md">
-                  <div className="grid-row">
-                    <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">
-                        Fish Count
-                      </div>
-                      <div className="font-ui-lg text-bold">
-                        {tripStats[trip.id]?.totalCount || 0}
-                      </div>
-                    </div>
-                    <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">
-                        Total Weight
-                      </div>
-                      <div className="font-ui-lg text-bold">
-                        {tripStats[trip.id]?.totalWeight || 0} lbs
-                      </div>
-                    </div>
-                    <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">
-                        Avg. Length
-                      </div>
-                      <div className="font-ui-lg text-bold">
-                        {tripStats[trip.id]?.avgLength || 0} in
-                      </div>
+                    <div className="padding-2 bg-white radius-bottom-md">
+                      <Grid row className="grid-gap-1">
+                        <Grid
+                          col={4}
+                          className="display-flex flex-column padding-y-1 stat-grid-column"
+                        >
+                          <div className="font-ui-xs text-base-dark margin-bottom-1">
+                            Fish Count
+                          </div>
+                          <div className="font-ui-lg text-bold">
+                            {tripStats[trip.id]?.totalCount || 0}
+                          </div>
+                        </Grid>
+                        <Grid
+                          col={4}
+                          className="display-flex flex-column padding-y-1 stat-grid-column"
+                        >
+                          <div className="font-ui-xs text-base-dark margin-bottom-1">
+                            Total Weight
+                          </div>
+                          <div className="font-ui-lg text-bold">
+                            {tripStats[trip.id]?.totalWeight || 0} lbs
+                          </div>
+                        </Grid>
+                        <Grid
+                          col={4}
+                          className="display-flex flex-column padding-y-1 stat-grid-column"
+                        >
+                          <div className="font-ui-xs text-base-dark margin-bottom-1">
+                            Avg. Length
+                          </div>
+                          <div className="font-ui-lg text-bold">
+                            {tripStats[trip.id]?.avgLength || 0} in
+                          </div>
+                        </Grid>
+                      </Grid>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            )}
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       {/* Sticky footer with "Start New Trip" button */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
