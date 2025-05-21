@@ -1,24 +1,3 @@
 {
-  "trips": [
-    {
-      "id": "8ce65a12-e53b-410d-853e-99da00e5e62b",
-      "tripDate": "05/06/2025",
-      "weather": "Cloudy",
-      "startTime": "00:15",
-      "status": "in-progress",
-      "step": 4,
-      "endWeather": "Rainy",
-      "endTime": "00:00"
-    },
-    {
-      "id": "b44dcfd8-1ce4-449a-b505-1b80a2680a70",
-      "tripDate": "05/02/2025",
-      "weather": "Cloudy",
-      "startTime": "00:15",
-      "status": "Not Submitted",
-      "step": 4,
-      "endWeather": "Cloudy",
-      "endTime": "00:15"
-    }
-  ]
+  "trips": []
 }
