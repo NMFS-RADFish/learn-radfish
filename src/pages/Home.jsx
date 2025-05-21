@@ -223,7 +223,7 @@ function HomePage() {
     <>
       <GridContainer className="padding-y-4 padding-x-2 text-center">
         <Grid row>
-          <Grid col="full">
+          <Grid col="fill">
             <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
 
             <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
@@ -256,7 +256,7 @@ function HomePage() {
                 </div>
 
                     <div className="padding-2 bg-white radius-bottom-md">
-                      <Grid row className="grid-gap-1">
+                      <Grid row>
                         <Grid
                           col={4}
                           className="display-flex flex-column padding-y-1 stat-grid-column"

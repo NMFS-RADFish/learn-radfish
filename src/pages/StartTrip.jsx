@@ -243,7 +243,7 @@ function StartTrip() {
       {/* Main content area using USWDS layout utilities */}
       <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
         <Grid row>
-          <Grid col="full">
+          <Grid col="fill">
             {/* Container to constrain width on larger screens */}
             <div className="width-full text-left">
               

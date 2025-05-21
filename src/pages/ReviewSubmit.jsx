@@ -8,9 +8,10 @@ import {
 } from "@nmfs-radfish/react-radfish";
 import { 
   Button, 
-  // Import USWDS StepIndicator components directly
   StepIndicator,
   StepIndicatorStep,
+  GridContainer,
+  Grid,
 } from "@trussworks/react-uswds";
 
 /**
@@ -336,98 +337,99 @@ function ReviewSubmit() {
   return (
     <>
       {/* Main content area */}
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
-        {/* Constrain content width */}
-        <div className="width-full maxw-mobile-lg text-left">
-          
-          {/* --- Embedded Step Indicator --- */}
-          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-            <StepIndicator 
-              headingLevel="h4" 
-              ofText="of" 
-              stepText="Step"
-              className="usa-step-indicator margin-bottom-0"
-              showLabels={false}
-            >
-              <StepIndicatorStep label="Start Trip" status="complete" />
-              <StepIndicatorStep label="Log Catch" status="complete" />
-              <StepIndicatorStep label="End Trip" status="complete" />
-              <StepIndicatorStep label="Review and Submit" status="current" />
-            </StepIndicator>
-          </div>
+      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
+        <Grid row>
+          <Grid col="fill">
 
-          {/* Trip info card - consolidated from start and end trip */}
-          {/* Using USWDS utility classes for card styling */}
-          <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
-            {/* Card Header */}
-            <div className="bg-primary-darker padding-y-1 padding-x-2">
-              <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Trip Summary</h3>
-            </div>
-            {/* Card Body */}
-            <div className="padding-2 display-flex flex-column gap-2">
-              {/* Date Row */}
-              <div className="display-flex flex-align-center gap-1">
-                <div className="width-10 text-bold font-sans-xs">Date</div>
-                <span className="text-base-dark font-sans-sm">{formatDate(trip.tripDate)}</span>
+              {/* --- Embedded Step Indicator --- */}
+              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+                <StepIndicator 
+                  headingLevel="h4" 
+                  ofText="of" 
+                  stepText="Step"
+                  className="usa-step-indicator margin-bottom-0"
+                  showLabels={false}
+                >
+                  <StepIndicatorStep label="Start Trip" status="complete" />
+                  <StepIndicatorStep label="Log Catch" status="complete" />
+                  <StepIndicatorStep label="End Trip" status="complete" />
+                  <StepIndicatorStep label="Review and Submit" status="current" />
+                </StepIndicator>
               </div>
-              {/* Weather Row */}
-              <div className="display-flex flex-align-center gap-1">
-                <div className="width-10 text-bold font-sans-xs">Weather</div>
-                <div className="display-flex flex-align-center">
-                  <span className="text-base-dark font-sans-sm">{trip.weather}</span>
-                  <span className="margin-x-1 text-base-dark">→</span>
-                  <span className="text-base-dark font-sans-sm">{trip.endWeather}</span>
+
+              {/* Trip info card - consolidated from start and end trip */}
+              {/* Using USWDS utility classes for card styling */}
+              <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+                {/* Card Header */}
+                <div className="bg-primary-darker padding-y-1 padding-x-2">
+                  <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Trip Summary</h3>
+                </div>
+                {/* Card Body */}
+                <div className="padding-2 display-flex flex-column gap-2">
+                  {/* Date Row */}
+                  <div className="display-flex flex-align-center gap-1">
+                    <div className="width-10 text-bold font-sans-xs">Date</div>
+                    <span className="text-base-dark font-sans-sm">{formatDate(trip.tripDate)}</span>
+                  </div>
+                  {/* Weather Row */}
+                  <div className="display-flex flex-align-center gap-1">
+                    <div className="width-10 text-bold font-sans-xs">Weather</div>
+                    <div className="display-flex flex-align-center">
+                      <span className="text-base-dark font-sans-sm">{trip.weather}</span>
+                      <span className="margin-x-1 text-base-dark">→</span>
+                      <span className="text-base-dark font-sans-sm">{trip.endWeather}</span>
+                    </div>
+                  </div>
+                  {/* Time Row */}
+                  <div className="display-flex flex-align-center gap-1">
+                    <div className="width-10 text-bold font-sans-xs">Time</div>
+                    <div className="display-flex flex-align-center">
+                      <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.startTime)}</span>
+                      <span className="margin-x-1 text-base-dark">→</span>
+                      <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.endTime)}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              {/* Time Row */}
-              <div className="display-flex flex-align-center gap-1">
-                <div className="width-10 text-bold font-sans-xs">Time</div>
-                <div className="display-flex flex-align-center">
-                  <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.startTime)}</span>
-                  <span className="margin-x-1 text-base-dark">→</span>
-                  <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.endTime)}</span>
+
+              {/* Aggregated Catch Data Card */}
+              {/* Using USWDS utility classes for card styling */}
+              <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+                 {/* Card Header */}
+                <div className="bg-primary-darker padding-y-1 padding-x-2">
+                  <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Aggregate Catches</h3>
+                </div>
+                <div className="padding-0">
+                  {aggregatedCatches.length > 0 ? (
+                    // RADFish Table component for displaying aggregated catches
+                    <Table
+                      // Map aggregated data to the format expected by the Table component
+                      data={aggregatedCatches.map((item, index) => ({
+                        id: index, // Use index as ID for the table row
+                        species: item.species,
+                        count: item.count,
+                        totalWeight: `${item.totalWeight} lbs`, // Add units
+                        avgLength: `${item.avgLength} in`, // Add units
+                      }))}
+                      // Define table columns: key corresponds to data keys, label is header text
+                      columns={[
+                        { key: "species", label: "Species", sortable: true },
+                        { key: "count", label: "Count", sortable: true },
+                        { key: "totalWeight", label: "Total Weight", sortable: true },
+                        { key: "avgLength", label: "Avg. Length", sortable: true },
+                      ]}
+                      // Enable striped rows for better readability
+                      striped
+                    />
+                  ) : (
+                    // Display message if no catches were recorded
+                    <p className="padding-2 text-base-dark">No catches recorded for this trip.</p>
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Aggregated Catch Data Card */}
-          {/* Using USWDS utility classes for card styling */}
-          <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
-             {/* Card Header */}
-            <div className="bg-primary-darker padding-y-1 padding-x-2">
-              <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Aggregate Catches</h3>
-            </div>
-            <div className="padding-0">
-              {aggregatedCatches.length > 0 ? (
-                // RADFish Table component for displaying aggregated catches
-                <Table
-                  // Map aggregated data to the format expected by the Table component
-                  data={aggregatedCatches.map((item, index) => ({
-                    id: index, // Use index as ID for the table row
-                    species: item.species,
-                    count: item.count,
-                    totalWeight: `${item.totalWeight} lbs`, // Add units
-                    avgLength: `${item.avgLength} in`, // Add units
-                  }))}
-                  // Define table columns: key corresponds to data keys, label is header text
-                  columns={[
-                    { key: "species", label: "Species", sortable: true },
-                    { key: "count", label: "Count", sortable: true },
-                    { key: "totalWeight", label: "Total Weight", sortable: true },
-                    { key: "avgLength", label: "Avg. Length", sortable: true },
-                  ]}
-                  // Enable striped rows for better readability
-                  striped
-                />
-              ) : (
-                // Display message if no catches were recorded
-                <p className="padding-2 text-base-dark">No catches recorded for this trip.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       {/* Sticky Footer with dynamic buttons */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">

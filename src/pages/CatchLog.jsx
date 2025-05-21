@@ -366,7 +366,7 @@ function CatchLog() {
     <>
       <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
         <Grid row>
-          <Grid col="full">
+          <Grid col="fill">
             <div className="text-left">
 
               {/* --- Embedded Step Indicator --- */}
