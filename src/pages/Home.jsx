@@ -224,36 +224,39 @@ function HomePage() {
       <GridContainer className="padding-y-4 padding-x-2 text-center">
         <Grid row>
           <Grid col="fill">
-            <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
+            <h1 className="font-heading-xl text-center margin-0">
+              Hi, Captain
+            </h1>
 
             <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
               Recent Trips
             </h2>
 
-        {trips.length === 0 ? (
-          <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
-            <p className="text-base margin-0 text-center">
-              No trips found. Start a new trip to record your fishing activity.
-            </p>
-          </div>
-        ) : (
-          <div className="width-full maxw-mobile-lg margin-x-auto margin-bottom-5">
-            {trips.map((trip) => (
-              <div
-                key={trip.id}
-                className="display-flex flex-column width-full border-radius-md bg-white shadow-2 overflow-hidden margin-bottom-2 cursor-pointer hover:shadow-4 hover:transform-"
-                onClick={() => handleTripClick(trip)}
-              >
-                <div
-                  className={`display-flex flex-justify flex-align-center padding-y-2 padding-x-2 text-white radius-top-md ${getHeaderClass(trip)}`}
-                >
-                  <div className="text-white font-ui-md text-bold">
-                    {formatDate(trip.tripDate)}
-                  </div>
-                  <div className="text-white font-ui-md text-bold">
-                    {getStatusLabel(trip)}
-                  </div>
-                </div>
+            {trips.length === 0 ? (
+              <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
+                <p className="text-base margin-0 text-center">
+                  No trips found. Start a new trip to record your fishing
+                  activity.
+                </p>
+              </div>
+            ) : (
+              <div className="width-full maxw-mobile-lg margin-x-auto margin-bottom-5">
+                {trips.map((trip) => (
+                  <div
+                    key={trip.id}
+                    className="display-flex flex-column width-full border-radius-md bg-white shadow-2 overflow-hidden margin-bottom-2 cursor-pointer hover:shadow-4 hover:transform-"
+                    onClick={() => handleTripClick(trip)}
+                  >
+                    <div
+                      className={`display-flex flex-justify flex-align-center padding-y-2 padding-x-2 text-white radius-top-md ${getHeaderClass(trip)}`}
+                    >
+                      <div className="text-white font-ui-md text-bold">
+                        {formatDate(trip.tripDate)}
+                      </div>
+                      <div className="text-white font-ui-md text-bold">
+                        {getStatusLabel(trip)}
+                      </div>
+                    </div>
 
                     <div className="padding-2 bg-white radius-bottom-md">
                       <Grid row>

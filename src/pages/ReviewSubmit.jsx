@@ -6,8 +6,8 @@ import {
   Table,
   useOfflineStatus,
 } from "@nmfs-radfish/react-radfish";
-import { 
-  Button, 
+import {
+  Button,
   StepIndicator,
   StepIndicatorStep,
   GridContainer,
@@ -33,7 +33,6 @@ import {
  *  - Using the RADFish `Table` component.
  */
 function ReviewSubmit() {
-
   const navigate = useNavigate();
   const location = useLocation();
   const app = useApplication();
@@ -176,13 +175,18 @@ function ReviewSubmit() {
    * @returns {string} The formatted time string (e.g., "1:30 PM"), or "" if input is invalid.
    */
   const format24HourTo12Hour = (timeString) => {
-    if (!timeString || typeof timeString !== 'string' || !timeString.includes(':')) return "";
+    if (
+      !timeString ||
+      typeof timeString !== "string" ||
+      !timeString.includes(":")
+    )
+      return "";
 
     try {
       // Parse hours and minutes
       const [hoursStr, minutesStr] = timeString.split(":");
       let hours = parseInt(hoursStr, 10);
-      const minutes = minutesStr.padStart(2, '0'); // Ensure minutes are two digits
+      const minutes = minutesStr.padStart(2, "0"); // Ensure minutes are two digits
 
       // Validate parsed values
       if (isNaN(hours) || hours < 0 || hours > 23) return "";
@@ -225,24 +229,31 @@ function ReviewSubmit() {
         navigate("/offline-confirm");
       } catch (error) {
         console.error("Error saving trip offline:", error);
-        setError("Failed to save trip for offline submission. Please try again.");
+        setError(
+          "Failed to save trip for offline submission. Please try again.",
+        );
       }
     } else {
       // Online: Attempt to submit to the backend
       try {
-        const response = await fetch('/api/trips', { // Assuming '/api/trips' is your JSON server endpoint
-          method: 'POST',
+        const response = await fetch("/api/trips", {
+          // Assuming '/api/trips' is your JSON server endpoint
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(trip), // Send the full trip object
         });
 
         if (!response.ok) {
           const status = response.status;
-          const statusText = response.statusText ? response.statusText.trim() : "";
-          const errorDetail = statusText ? `${status} ${statusText}` : `${status} Server error occurred`;
-          
+          const statusText = response.statusText
+            ? response.statusText.trim()
+            : "";
+          const errorDetail = statusText
+            ? `${status} ${statusText}`
+            : `${status} Server error occurred`;
+
           console.error("Server submission failed:", errorDetail);
           setError(`Server submission failed: ${errorDetail}`);
           return;
@@ -255,10 +266,12 @@ function ReviewSubmit() {
           step: 4,
         });
         navigate("/online-confirm");
-
-      } catch (error) { // Catch network errors or other issues with the fetch call
+      } catch (error) {
+        // Catch network errors or other issues with the fetch call
         console.error("Error submitting trip online:", error);
-        setError("Failed to submit trip. Check your internet connection or try saving offline.");
+        setError(
+          "Failed to submit trip. Check your internet connection or try saving offline.",
+        );
       }
     }
   };
@@ -323,12 +336,16 @@ function ReviewSubmit() {
 
   // Display error message if fetching failed
   if (error) {
-    return <div className="padding-5 text-center text-error">Error: {error}</div>;
+    return (
+      <div className="padding-5 text-center text-error">Error: {error}</div>
+    );
   }
 
   // Display message if trip data is unexpectedly missing after loading
   if (!trip) {
-    return <div className="padding-5 text-center">Trip data not available.</div>;
+    return (
+      <div className="padding-5 text-center">Trip data not available.</div>
+    );
   }
 
   // Get dynamic footer button properties
@@ -340,93 +357,116 @@ function ReviewSubmit() {
       <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
         <Grid row>
           <Grid col="fill">
+            {/* --- Embedded Step Indicator --- */}
+            <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+              <StepIndicator
+                headingLevel="h4"
+                ofText="of"
+                stepText="Step"
+                className="usa-step-indicator margin-bottom-0"
+                showLabels={false}
+              >
+                <StepIndicatorStep label="Start Trip" status="complete" />
+                <StepIndicatorStep label="Log Catch" status="complete" />
+                <StepIndicatorStep label="End Trip" status="complete" />
+                <StepIndicatorStep label="Review and Submit" status="current" />
+              </StepIndicator>
+            </div>
 
-              {/* --- Embedded Step Indicator --- */}
-              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-                <StepIndicator 
-                  headingLevel="h4" 
-                  ofText="of" 
-                  stepText="Step"
-                  className="usa-step-indicator margin-bottom-0"
-                  showLabels={false}
-                >
-                  <StepIndicatorStep label="Start Trip" status="complete" />
-                  <StepIndicatorStep label="Log Catch" status="complete" />
-                  <StepIndicatorStep label="End Trip" status="complete" />
-                  <StepIndicatorStep label="Review and Submit" status="current" />
-                </StepIndicator>
+            {/* Trip info card - consolidated from start and end trip */}
+            {/* Using USWDS utility classes for card styling */}
+            <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+              {/* Card Header */}
+              <div className="bg-primary-darker padding-y-1 padding-x-2">
+                <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">
+                  Trip Summary
+                </h3>
               </div>
-
-              {/* Trip info card - consolidated from start and end trip */}
-              {/* Using USWDS utility classes for card styling */}
-              <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
-                {/* Card Header */}
-                <div className="bg-primary-darker padding-y-1 padding-x-2">
-                  <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Trip Summary</h3>
+              {/* Card Body */}
+              <div className="padding-2 display-flex flex-column gap-2">
+                {/* Date Row */}
+                <div className="display-flex flex-align-center gap-1">
+                  <div className="width-10 text-bold font-sans-xs">Date</div>
+                  <span className="text-base-dark font-sans-sm">
+                    {formatDate(trip.tripDate)}
+                  </span>
                 </div>
-                {/* Card Body */}
-                <div className="padding-2 display-flex flex-column gap-2">
-                  {/* Date Row */}
-                  <div className="display-flex flex-align-center gap-1">
-                    <div className="width-10 text-bold font-sans-xs">Date</div>
-                    <span className="text-base-dark font-sans-sm">{formatDate(trip.tripDate)}</span>
-                  </div>
-                  {/* Weather Row */}
-                  <div className="display-flex flex-align-center gap-1">
-                    <div className="width-10 text-bold font-sans-xs">Weather</div>
-                    <div className="display-flex flex-align-center">
-                      <span className="text-base-dark font-sans-sm">{trip.weather}</span>
-                      <span className="margin-x-1 text-base-dark">→</span>
-                      <span className="text-base-dark font-sans-sm">{trip.endWeather}</span>
-                    </div>
-                  </div>
-                  {/* Time Row */}
-                  <div className="display-flex flex-align-center gap-1">
-                    <div className="width-10 text-bold font-sans-xs">Time</div>
-                    <div className="display-flex flex-align-center">
-                      <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.startTime)}</span>
-                      <span className="margin-x-1 text-base-dark">→</span>
-                      <span className="text-base-dark font-sans-sm">{format24HourTo12Hour(trip.endTime)}</span>
-                    </div>
+                {/* Weather Row */}
+                <div className="display-flex flex-align-center gap-1">
+                  <div className="width-10 text-bold font-sans-xs">Weather</div>
+                  <div className="display-flex flex-align-center">
+                    <span className="text-base-dark font-sans-sm">
+                      {trip.weather}
+                    </span>
+                    <span className="margin-x-1 text-base-dark">→</span>
+                    <span className="text-base-dark font-sans-sm">
+                      {trip.endWeather}
+                    </span>
                   </div>
                 </div>
+                {/* Time Row */}
+                <div className="display-flex flex-align-center gap-1">
+                  <div className="width-10 text-bold font-sans-xs">Time</div>
+                  <div className="display-flex flex-align-center">
+                    <span className="text-base-dark font-sans-sm">
+                      {format24HourTo12Hour(trip.startTime)}
+                    </span>
+                    <span className="margin-x-1 text-base-dark">→</span>
+                    <span className="text-base-dark font-sans-sm">
+                      {format24HourTo12Hour(trip.endTime)}
+                    </span>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              {/* Aggregated Catch Data Card */}
-              {/* Using USWDS utility classes for card styling */}
-              <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
-                 {/* Card Header */}
-                <div className="bg-primary-darker padding-y-1 padding-x-2">
-                  <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">Aggregate Catches</h3>
-                </div>
-                <div className="padding-0">
-                  {aggregatedCatches.length > 0 ? (
-                    // RADFish Table component for displaying aggregated catches
-                    <Table
-                      // Map aggregated data to the format expected by the Table component
-                      data={aggregatedCatches.map((item, index) => ({
-                        id: index, // Use index as ID for the table row
-                        species: item.species,
-                        count: item.count,
-                        totalWeight: `${item.totalWeight} lbs`, // Add units
-                        avgLength: `${item.avgLength} in`, // Add units
-                      }))}
-                      // Define table columns: key corresponds to data keys, label is header text
-                      columns={[
-                        { key: "species", label: "Species", sortable: true },
-                        { key: "count", label: "Count", sortable: true },
-                        { key: "totalWeight", label: "Total Weight", sortable: true },
-                        { key: "avgLength", label: "Avg. Length", sortable: true },
-                      ]}
-                      // Enable striped rows for better readability
-                      striped
-                    />
-                  ) : (
-                    // Display message if no catches were recorded
-                    <p className="padding-2 text-base-dark">No catches recorded for this trip.</p>
-                  )}
-                </div>
+            {/* Aggregated Catch Data Card */}
+            {/* Using USWDS utility classes for card styling */}
+            <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+              {/* Card Header */}
+              <div className="bg-primary-darker padding-y-1 padding-x-2">
+                <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">
+                  Aggregate Catches
+                </h3>
               </div>
+              <div className="padding-0">
+                {aggregatedCatches.length > 0 ? (
+                  // RADFish Table component for displaying aggregated catches
+                  <Table
+                    // Map aggregated data to the format expected by the Table component
+                    data={aggregatedCatches.map((item, index) => ({
+                      id: index, // Use index as ID for the table row
+                      species: item.species,
+                      count: item.count,
+                      totalWeight: `${item.totalWeight} lbs`, // Add units
+                      avgLength: `${item.avgLength} in`, // Add units
+                    }))}
+                    // Define table columns: key corresponds to data keys, label is header text
+                    columns={[
+                      { key: "species", label: "Species", sortable: true },
+                      { key: "count", label: "Count", sortable: true },
+                      {
+                        key: "totalWeight",
+                        label: "Total Weight",
+                        sortable: true,
+                      },
+                      {
+                        key: "avgLength",
+                        label: "Avg. Length",
+                        sortable: true,
+                      },
+                    ]}
+                    // Enable striped rows for better readability
+                    striped
+                  />
+                ) : (
+                  // Display message if no catches were recorded
+                  <p className="padding-2 text-base-dark">
+                    No catches recorded for this trip.
+                  </p>
+                )}
+              </div>
+            </div>
           </Grid>
         </Grid>
       </GridContainer>
@@ -440,7 +480,11 @@ function ReviewSubmit() {
               outline
               type="button"
               // Adjust width based on whether the Next button is also shown
-              className={footerProps.showNextButton ? "width-card-lg bg-white" : "width-full bg-white"}
+              className={
+                footerProps.showNextButton
+                  ? "width-card-lg bg-white"
+                  : "width-full bg-white"
+              }
               onClick={() =>
                 navigate(footerProps.backPath, footerProps.backNavState)
               }
@@ -466,5 +510,3 @@ function ReviewSubmit() {
 }
 
 export default ReviewSubmit;
-
-

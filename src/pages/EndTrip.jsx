@@ -176,7 +176,9 @@ function EndTrip() {
 
   // --- Render Logic ---
   if (isLoading) {
-    return <div className="padding-5 text-center">Loading trip end details...</div>;
+    return (
+      <div className="padding-5 text-center">Loading trip end details...</div>
+    );
   }
 
   return (
@@ -184,69 +186,79 @@ function EndTrip() {
       <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
         <Grid row>
           <Grid col="fill">
-              
-              {/* --- Embedded Step Indicator --- */}
-              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-                <StepIndicator 
-                  headingLevel="h4" 
-                  ofText="of" 
-                  stepText="Step"
-                  className="usa-step-indicator margin-bottom-0"
-                  showLabels={false}
+            {/* --- Embedded Step Indicator --- */}
+            <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+              <StepIndicator
+                headingLevel="h4"
+                ofText="of"
+                stepText="Step"
+                className="usa-step-indicator margin-bottom-0"
+                showLabels={false}
+              >
+                <StepIndicatorStep label="Start Trip" status="complete" />
+                <StepIndicatorStep label="Log Catch" status="complete" />
+                <StepIndicatorStep label="End Trip" status="current" />
+                <StepIndicatorStep label="Review and Submit" />
+              </StepIndicator>
+            </div>
+
+            <Form onSubmit={handleSubmit} large className="margin-top-3">
+              {/* Trip End Time */}
+              <FormGroup error={submitted && errors.endTime}>
+                <Label htmlFor="endTime" error={submitted && errors.endTime}>
+                  Time
+                  <span className="text-secondary-vivid margin-left-05">*</span>
+                </Label>
+                <TimePicker
+                  id="time"
+                  name="time"
+                  defaultValue={formData.endTime}
+                  onChange={(time) => handleTimeChange(time)}
+                  minTime="00:00"
+                  maxTime="23:30"
+                  step={15}
+                  validationStatus={
+                    submitted && errors.endTime ? "error" : undefined
+                  }
+                  className={
+                    submitted && errors.endTime ? "usa-input--error" : ""
+                  }
+                  aria-describedby="endTime-error-message"
+                />
+                <ErrorMessage id="endTime-error-message">
+                  {(submitted && errors.endTime) || "\u00A0"}
+                </ErrorMessage>
+              </FormGroup>
+
+              {/* Weather Conditions Select */}
+              <FormGroup error={submitted && errors.endWeather}>
+                <Label
+                  htmlFor="endWeather"
+                  error={submitted && errors.endWeather}
                 >
-                  <StepIndicatorStep label="Start Trip" status="complete" />
-                  <StepIndicatorStep label="Log Catch" status="complete" />
-                  <StepIndicatorStep label="End Trip" status="current" />
-                  <StepIndicatorStep label="Review and Submit" />
-                </StepIndicator>
-              </div>
-
-              <Form onSubmit={handleSubmit} large className="margin-top-3">
-                {/* Trip End Time */}
-                <FormGroup error={submitted && errors.endTime}>
-                  <Label htmlFor="endTime" error={submitted && errors.endTime}>
-                    Time<span className="text-secondary-vivid margin-left-05">*</span>
-                  </Label>
-                  <TimePicker
-                    id="time"
-                    name="time"
-                    defaultValue={formData.endTime}
-                    onChange={(time) => handleTimeChange(time)}
-                    minTime="00:00"
-                    maxTime="23:30"
-                    step={15}
-                    validationStatus={submitted && errors.endTime ? "error" : undefined}
-                    className={submitted && errors.endTime ? "usa-input--error" : ""}
-                    aria-describedby="endTime-error-message"
-                  />
-                  <ErrorMessage id="endTime-error-message">
-                    {(submitted && errors.endTime) || "\u00A0"}
-                  </ErrorMessage>
-                </FormGroup>
-
-                {/* Weather Conditions Select */}
-                <FormGroup error={submitted && errors.endWeather}>
-                  <Label htmlFor="endWeather" error={submitted && errors.endWeather}>
-                    Weather<span className="text-secondary-vivid margin-left-05">*</span>
-                  </Label>
-                  <Select
-                    id="endWeather"
-                    name="endWeather"
-                    value={formData.endWeather}
-                    onChange={handleInputChange}
-                    validationStatus={submitted && errors.endWeather ? "error" : undefined}
-                    aria-describedby="endWeather-error-message"
-                  >
-                    <option value="">-Select-</option>
-                    <option value="Sunny">Sunny</option>
-                    <option value="Cloudy">Cloudy</option>
-                    <option value="Rainy">Rainy</option>
-                  </Select>
-                  <ErrorMessage id="endWeather-error-message">
-                    {(submitted && errors.endWeather) || "\u00A0"}
-                  </ErrorMessage>
-                </FormGroup>
-              </Form>
+                  Weather
+                  <span className="text-secondary-vivid margin-left-05">*</span>
+                </Label>
+                <Select
+                  id="endWeather"
+                  name="endWeather"
+                  value={formData.endWeather}
+                  onChange={handleInputChange}
+                  validationStatus={
+                    submitted && errors.endWeather ? "error" : undefined
+                  }
+                  aria-describedby="endWeather-error-message"
+                >
+                  <option value="">-Select-</option>
+                  <option value="Sunny">Sunny</option>
+                  <option value="Cloudy">Cloudy</option>
+                  <option value="Rainy">Rainy</option>
+                </Select>
+                <ErrorMessage id="endWeather-error-message">
+                  {(submitted && errors.endWeather) || "\u00A0"}
+                </ErrorMessage>
+              </FormGroup>
+            </Form>
           </Grid>
         </Grid>
       </GridContainer>

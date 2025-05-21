@@ -19,22 +19,22 @@ import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Utility to format a date string to YYYY-MM-DD for the DatePicker default value
 const formatToYYYYMMDD = (dateString) => {
-  if (!dateString || typeof dateString !== 'string') {
-    return '';
+  if (!dateString || typeof dateString !== "string") {
+    return "";
   }
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
       console.warn(`Invalid date string could not be parsed: ${dateString}`);
-      return '';
+      return "";
     }
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
   } catch (error) {
     console.error(`Error formatting date string: ${dateString}`, error);
-    return '';
+    return "";
   }
 };
 
@@ -93,7 +93,7 @@ function StartTrip() {
         setIsLoading(false);
         return;
       }
-      
+
       setIsLoading(true);
       try {
         // Access the 'trip' store and 'Form' collection from RADFish
@@ -114,7 +114,9 @@ function StartTrip() {
           });
         } else {
           // If trip not found (e.g., invalid ID passed), treat as a new trip
-          console.warn(`Trip with ID ${tripIdFromState} not found. Starting new trip form.`);
+          console.warn(
+            `Trip with ID ${tripIdFromState} not found. Starting new trip form.`,
+          );
           setCurrentTripId(null);
           setFormData({ tripDate: "", weather: "", startTime: "" });
         }
@@ -136,28 +138,28 @@ function StartTrip() {
   const handleInputChange = (e) => {
     if (e && e.target) {
       const { name, value } = e.target;
-      setFormData(prevData => ({ ...prevData, [name]: value }));
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
       // Clear validation error for the field being edited
       if (errors[name]) {
-        setErrors(prevErrors => ({ ...prevErrors, [name]: undefined }));
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: undefined }));
       }
     }
   };
 
   // Handles changes specifically for the USWDS DatePicker component
   const handleDateChange = (value) => {
-    setFormData(prevData => ({ ...prevData, tripDate: value || "" }));
+    setFormData((prevData) => ({ ...prevData, tripDate: value || "" }));
     if (errors.tripDate) {
-      setErrors(prevErrors => ({ ...prevErrors, tripDate: undefined }));
+      setErrors((prevErrors) => ({ ...prevErrors, tripDate: undefined }));
     }
   };
 
   // Handles changes specifically for the USWDS TimePicker component
   const handleTimeChange = (time) => {
     // Assumes only one time picker, defaults name to 'startTime'
-    setFormData(prevData => ({ ...prevData, startTime: time }));
+    setFormData((prevData) => ({ ...prevData, startTime: time }));
     if (errors.startTime) {
-      setErrors(prevErrors => ({ ...prevErrors, startTime: undefined }));
+      setErrors((prevErrors) => ({ ...prevErrors, startTime: undefined }));
     }
   };
 
@@ -208,7 +210,7 @@ function StartTrip() {
           weather: formData.weather,
           startTime: formData.startTime,
           status: "in-progress", // Set status for new/updated trip
-          step: 2 // Update step number
+          step: 2, // Update step number
         };
 
         if (currentTripId) {
@@ -219,14 +221,24 @@ function StartTrip() {
           // --- Create new trip ---
           const newTripId = crypto.randomUUID(); // Generate a unique ID
           // Add ID to data and create new record in IndexedDB
-          await Form.create({ id: newTripId, ...tripData, endWeather: "", endTime: "" });
+          await Form.create({
+            id: newTripId,
+            ...tripData,
+            endWeather: "",
+            endTime: "",
+          });
           navigateToId = newTripId; // Store the new ID for navigation
           setCurrentTripId(newTripId); // Update state with the new ID
         }
         // Navigate to the next step (CatchLog), passing the tripId via state
         navigate(`/catch`, { state: { tripId: navigateToId } });
       } catch (error) {
-        console.error("Error saving trip data:", error, "Trip ID:", currentTripId);
+        console.error(
+          "Error saving trip data:",
+          error,
+          "Trip ID:",
+          currentTripId,
+        );
       }
     }
   };
@@ -246,12 +258,11 @@ function StartTrip() {
           <Grid col="fill">
             {/* Container to constrain width on larger screens */}
             <div className="width-full text-left">
-              
               {/* --- Embedded Step Indicator --- */}
               <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-                <StepIndicator 
-                  headingLevel="h4" 
-                  ofText="of" 
+                <StepIndicator
+                  headingLevel="h4"
+                  ofText="of"
                   stepText="Step"
                   className="usa-step-indicator margin-bottom-0"
                   showLabels={false}
@@ -269,8 +280,14 @@ function StartTrip() {
                 {/* FormGroup adds spacing and connects label/input/error */}
                 <FormGroup error={submitted && errors.tripDate}>
                   {/* Label with required indicator */}
-                  <Label htmlFor="tripDate" error={submitted && errors.tripDate}>
-                    Date<span className="text-secondary-vivid margin-left-05">*</span>
+                  <Label
+                    htmlFor="tripDate"
+                    error={submitted && errors.tripDate}
+                  >
+                    Date
+                    <span className="text-secondary-vivid margin-left-05">
+                      *
+                    </span>
                   </Label>
                   {/* Hint text for date format */}
                   <div className="usa-hint" id="tripDate-hint">
@@ -283,18 +300,27 @@ function StartTrip() {
                     onChange={handleDateChange} // Use specific handler
                     aria-describedby="tripDate-hint"
                     // Apply error styling if submitted and error exists
-                    className={submitted && errors.tripDate ? "usa-input--error" : ""}
+                    className={
+                      submitted && errors.tripDate ? "usa-input--error" : ""
+                    }
                   />
                   {/* Error message displayed below input */}
                   <ErrorMessage id="tripDate-error-message">
-                    {(submitted && errors.tripDate) || "\u00A0"} {/* Non-breaking space for layout */}
+                    {(submitted && errors.tripDate) || "\u00A0"}{" "}
+                    {/* Non-breaking space for layout */}
                   </ErrorMessage>
                 </FormGroup>
 
                 {/* Trip Start Time - USWDS TimePicker */}
                 <FormGroup error={submitted && errors.startTime}>
-                  <Label htmlFor="startTime" error={submitted && errors.startTime}>
-                    Time<span className="text-secondary-vivid margin-left-05">*</span>
+                  <Label
+                    htmlFor="startTime"
+                    error={submitted && errors.startTime}
+                  >
+                    Time
+                    <span className="text-secondary-vivid margin-left-05">
+                      *
+                    </span>
                   </Label>
                   <TimePicker
                     id="time"
@@ -304,8 +330,12 @@ function StartTrip() {
                     minTime="00:00"
                     maxTime="23:30"
                     step={15}
-                    validationStatus={submitted && errors.startTime ? "error" : undefined}
-                    className={submitted && errors.startTime ? "usa-input--error" : ""}
+                    validationStatus={
+                      submitted && errors.startTime ? "error" : undefined
+                    }
+                    className={
+                      submitted && errors.startTime ? "usa-input--error" : ""
+                    }
                     aria-describedby="startTime-error-message"
                   />
                   <ErrorMessage id="startTime-error-message">
@@ -316,14 +346,19 @@ function StartTrip() {
                 {/* Weather Conditions - USWDS Select */}
                 <FormGroup error={submitted && errors.weather}>
                   <Label htmlFor="weather" error={submitted && errors.weather}>
-                    Weather<span className="text-secondary-vivid margin-left-05">*</span>
+                    Weather
+                    <span className="text-secondary-vivid margin-left-05">
+                      *
+                    </span>
                   </Label>
                   <Select
                     id="weather"
                     name="weather"
                     value={formData.weather}
                     onChange={handleInputChange} // Standard handler works here
-                    validationStatus={submitted && errors.weather ? "error" : undefined}
+                    validationStatus={
+                      submitted && errors.weather ? "error" : undefined
+                    }
                     aria-describedby="weather-error-message"
                   >
                     <option value="">-Select-</option>
