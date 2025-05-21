@@ -13,6 +13,8 @@ import {
   Icon,
   StepIndicator,
   StepIndicatorStep,
+  GridContainer,
+  Grid,
 } from "@trussworks/react-uswds";
 import { useApplication } from "@nmfs-radfish/react-radfish";
 
@@ -346,7 +348,7 @@ function CatchLog() {
       try {
         const Catch = app.stores["trip"].getCollection("Catch");
         // Remove from RADFish/IndexedDB
-        await Catch.remove(catchToDelete.id);
+        await Catch.delete({id: catchToDelete.id});
         // Update local state to remove from UI
         setCatches(prev => prev.filter((_, i) => i !== index));
       } catch (error) {
@@ -362,363 +364,369 @@ function CatchLog() {
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
-        <div className="width-full maxw-mobile-lg text-left">
+      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
+        <Grid row>
+          <Grid col="full">
+            <div className="text-left">
 
-          {/* --- Embedded Step Indicator --- */}
-          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-            <StepIndicator 
-              headingLevel="h4" 
-              ofText="of" 
-              stepText="Step"
-              className="usa-step-indicator margin-bottom-0"
-              showLabels={false}
-            >
-              <StepIndicatorStep label="Start Trip" status="complete" />
-              <StepIndicatorStep label="Log Catch" status="current" />
-              <StepIndicatorStep label="End Trip" />
-              <StepIndicatorStep label="Review and Submit" />
-            </StepIndicator>
-          </div>
-
-          {/* New Catch Entry Form Section */}
-          <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
-            <Form onSubmit={handleAddCatch} large className="margin-top-3 width-full">
-              
-              {/* Species Dropdown */}
-              <FormGroup error={submitted && errors.species}>
-                <Label htmlFor="species" error={submitted && errors.species}>
-                  Species<span className="text-secondary-vivid margin-left-05">*</span>
-                </Label>
-                <Select
-                  id="species"
-                  name="species"
-                  value={currentCatch.species}
-                  onChange={handleInputChange}
-                  validationStatus={submitted && errors.species ? "error" : undefined}
-                  aria-describedby={submitted && errors.species ? "species-error-message" : undefined}
+              {/* --- Embedded Step Indicator --- */}
+              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+                <StepIndicator 
+                  headingLevel="h4" 
+                  ofText="of" 
+                  stepText="Step"
+                  className="usa-step-indicator margin-bottom-0"
+                  showLabels={false}
                 >
-                  <option value="">-Select-</option>
-                  {SPECIES_OPTIONS.map((species) => (
-                    <option key={species} value={species}>{species}</option>
-                  ))}
-                </Select>
-                <ErrorMessage id="species-error-message">
-                  {(submitted && errors.species) || "\u00A0"}
-                </ErrorMessage>
-              </FormGroup>
+                  <StepIndicatorStep label="Start Trip" status="complete" />
+                  <StepIndicatorStep label="Log Catch" status="current" />
+                  <StepIndicatorStep label="End Trip" />
+                  <StepIndicatorStep label="Review and Submit" />
+                </StepIndicator>
+              </div>
 
-              {/* Weight & Length Inputs Row */}
-              <div className="display-flex gap-2 width-full">
-                {/* Weight Input*/}
-                <div className="flex-1">
-                  <FormGroup error={submitted && errors.weight}>
-                    <Label htmlFor="weight" error={submitted && errors.weight}>
-                      Weight<span className="text-secondary-vivid margin-left-05">*</span>
+              {/* New Catch Entry Form Section */}
+              <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
+                <Form onSubmit={handleAddCatch} large className="margin-top-3 width-full">
+                  
+                  {/* Species Dropdown */}
+                  <FormGroup error={submitted && errors.species}>
+                    <Label htmlFor="species" error={submitted && errors.species}>
+                      Species<span className="text-secondary-vivid margin-left-05">*</span>
                     </Label>
-                    <span className="usa-hint display-block text-left">lbs</span>
-                    <TextInput
-                      id="weight"
-                      name="weight"
-                      type="number"
-                      value={currentCatch.weight}
+                    <Select
+                      id="species"
+                      name="species"
+                      value={currentCatch.species}
                       onChange={handleInputChange}
-                      validationStatus={submitted && errors.weight ? "error" : undefined}
-                      aria-describedby={submitted && errors.weight ? "weight-error-message" : undefined}
-                    />
-                    <ErrorMessage id="weight-error-message">
-                      {(submitted && errors.weight) || "\u00A0"}
+                      validationStatus={submitted && errors.species ? "error" : undefined}
+                      aria-describedby={submitted && errors.species ? "species-error-message" : undefined}
+                    >
+                      <option value="">-Select-</option>
+                      {SPECIES_OPTIONS.map((species) => (
+                        <option key={species} value={species}>{species}</option>
+                      ))}
+                    </Select>
+                    <ErrorMessage id="species-error-message">
+                      {(submitted && errors.species) || "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
-                </div>
-                {/* Length Input */}
-                <div className="flex-1">
-                  <FormGroup error={submitted && errors.length}>
-                    <Label htmlFor="length" error={submitted && errors.length}>
-                      Length<span className="text-secondary-vivid margin-left-05">*</span>
+
+                  {/* Weight & Length Inputs Row */}
+                  <Grid row className="grid-gap-2">
+                    {/* Weight Input*/}
+                    <Grid col={6}>
+                      <FormGroup error={submitted && errors.weight}>
+                        <Label htmlFor="weight" error={submitted && errors.weight}>
+                          Weight<span className="text-secondary-vivid margin-left-05">*</span>
+                        </Label>
+                        <span className="usa-hint display-block text-left">lbs</span>
+                        <TextInput
+                          id="weight"
+                          name="weight"
+                          type="number"
+                          value={currentCatch.weight}
+                          onChange={handleInputChange}
+                          validationStatus={submitted && errors.weight ? "error" : undefined}
+                          aria-describedby={submitted && errors.weight ? "weight-error-message" : undefined}
+                        />
+                        <ErrorMessage id="weight-error-message">
+                          {(submitted && errors.weight) || "\u00A0"}
+                        </ErrorMessage>
+                      </FormGroup>
+                    </Grid>
+                    {/* Length Input */}
+                    <Grid col={6}>
+                      <FormGroup error={submitted && errors.length}>
+                        <Label htmlFor="length" error={submitted && errors.length}>
+                          Length<span className="text-secondary-vivid margin-left-05">*</span>
+                        </Label>
+                        <span className="usa-hint display-block text-left">inches</span>
+                        <TextInput
+                          id="length"
+                          name="length"
+                          type="number"
+                          value={currentCatch.length}
+                          onChange={handleInputChange}
+                          validationStatus={submitted && errors.length ? "error" : undefined}
+                          aria-describedby={submitted && errors.length ? "length-error-message" : undefined}
+                        />
+                        <ErrorMessage id="length-error-message">
+                          {(submitted && errors.length) || "\u00A0"}
+                        </ErrorMessage>
+                      </FormGroup>
+                    </Grid>
+                  </Grid>
+
+                  {/* Catch Time Input */}
+                  <FormGroup error={submitted && errors.time}>
+                    <Label htmlFor="catchTime" error={submitted && errors.time}>
+                      Time<span className="text-secondary-vivid margin-left-05">*</span>
                     </Label>
-                    <span className="usa-hint display-block text-left">inches</span>
-                    <TextInput
-                      id="length"
-                      name="length"
-                      type="number"
-                      value={currentCatch.length}
-                      onChange={handleInputChange}
-                      validationStatus={submitted && errors.length ? "error" : undefined}
-                      aria-describedby={submitted && errors.length ? "length-error-message" : undefined}
+                    <TimePicker
+                      key={catchTimeKey} // Use key to force re-render on reset
+                      id="catchTime"
+                      name="time"
+                      defaultValue={currentCatch.time}
+                      onChange={handleTimeChange}
+                      minTime="00:00"
+                      maxTime="23:30"
+                      step={15}
+                      validationStatus={submitted && errors.time ? "error" : undefined}
+                      className={submitted && errors.time ? "usa-input--error" : ""}
+                      aria-describedby={submitted && errors.time ? "time-error-message" : undefined}
                     />
-                    <ErrorMessage id="length-error-message">
-                      {(submitted && errors.length) || "\u00A0"}
+                    <ErrorMessage id="time-error-message">
+                      {(submitted && errors.time) || "\u00A0"}
                     </ErrorMessage>
                   </FormGroup>
-                </div>
+
+                  {/* Coordinate Inputs Row */}
+                  <Grid row className="grid-gap-2">
+                    {/* Latitude Input */}
+                    <Grid col={6}>
+                      <FormGroup error={submitted && errors.latitude}>
+                        <Label htmlFor="latitude" error={submitted && errors.latitude}>Latitude</Label>
+                        <span className="usa-hint display-block text-left">DD</span>
+                        <TextInput
+                          id="latitude"
+                          name="latitude"
+                          type="number"
+                          value={currentCatch.latitude}
+                          onChange={handleInputChange}
+                          validationStatus={submitted && errors.latitude ? "error" : undefined}
+                          aria-describedby={submitted && errors.latitude ? "latitude-error-message" : undefined}
+                        />
+                        <ErrorMessage id="latitude-error-message">
+                          {(submitted && errors.latitude) || "\u00A0"}
+                        </ErrorMessage>
+                      </FormGroup>
+                    </Grid>
+                    {/* Longitude Input */}
+                    <Grid col={6}>
+                      <FormGroup error={submitted && errors.longitude}>
+                        <Label htmlFor="longitude" error={submitted && errors.longitude}>Longitude</Label>
+                        <span className="usa-hint display-block text-left">DD</span>
+                        <TextInput
+                          id="longitude"
+                          name="longitude"
+                          type="number"
+                          value={currentCatch.longitude}
+                          onChange={handleInputChange}
+                          validationStatus={submitted && errors.longitude ? "error" : undefined}
+                          aria-describedby={submitted && errors.longitude ? "longitude-error-message" : undefined}
+                        />
+                        <ErrorMessage id="longitude-error-message">
+                          {(submitted && errors.longitude) || "\u00A0"}
+                        </ErrorMessage>
+                      </FormGroup>
+                    </Grid>
+                  </Grid>
+
+                  {/* Add Catch Button Area */}
+                  <div className="display-flex flex-justify-start margin-top-1 margin-bottom-2">
+                    <Button type="submit" className="width-full" accentStyle="cool">
+                      Add Catch
+                    </Button>
+                  </div>
+                </Form>
               </div>
 
-              {/* Catch Time Input */}
-              <FormGroup error={submitted && errors.time}>
-                <Label htmlFor="catchTime" error={submitted && errors.time}>
-                  Time<span className="text-secondary-vivid margin-left-05">*</span>
-                </Label>
-                <TimePicker
-                  key={catchTimeKey} // Use key to force re-render on reset
-                  id="catchTime"
-                  name="time"
-                  defaultValue={currentCatch.time}
-                  onChange={handleTimeChange}
-                  minTime="00:00"
-                  maxTime="23:30"
-                  step={15}
-                  validationStatus={submitted && errors.time ? "error" : undefined}
-                  className={submitted && errors.time ? "usa-input--error" : ""}
-                  aria-describedby={submitted && errors.time ? "time-error-message" : undefined}
-                />
-                <ErrorMessage id="time-error-message">
-                  {(submitted && errors.time) || "\u00A0"}
-                </ErrorMessage>
-              </FormGroup>
-
-              {/* Coordinate Inputs Row */}
-              <div className="display-flex gap-2 width-full">
-                {/* Latitude Input */}
-                <div className="flex-1">
-                  <FormGroup error={submitted && errors.latitude}>
-                    <Label htmlFor="latitude" error={submitted && errors.latitude}>Latitude</Label>
-                    <span className="usa-hint display-block text-left">DD</span>
-                    <TextInput
-                      id="latitude"
-                      name="latitude"
-                      type="number"
-                      value={currentCatch.latitude}
-                      onChange={handleInputChange}
-                      validationStatus={submitted && errors.latitude ? "error" : undefined}
-                      aria-describedby={submitted && errors.latitude ? "latitude-error-message" : undefined}
-                    />
-                    <ErrorMessage id="latitude-error-message">
-                      {(submitted && errors.latitude) || "\u00A0"}
-                    </ErrorMessage>
-                  </FormGroup>
-                </div>
-                {/* Longitude Input */}
-                <div className="flex-1">
-                  <FormGroup error={submitted && errors.longitude}>
-                    <Label htmlFor="longitude" error={submitted && errors.longitude}>Longitude</Label>
-                    <span className="usa-hint display-block text-left">DD</span>
-                    <TextInput
-                      id="longitude"
-                      name="longitude"
-                      type="number"
-                      value={currentCatch.longitude}
-                      onChange={handleInputChange}
-                      validationStatus={submitted && errors.longitude ? "error" : undefined}
-                      aria-describedby={submitted && errors.longitude ? "longitude-error-message" : undefined}
-                    />
-                    <ErrorMessage id="longitude-error-message">
-                      {(submitted && errors.longitude) || "\u00A0"}
-                    </ErrorMessage>
-                  </FormGroup>
-                </div>
-              </div>
-
-              {/* Add Catch Button Area */}
-              <div className="display-flex flex-justify-start margin-top-1 margin-bottom-2">
-                <Button type="submit" className="width-full" accentStyle="cool">
-                  Add Catch
-                </Button>
-              </div>
-            </Form>
-          </div>
-
-          {/* Recorded Catches Section */}
-          {catches.length > 0 && (
-            <>
-              {/* Container for the recorded catches section */}
-              <div className="width-full border-top border-base-lighter padding-top-105 margin-top-105">
-                <h2 className="font-heading-lg margin-bottom-1">Recorded Catches</h2>
-                {/* List container for individual catch items */}
-                <div className="display-flex flex-column width-full">
-                  {catches.map((catchItem, index) => {
-                    // Get errors for this specific catch item, default to empty object if none
-                    const catchErrors = recordedCatchErrors[index] || {};
-                    
-                    return (
-                      // Container for a single recorded catch item
-                      <div key={catchItem.id || index} className="padding-y-1 border-bottom border-base-lighter">
-                        {/* Wrapper for the recorded catch form elements */}
-                        <div className="position-relative width-full">
-                          {/* Delete button positioned absolutely */}
-                          <div className="position-absolute top-neg-105 right-0">
-                            <Button
-                              type="button"
-                              unstyled // Use unstyled to allow custom styling with utilities
-                              onClick={() => handleDeleteCatch(index)}
-                              className="text-secondary hover:bg-base-lightest border-radius-sm padding-05 display-flex flex-align-center"
-                              aria-label="Delete this catch"
-                            >
-                              Delete <Icon.Delete size={3} aria-hidden="true" />
-                            </Button>
-                          </div>
-  
-                          {/* Recorded Catch Form Fields */}
-                          <FormGroup className="margin-y-1" error={!!catchErrors.species}>
-                            <Label htmlFor={`recorded-species-${index}`} error={!!catchErrors.species}>
-                              Species<span className="text-secondary-vivid margin-left-05">*</span>
-                            </Label>
-                            <Select
-                              id={`recorded-species-${index}`}
-                              name="species"
-                              value={catchItem.species}
-                              className="margin-top-05 margin-bottom-0"
-                              onChange={(e) => handleRecordedCatchChange(index, "species", e.target.value)}
-                              validationStatus={catchErrors.species ? "error" : undefined}
-                              aria-describedby={catchErrors.species ? `recorded-species-${index}-error-message` : undefined}
-                            >
-                              <option value="">-Select-</option>
-                              {SPECIES_OPTIONS.map((species) => (
-                                <option key={species} value={species}>{species}</option>
-                              ))}
-                            </Select>
-                            {catchErrors.species && (
-                              <ErrorMessage id={`recorded-species-${index}-error-message`}>
-                                {catchErrors.species}
-                              </ErrorMessage>
-                            )}
-                          </FormGroup>
-  
-                          {/* Recorded Weight/Length Row */}
-                          <div className="display-flex gap-2 width-full">
-                            {/* Recorded Weight */}
-                            <div className="flex-1">
-                              <FormGroup className="margin-y-1" error={!!catchErrors.weight}>
-                                <Label htmlFor={`recorded-weight-${index}`} error={!!catchErrors.weight}>
-                                  Weight<span className="text-secondary-vivid margin-left-05">*</span>
+              {/* Recorded Catches Section */}
+              {catches.length > 0 && (
+                <>
+                  {/* Container for the recorded catches section */}
+                  <div className="width-full border-top border-base-lighter padding-top-105 margin-top-105">
+                    <h2 className="font-heading-lg margin-bottom-1">Recorded Catches</h2>
+                    {/* List container for individual catch items */}
+                    <div className="display-flex flex-column width-full">
+                      {catches.map((catchItem, index) => {
+                        // Get errors for this specific catch item, default to empty object if none
+                        const catchErrors = recordedCatchErrors[index] || {};
+                        
+                        return (
+                          // Container for a single recorded catch item
+                          <div key={catchItem.id || index} className="padding-y-1 border-bottom border-base-lighter">
+                            {/* Wrapper for the recorded catch form elements */}
+                            <div className="position-relative width-full">
+                              {/* Delete button positioned absolutely */}
+                              <div className="position-absolute top-neg-105 right-0">
+                                <Button
+                                  type="button"
+                                  unstyled // Use unstyled to allow custom styling with utilities
+                                  onClick={() => handleDeleteCatch(index)}
+                                  className="text-secondary hover:bg-base-lightest border-radius-sm padding-05 display-flex flex-align-center"
+                                  aria-label="Delete this catch"
+                                >
+                                  Delete <Icon.Delete size={3} aria-hidden="true" />
+                                </Button>
+                              </div>
+    
+                              {/* Recorded Catch Form Fields */}
+                              <FormGroup className="margin-y-1" error={!!catchErrors.species}>
+                                <Label htmlFor={`recorded-species-${index}`} error={!!catchErrors.species}>
+                                  Species<span className="text-secondary-vivid margin-left-05">*</span>
                                 </Label>
-                                <span className="usa-hint display-block text-left">lbs</span>
-                                <TextInput
-                                  id={`recorded-weight-${index}`}
-                                  name="weight"
-                                  type="number"
-                                  value={catchItem.weight}
-                                  onChange={(e) => handleRecordedCatchChange(index, "weight", e.target.value)}
-                                  validationStatus={catchErrors.weight ? "error" : undefined}
-                                  aria-describedby={catchErrors.weight ? `recorded-weight-${index}-error-message` : undefined}
-                                />
-                                {catchErrors.weight && (
-                                  <ErrorMessage id={`recorded-weight-${index}-error-message`}>
-                                    {catchErrors.weight}
+                                <Select
+                                  id={`recorded-species-${index}`}
+                                  name="species"
+                                  value={catchItem.species}
+                                  className="margin-top-05 margin-bottom-0"
+                                  onChange={(e) => handleRecordedCatchChange(index, "species", e.target.value)}
+                                  validationStatus={catchErrors.species ? "error" : undefined}
+                                  aria-describedby={catchErrors.species ? `recorded-species-${index}-error-message` : undefined}
+                                >
+                                  <option value="">-Select-</option>
+                                  {SPECIES_OPTIONS.map((species) => (
+                                    <option key={species} value={species}>{species}</option>
+                                  ))}
+                                </Select>
+                                {catchErrors.species && (
+                                  <ErrorMessage id={`recorded-species-${index}-error-message`}>
+                                    {catchErrors.species}
                                   </ErrorMessage>
                                 )}
                               </FormGroup>
-                            </div>
-                            {/* Recorded Length */}
-                            <div className="flex-1">
-                              <FormGroup className="margin-y-1" error={!!catchErrors.length}>
-                                <Label htmlFor={`recorded-length-${index}`} error={!!catchErrors.length}>
-                                  Length<span className="text-secondary-vivid margin-left-05">*</span>
+    
+                              {/* Recorded Weight/Length Row */}
+                              <Grid row className="grid-gap-2">
+                                {/* Recorded Weight */}
+                                <Grid col={6}>
+                                  <FormGroup className="margin-y-1" error={!!catchErrors.weight}>
+                                    <Label htmlFor={`recorded-weight-${index}`} error={!!catchErrors.weight}>
+                                      Weight<span className="text-secondary-vivid margin-left-05">*</span>
+                                    </Label>
+                                    <span className="usa-hint display-block text-left">lbs</span>
+                                    <TextInput
+                                      id={`recorded-weight-${index}`}
+                                      name="weight"
+                                      type="number"
+                                      value={catchItem.weight}
+                                      className="margin-top-05 margin-bottom-0"
+                                      onChange={(e) => handleRecordedCatchChange(index, "weight", e.target.value)}
+                                      validationStatus={catchErrors.weight ? "error" : undefined}
+                                      aria-describedby={catchErrors.weight ? `recorded-weight-${index}-error-message` : undefined}
+                                    />
+                                    {catchErrors.weight && (
+                                      <ErrorMessage id={`recorded-weight-${index}-error-message`}>
+                                        {catchErrors.weight}
+                                      </ErrorMessage>
+                                    )}
+                                  </FormGroup>
+                                </Grid>
+                                {/* Recorded Length */}
+                                <Grid col={6}>
+                                  <FormGroup className="margin-y-1" error={!!catchErrors.length}>
+                                    <Label htmlFor={`recorded-length-${index}`} error={!!catchErrors.length}>
+                                      Length<span className="text-secondary-vivid margin-left-05">*</span>
+                                    </Label>
+                                    <span className="usa-hint display-block text-left">inches</span>
+                                    <TextInput
+                                      id={`recorded-length-${index}`}
+                                      name="length"
+                                      type="number"
+                                      value={catchItem.length}
+                                      className="margin-top-05 margin-bottom-0"
+                                      onChange={(e) => handleRecordedCatchChange(index, "length", e.target.value)}
+                                      validationStatus={catchErrors.length ? "error" : undefined}
+                                      aria-describedby={catchErrors.length ? `recorded-length-${index}-error-message` : undefined}
+                                    />
+                                    {catchErrors.length && (
+                                      <ErrorMessage id={`recorded-length-${index}-error-message`}>
+                                        {catchErrors.length}
+                                      </ErrorMessage>
+                                    )}
+                                  </FormGroup>
+                                </Grid>
+                              </Grid>
+    
+                              {/* Recorded Time */}
+                              <FormGroup className="margin-y-1" error={!!catchErrors.time}>
+                                <Label htmlFor={`recorded-time-${index}`} error={!!catchErrors.time}>
+                                  Time<span className="text-secondary-vivid margin-left-05">*</span>
                                 </Label>
-                                <span className="usa-hint display-block text-left">inches</span>
-                                <TextInput
-                                  id={`recorded-length-${index}`}
-                                  name="length"
-                                  type="number"
-                                  value={catchItem.length}
-                                  onChange={(e) => handleRecordedCatchChange(index, "length", e.target.value)}
-                                  validationStatus={catchErrors.length ? "error" : undefined}
-                                  aria-describedby={catchErrors.length ? `recorded-length-${index}-error-message` : undefined}
+                                <TimePicker
+                                  id={`recorded-time-${index}`}
+                                  name="time"
+                                  className={`margin-top-05 margin-bottom-0 ${catchErrors.time ? "usa-input--error" : ""}`}
+                                  defaultValue={catchItem.time}
+                                  onChange={(time) => handleRecordedTimeChange(index, time)}
+                                  minTime="00:00"
+                                  maxTime="23:30"
+                                  step={15}
+                                  validationStatus={catchErrors.time ? "error" : undefined}
+                                  aria-describedby={catchErrors.time ? `recorded-time-${index}-error-message` : undefined}
                                 />
-                                {catchErrors.length && (
-                                  <ErrorMessage id={`recorded-length-${index}-error-message`}>
-                                    {catchErrors.length}
+                                {catchErrors.time && (
+                                  <ErrorMessage id={`recorded-time-${index}-error-message`}>
+                                    {catchErrors.time}
                                   </ErrorMessage>
                                 )}
                               </FormGroup>
+    
+                              {/* Recorded Coordinate Inputs Row */}
+                              <Grid row className="grid-gap-2">
+                                {/* Recorded Latitude */}
+                                <Grid col={6}>
+                                  <FormGroup className="margin-y-1" error={!!catchErrors.latitude}>
+                                    <Label htmlFor={`recorded-latitude-${index}`} error={!!catchErrors.latitude}>
+                                      Latitude
+                                    </Label>
+                                    <span className="usa-hint display-block text-left">DD</span>
+                                    <TextInput
+                                      id={`recorded-latitude-${index}`}
+                                      name="latitude"
+                                      type="number"
+                                      value={catchItem.latitude}
+                                      className="margin-top-05 margin-bottom-0"
+                                      onChange={(e) => handleRecordedCatchChange(index, "latitude", e.target.value)}
+                                      validationStatus={catchErrors.latitude ? "error" : undefined}
+                                      aria-describedby={catchErrors.latitude ? `recorded-latitude-${index}-error-message` : undefined}
+                                    />
+                                    {catchErrors.latitude && (
+                                      <ErrorMessage id={`recorded-latitude-${index}-error-message`}>
+                                        {catchErrors.latitude}
+                                      </ErrorMessage>
+                                    )}
+                                  </FormGroup>
+                                </Grid>
+                                {/* Recorded Longitude */}
+                                <Grid col={6}>
+                                  <FormGroup className="margin-y-1" error={!!catchErrors.longitude}>
+                                    <Label htmlFor={`recorded-longitude-${index}`} error={!!catchErrors.longitude}>
+                                      Longitude
+                                    </Label>
+                                    <span className="usa-hint display-block text-left">DD</span>
+                                    <TextInput
+                                      id={`recorded-longitude-${index}`}
+                                      name="longitude"
+                                      type="number"
+                                      value={catchItem.longitude}
+                                      className="margin-top-05 margin-bottom-0"
+                                      onChange={(e) => handleRecordedCatchChange(index, "longitude", e.target.value)}
+                                      validationStatus={catchErrors.longitude ? "error" : undefined}
+                                      aria-describedby={catchErrors.longitude ? `recorded-longitude-${index}-error-message` : undefined}
+                                    />
+                                    {catchErrors.longitude && (
+                                      <ErrorMessage id={`recorded-longitude-${index}-error-message`}>
+                                        {catchErrors.longitude}
+                                      </ErrorMessage>
+                                    )}
+                                  </FormGroup>
+                                </Grid>
+                              </Grid>
                             </div>
                           </div>
-  
-                          {/* Recorded Time */}
-                          <FormGroup className="margin-y-1" error={!!catchErrors.time}>
-                            <Label htmlFor={`recorded-time-${index}`} error={!!catchErrors.time}>
-                              Time<span className="text-secondary-vivid margin-left-05">*</span>
-                            </Label>
-                            <TimePicker
-                              id={`recorded-time-${index}`}
-                              name="time"
-                              className={`margin-top-05 margin-bottom-0 ${catchErrors.time ? "usa-input--error" : ""}`}
-                              defaultValue={catchItem.time}
-                              onChange={(time) => handleRecordedTimeChange(index, time)}
-                              minTime="00:00"
-                              maxTime="23:30"
-                              step={15}
-                              validationStatus={catchErrors.time ? "error" : undefined}
-                              aria-describedby={catchErrors.time ? `recorded-time-${index}-error-message` : undefined}
-                            />
-                            {catchErrors.time && (
-                              <ErrorMessage id={`recorded-time-${index}-error-message`}>
-                                {catchErrors.time}
-                              </ErrorMessage>
-                            )}
-                          </FormGroup>
-  
-                          {/* Recorded Coordinates Row */}
-                          <div className="display-flex gap-2 width-full">
-                            {/* Recorded Latitude */}
-                            <div className="flex-1">
-                              <FormGroup className="margin-y-1" error={!!catchErrors.latitude}>
-                                <Label htmlFor={`recorded-latitude-${index}`} error={!!catchErrors.latitude}>Latitude</Label>
-                                <span className="usa-hint display-block text-left">DD</span>
-                                <TextInput
-                                  id={`recorded-latitude-${index}`}
-                                  name="latitude"
-                                  type="number"
-                                  className="margin-top-05 margin-bottom-0"
-                                  value={catchItem.latitude ?? ""}
-                                  onChange={(e) => {
-                                    handleRecordedCatchChange(index, "latitude", e.target.value);
-                                  }}
-                                  validationStatus={catchErrors.latitude ? "error" : undefined}
-                                  aria-describedby={catchErrors.latitude ? `recorded-latitude-${index}-error-message` : undefined}
-                                />
-                                {catchErrors.latitude && (
-                                  <ErrorMessage id={`recorded-latitude-${index}-error-message`}>
-                                    {catchErrors.latitude}
-                                  </ErrorMessage>
-                                )}
-                              </FormGroup>
-                            </div>
-                            {/* Recorded Longitude */}
-                            <div className="flex-1">
-                              <FormGroup className="margin-y-1" error={!!catchErrors.longitude}>
-                                <Label htmlFor={`recorded-longitude-${index}`} error={!!catchErrors.longitude}>Longitude</Label>
-                                <span className="usa-hint display-block text-left">DD</span>
-                                <TextInput
-                                  id={`recorded-longitude-${index}`}
-                                  name="longitude"
-                                  type="number"
-                                  className="margin-top-05 margin-bottom-0"
-                                  value={catchItem.longitude ?? ""}
-                                  onChange={(e) => {
-                                    handleRecordedCatchChange(index, "longitude", e.target.value);
-                                  }}
-                                  validationStatus={catchErrors.longitude ? "error" : undefined}
-                                  aria-describedby={catchErrors.longitude ? `recorded-longitude-${index}-error-message` : undefined}
-                                />
-                                {catchErrors.longitude && (
-                                  <ErrorMessage id={`recorded-longitude-${index}-error-message`}>
-                                    {catchErrors.longitude}
-                                  </ErrorMessage>
-                                )}
-                              </FormGroup>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       {/* Footer uses USWDS utilities */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
