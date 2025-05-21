@@ -232,16 +232,16 @@ function HomePage() {
               Recent Trips
             </h2>
 
-            {trips.length === 0 ? (
-              <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
-                <p className="text-base margin-0 text-center">
-                  No trips found. Start a new trip to record your fishing
-                  activity.
-                </p>
-              </div>
-            ) : (
-              <div className="width-full maxw-mobile-lg margin-x-auto margin-bottom-5">
-                {trips.map((trip) => (
+            <div className="width-full maxw-mobile-lg margin-x-auto margin-bottom-5">
+              {trips.length === 0 ? (
+                <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
+                  <p className="text-base margin-0 text-center">
+                    No trips found. Start a new trip to record your fishing
+                    activity.
+                  </p>
+                </div>
+              ) : (
+                trips.map((trip) => (
                   <div
                     key={trip.id}
                     className="display-flex flex-column width-full border-radius-md bg-white shadow-2 overflow-hidden margin-bottom-2 cursor-pointer hover:shadow-4 hover:transform-"
@@ -296,9 +296,9 @@ function HomePage() {
                       </Grid>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </Grid>
         </Grid>
       </GridContainer>
