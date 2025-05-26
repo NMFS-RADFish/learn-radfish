@@ -50,8 +50,8 @@ USWDS COMPONENT OVERRIDES
   margin-right: 0;
 }
 
-.usa-form-group > #time-label {
-  margin-top: -1rem;
+.usa-form-group {
+    margin-top: 0 !important;
 }
 
 .usa-combo-box.usa-combo-box {

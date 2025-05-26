@@ -470,7 +470,7 @@ function CatchLog() {
                       defaultValue={currentCatch.time}
                       onChange={handleTimeChange}
                       minTime="00:00"
-                      maxTime="23:30"
+                      maxTime="23:45"
                       step={15}
                       validationStatus={submitted && errors.time ? "error" : undefined}
                       className={submitted && errors.time ? "usa-input--error" : ""}
@@ -651,12 +651,12 @@ function CatchLog() {
                                 </Label>
                                 <TimePicker
                                   id={`recorded-time-${index}`}
-                                  name="time"
+                                  name={`recorded-time-${index}`}
                                   className={`margin-top-05 margin-bottom-0 ${catchErrors.time ? "usa-input--error" : ""}`}
                                   defaultValue={catchItem.time}
                                   onChange={(time) => handleRecordedTimeChange(index, time)}
                                   minTime="00:00"
-                                  maxTime="23:30"
+                                  maxTime="23:45"
                                   step={15}
                                   validationStatus={catchErrors.time ? "error" : undefined}
                                   aria-describedby={catchErrors.time ? `recorded-time-${index}-error-message` : undefined}

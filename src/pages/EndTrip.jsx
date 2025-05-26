@@ -209,12 +209,12 @@ function EndTrip() {
                   Time
                 </Label>
                 <TimePicker
-                  id="time"
-                  name="time"
+                  id="endTime"
+                  name="endTime"
                   defaultValue={formData.endTime}
                   onChange={(time) => handleTimeChange(time)}
                   minTime="00:00"
-                  maxTime="23:30"
+                  maxTime="23:45"
                   step={15}
                   validationStatus={
                     submitted && errors.endTime ? "error" : undefined

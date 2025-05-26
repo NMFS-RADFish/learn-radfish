@@ -319,12 +319,12 @@ function StartTrip() {
                     Time
                   </Label>
                   <TimePicker
-                    id="time"
-                    name="time"
+                    id="startTime"
+                    name="startTime"
                     defaultValue={formData.startTime}
                     onChange={handleTimeChange} // Use specific handler
                     minTime="00:00"
-                    maxTime="23:30"
+                    maxTime="23:45"
                     step={15}
                     validationStatus={
                       submitted && errors.startTime ? "error" : undefined
