@@ -205,9 +205,8 @@ function EndTrip() {
             <Form onSubmit={handleSubmit} large className="margin-top-3">
               {/* Trip End Time */}
               <FormGroup error={submitted && errors.endTime}>
-                <Label htmlFor="endTime" error={submitted && errors.endTime}>
+                <Label htmlFor="endTime" error={submitted && errors.endTime} requiredMarker>
                   Time
-                  <span className="text-secondary-vivid margin-left-05">*</span>
                 </Label>
                 <TimePicker
                   id="time"
@@ -235,9 +234,9 @@ function EndTrip() {
                 <Label
                   htmlFor="endWeather"
                   error={submitted && errors.endWeather}
+                  requiredMarker
                 >
                   Weather
-                  <span className="text-secondary-vivid margin-left-05">*</span>
                 </Label>
                 <Select
                   id="endWeather"

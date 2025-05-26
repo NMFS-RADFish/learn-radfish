@@ -391,8 +391,8 @@ function CatchLog() {
                   
                   {/* Species Dropdown */}
                   <FormGroup error={submitted && errors.species}>
-                    <Label htmlFor="species" error={submitted && errors.species}>
-                      Species<span className="text-secondary-vivid margin-left-05">*</span>
+                    <Label htmlFor="species" error={submitted && errors.species} requiredMarker>
+                      Species
                     </Label>
                     <Select
                       id="species"
@@ -417,8 +417,8 @@ function CatchLog() {
                     {/* Weight Input*/}
                     <Grid col={6}>
                       <FormGroup error={submitted && errors.weight}>
-                        <Label htmlFor="weight" error={submitted && errors.weight}>
-                          Weight<span className="text-secondary-vivid margin-left-05">*</span>
+                        <Label htmlFor="weight" error={submitted && errors.weight} requiredMarker>
+                          Weight
                         </Label>
                         <span className="usa-hint display-block text-left">lbs</span>
                         <TextInput
@@ -438,8 +438,8 @@ function CatchLog() {
                     {/* Length Input */}
                     <Grid col={6}>
                       <FormGroup error={submitted && errors.length}>
-                        <Label htmlFor="length" error={submitted && errors.length}>
-                          Length<span className="text-secondary-vivid margin-left-05">*</span>
+                        <Label htmlFor="length" error={submitted && errors.length} requiredMarker>
+                          Length
                         </Label>
                         <span className="usa-hint display-block text-left">inches</span>
                         <TextInput
@@ -460,8 +460,8 @@ function CatchLog() {
 
                   {/* Catch Time Input */}
                   <FormGroup error={submitted && errors.time}>
-                    <Label htmlFor="catchTime" error={submitted && errors.time}>
-                      Time<span className="text-secondary-vivid margin-left-05">*</span>
+                    <Label htmlFor="catchTime" error={submitted && errors.time} requiredMarker>
+                      Time
                     </Label>
                     <TimePicker
                       key={catchTimeKey} // Use key to force re-render on reset
@@ -486,7 +486,9 @@ function CatchLog() {
                     {/* Latitude Input */}
                     <Grid col={6}>
                       <FormGroup error={submitted && errors.latitude}>
-                        <Label htmlFor="latitude" error={submitted && errors.latitude}>Latitude</Label>
+                        <Label htmlFor="latitude" error={submitted && errors.latitude}>
+                          Latitude
+                        </Label>
                         <span className="usa-hint display-block text-left">DD</span>
                         <TextInput
                           id="latitude"
@@ -505,7 +507,9 @@ function CatchLog() {
                     {/* Longitude Input */}
                     <Grid col={6}>
                       <FormGroup error={submitted && errors.longitude}>
-                        <Label htmlFor="longitude" error={submitted && errors.longitude}>Longitude</Label>
+                        <Label htmlFor="longitude" error={submitted && errors.longitude}>
+                          Longitude
+                        </Label>
                         <span className="usa-hint display-block text-left">DD</span>
                         <TextInput
                           id="longitude"
@@ -564,8 +568,8 @@ function CatchLog() {
     
                               {/* Recorded Catch Form Fields */}
                               <FormGroup className="margin-y-1" error={!!catchErrors.species}>
-                                <Label htmlFor={`recorded-species-${index}`} error={!!catchErrors.species}>
-                                  Species<span className="text-secondary-vivid margin-left-05">*</span>
+                                <Label htmlFor={`recorded-species-${index}`} error={!!catchErrors.species} requiredMarker>
+                                  Species
                                 </Label>
                                 <Select
                                   id={`recorded-species-${index}`}
@@ -593,8 +597,8 @@ function CatchLog() {
                                 {/* Recorded Weight */}
                                 <Grid col={6}>
                                   <FormGroup className="margin-y-1" error={!!catchErrors.weight}>
-                                    <Label htmlFor={`recorded-weight-${index}`} error={!!catchErrors.weight}>
-                                      Weight<span className="text-secondary-vivid margin-left-05">*</span>
+                                    <Label htmlFor={`recorded-weight-${index}`} error={!!catchErrors.weight} requiredMarker>
+                                      Weight
                                     </Label>
                                     <span className="usa-hint display-block text-left">lbs</span>
                                     <TextInput
@@ -617,8 +621,8 @@ function CatchLog() {
                                 {/* Recorded Length */}
                                 <Grid col={6}>
                                   <FormGroup className="margin-y-1" error={!!catchErrors.length}>
-                                    <Label htmlFor={`recorded-length-${index}`} error={!!catchErrors.length}>
-                                      Length<span className="text-secondary-vivid margin-left-05">*</span>
+                                    <Label htmlFor={`recorded-length-${index}`} error={!!catchErrors.length} requiredMarker>
+                                      Length
                                     </Label>
                                     <span className="usa-hint display-block text-left">inches</span>
                                     <TextInput
@@ -642,8 +646,8 @@ function CatchLog() {
     
                               {/* Recorded Time */}
                               <FormGroup className="margin-y-1" error={!!catchErrors.time}>
-                                <Label htmlFor={`recorded-time-${index}`} error={!!catchErrors.time}>
-                                  Time<span className="text-secondary-vivid margin-left-05">*</span>
+                                <Label htmlFor={`recorded-time-${index}`} error={!!catchErrors.time} requiredMarker>
+                                  Time
                                 </Label>
                                 <TimePicker
                                   id={`recorded-time-${index}`}

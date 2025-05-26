@@ -283,11 +283,9 @@ function StartTrip() {
                   <Label
                     htmlFor="tripDate"
                     error={submitted && errors.tripDate}
+                    requiredMarker
                   >
                     Date
-                    <span className="text-secondary-vivid margin-left-05">
-                      *
-                    </span>
                   </Label>
                   {/* Hint text for date format */}
                   <div className="usa-hint" id="tripDate-hint">
@@ -316,11 +314,9 @@ function StartTrip() {
                   <Label
                     htmlFor="startTime"
                     error={submitted && errors.startTime}
+                    requiredMarker
                   >
                     Time
-                    <span className="text-secondary-vivid margin-left-05">
-                      *
-                    </span>
                   </Label>
                   <TimePicker
                     id="time"
@@ -345,11 +341,8 @@ function StartTrip() {
 
                 {/* Weather Conditions - USWDS Select */}
                 <FormGroup error={submitted && errors.weather}>
-                  <Label htmlFor="weather" error={submitted && errors.weather}>
+                  <Label htmlFor="weather" error={submitted && errors.weather} requiredMarker>
                     Weather
-                    <span className="text-secondary-vivid margin-left-05">
-                      *
-                    </span>
                   </Label>
                   <Select
                     id="weather"
