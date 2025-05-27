@@ -1,20 +1,22 @@
 import "../index.css";
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
+  Button,
+  ErrorMessage,
   Form,
   FormGroup,
-  ErrorMessage,
-  TimePicker,
-  Select,
+  Grid,
+  GridContainer,
   Label,
-  Button,
+  Select,
   StepIndicator,
   StepIndicatorStep,
-  GridContainer,
-  Grid,
+  TimePicker,
 } from "@trussworks/react-uswds";
-import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Field name constants
 const FIELD_WEATHER = "Weather condition";
@@ -205,7 +207,12 @@ function EndTrip() {
             <Form onSubmit={handleSubmit} large className="margin-top-3">
               {/* Trip End Time */}
               <FormGroup error={submitted && errors.endTime}>
-                <Label htmlFor="endTime" error={submitted && errors.endTime} requiredMarker>
+                <Label
+                  htmlFor="endTime"
+                  error={submitted && errors.endTime}
+                  className="input-time-label"
+                  requiredMarker
+                >
                   Time
                 </Label>
                 <TimePicker
@@ -224,9 +231,11 @@ function EndTrip() {
                   }
                   aria-describedby="endTime-error-message"
                 />
-                <ErrorMessage id="endTime-error-message">
-                  {(submitted && errors.endTime) || "\u00A0"}
-                </ErrorMessage>
+                {submitted && errors.endTime && (
+                  <ErrorMessage id="endTime-error-message" className="font-sans-2xs">
+                    {errors.endTime}
+                  </ErrorMessage>
+                )}
               </FormGroup>
 
               {/* Weather Conditions Select */}
@@ -253,9 +262,11 @@ function EndTrip() {
                   <option value="Cloudy">Cloudy</option>
                   <option value="Rainy">Rainy</option>
                 </Select>
-                <ErrorMessage id="endWeather-error-message">
-                  {(submitted && errors.endWeather) || "\u00A0"}
-                </ErrorMessage>
+                {submitted && errors.endWeather && (
+                  <ErrorMessage id="endWeather-error-message" className="font-sans-2xs">
+                    {errors.endWeather}
+                  </ErrorMessage>
+                )}
               </FormGroup>
             </Form>
           </Grid>

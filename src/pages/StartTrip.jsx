@@ -1,21 +1,21 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
+  Button,
+  DatePicker,
+  ErrorMessage,
   Form,
   FormGroup,
-  ErrorMessage,
-  TimePicker,
-  Select,
+  Grid,
+  GridContainer,
   Label,
-  DatePicker,
-  Button,
+  Select,
   StepIndicator,
   StepIndicatorStep,
-  GridContainer,
-  Grid,
+  TimePicker,
 } from "@trussworks/react-uswds";
-import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Utility to format a date string to YYYY-MM-DD for the DatePicker default value
 const formatToYYYYMMDD = (dateString) => {
@@ -283,14 +283,12 @@ function StartTrip() {
                   <Label
                     htmlFor="tripDate"
                     error={submitted && errors.tripDate}
+                    hint=" mm/dd/yyyy"
+                    className="input-date-label"
                     requiredMarker
                   >
                     Date
                   </Label>
-                  {/* Hint text for date format */}
-                  <div className="usa-hint" id="tripDate-hint">
-                    mm/dd/yyyy
-                  </div>
                   <DatePicker
                     id="tripDate"
                     name="tripDate"
@@ -302,11 +300,14 @@ function StartTrip() {
                       submitted && errors.tripDate ? "usa-input--error" : ""
                     }
                   />
-                  {/* Error message displayed below input */}
-                  <ErrorMessage id="tripDate-error-message">
-                    {(submitted && errors.tripDate) || "\u00A0"}{" "}
-                    {/* Non-breaking space for layout */}
-                  </ErrorMessage>
+                  {submitted && errors.tripDate && (
+                    <ErrorMessage
+                      id="tripDate-error-message"
+                      className="font-sans-2xs"
+                    >
+                      {errors.tripDate}
+                    </ErrorMessage>
+                  )}
                 </FormGroup>
 
                 {/* Trip Start Time - USWDS TimePicker */}
@@ -314,10 +315,12 @@ function StartTrip() {
                   <Label
                     htmlFor="startTime"
                     error={submitted && errors.startTime}
+                    className="input-time-label"
                     requiredMarker
                   >
                     Time
                   </Label>
+
                   <TimePicker
                     id="startTime"
                     name="startTime"
@@ -334,14 +337,23 @@ function StartTrip() {
                     }
                     aria-describedby="startTime-error-message"
                   />
-                  <ErrorMessage id="startTime-error-message">
-                    {(submitted && errors.startTime) || "\u00A0"}
-                  </ErrorMessage>
+                  {submitted && errors.startTime && (
+                    <ErrorMessage
+                      id="startTime-error-message"
+                      className="font-sans-2xs"
+                    >
+                      {errors.startTime}
+                    </ErrorMessage>
+                  )}
                 </FormGroup>
 
                 {/* Weather Conditions - USWDS Select */}
                 <FormGroup error={submitted && errors.weather}>
-                  <Label htmlFor="weather" error={submitted && errors.weather} requiredMarker>
+                  <Label
+                    htmlFor="weather"
+                    error={submitted && errors.weather}
+                    requiredMarker
+                  >
                     Weather
                   </Label>
                   <Select
@@ -359,9 +371,14 @@ function StartTrip() {
                     <option value="Cloudy">Cloudy</option>
                     <option value="Rainy">Rainy</option>
                   </Select>
-                  <ErrorMessage id="weather-error-message">
-                    {(submitted && errors.weather) || "\u00A0"}
-                  </ErrorMessage>
+                  {submitted && errors.weather && (
+                    <ErrorMessage
+                      id="weather-error-message"
+                      className="font-sans-2xs"
+                    >
+                      {errors.weather}
+                    </ErrorMessage>
+                  )}
                 </FormGroup>
               </Form>
             </div>
