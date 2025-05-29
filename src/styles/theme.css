@@ -35,3 +35,74 @@ body {
 .header-logo {
   width: 72px;
 }
+
+/* 
+=========================================
+USWDS COMPONENT OVERRIDES
+=========================================
+*/
+
+.usa-navbar.usa-navbar {
+  border-bottom: none;
+}
+
+.usa-button.usa-button {
+  margin-right: 0;
+}
+
+.usa-combo-box.usa-combo-box {
+  width: 100%;
+}
+
+.usa-table.usa-table {
+  margin: 0;
+}
+
+/* Fit error border to DatePicker */
+.input-date-label + .usa-input--error {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.input-date-label
+  + .usa-input--error
+  > .usa-date-picker__wrapper
+  > input {
+  margin-top: 0;
+}
+
+/* Fit error border to TimePicker */
+.input-time-label + div > .usa-input--error {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.input-time-label + div > .usa-input--error > .usa-combo-box__input {
+  margin-top: 0;
+}
+
+/* Remove margin-top from TimePicker input */
+.input-time-label + div {
+  margin-top: 0;
+}
+
+.usa-logo.usa-logo {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+@media (min-width: 64em) {
+  .usa-nav__primary > .usa-nav__primary-item > a.usa-nav__link {
+    padding: 10px;
+  }
+
+  .usa-header--basic.usa-header--basic .usa-nav.usa-nav {
+    padding: 0;
+  }
+}
+
+@media (min-width: 480px) {
+  .usa-logo.usa-logo {
+    margin-left: 0;
+  }
+}

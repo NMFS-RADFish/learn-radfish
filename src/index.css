@@ -1,22 +1,17 @@
+/* 
+=========================================
+IMPORTS
+=========================================
+*/
 /* trussworks component styles */
 @import "@trussworks/react-uswds/lib/uswds.css";
 @import "@trussworks/react-uswds/lib/index.css";
 
-/* Custom USWDS overrides */
-.usa-nav-container {
-  padding: 2rem 0 .5rem 0;
-}
-
-@media (max-width: 63.99em) {
-  .usa-navbar {
-    border-bottom: none;
-  }
-}
-
-.usa-logo a {
-  color: white;
-}
-
+/* 
+=========================================
+GLOBAL STYLES
+=========================================
+*/
 /* normalize css */
 body {
   margin: 0;
@@ -39,86 +34,26 @@ body {
   height: 100%;
 }
 
-.app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.sticky-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  width: 100%;
-}
-
-.main-content {
-  flex: 1;
-  padding-bottom: 80px; /* Space for the footer */
-}
-
-.sticky-footer {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background-color: white;
-  padding: 1rem;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 99;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-.back-button {
-  width: 30%;
-}
-
-.next-button {
-  width: 70%;
-}
-
-.step-indicator-container {
-  margin: 2rem 0;
-  width: 100%;
-  max-width: 100%;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #ccc;
-}
-
-@media (min-width: 64em) {
-  .step-indicator-container {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .step-indicator-container .usa-step-indicator {
-    max-width: 800px;
-    width: 100%;
-  }
-}
-
-/* Center content in the pages */
-.page-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem 1rem;
-  text-align: center;
-}
-
-.footer-button-container {
-  display: flex;
+.gap-2 {
   gap: 1rem;
-  justify-content: center;
 }
 
-/* For pages with only one button in the footer */
-.single-button {
-  justify-content: center;
+/* 
+=========================================
+RECENT TRIPS STYLES
+=========================================
+
+/* Vertical dividers for grid statistics */
+.stat-grid-column {
+  position: relative;
+}
+
+.stat-grid-column:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background-color: #dfe1e2;
 }
