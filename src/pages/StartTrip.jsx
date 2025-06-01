@@ -1,38 +1,40 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
+  Button,
+  DatePicker,
+  ErrorMessage,
   Form,
   FormGroup,
-  ErrorMessage,
-  TimePicker,
-  Select,
+  Grid,
+  GridContainer,
   Label,
-  DatePicker,
-  Button,
+  Select,
   StepIndicator,
   StepIndicatorStep,
+  TimePicker,
 } from "@trussworks/react-uswds";
-import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Utility to format a date string to YYYY-MM-DD for the DatePicker default value
 const formatToYYYYMMDD = (dateString) => {
-  if (!dateString || typeof dateString !== 'string') {
-    return '';
+  if (!dateString || typeof dateString !== "string") {
+    return "";
   }
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
       console.warn(`Invalid date string could not be parsed: ${dateString}`);
-      return '';
+      return "";
     }
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
   } catch (error) {
     console.error(`Error formatting date string: ${dateString}`, error);
-    return '';
+    return "";
   }
 };
 
@@ -91,7 +93,6 @@ function StartTrip() {
         setIsLoading(false);
         return;
       }
-      
       setIsLoading(true);
       try {
         // Access the 'trip' store and 'Form' collection from RADFish
@@ -112,7 +113,9 @@ function StartTrip() {
           });
         } else {
           // If trip not found (e.g., invalid ID passed), treat as a new trip
-          console.warn(`Trip with ID ${tripIdFromState} not found. Starting new trip form.`);
+          console.warn(
+            `Trip with ID ${tripIdFromState} not found. Starting new trip form.`,
+          );
           setCurrentTripId(null);
           setFormData({ tripDate: "", weather: "", startTime: "" });
         }
@@ -134,28 +137,28 @@ function StartTrip() {
   const handleInputChange = (e) => {
     if (e && e.target) {
       const { name, value } = e.target;
-      setFormData(prevData => ({ ...prevData, [name]: value }));
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
       // Clear validation error for the field being edited
       if (errors[name]) {
-        setErrors(prevErrors => ({ ...prevErrors, [name]: undefined }));
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: undefined }));
       }
     }
   };
 
   // Handles changes specifically for the USWDS DatePicker component
   const handleDateChange = (value) => {
-    setFormData(prevData => ({ ...prevData, tripDate: value || "" }));
+    setFormData((prevData) => ({ ...prevData, tripDate: value || "" }));
     if (errors.tripDate) {
-      setErrors(prevErrors => ({ ...prevErrors, tripDate: undefined }));
+      setErrors((prevErrors) => ({ ...prevErrors, tripDate: undefined }));
     }
   };
 
   // Handles changes specifically for the USWDS TimePicker component
   const handleTimeChange = (time) => {
     // Assumes only one time picker, defaults name to 'startTime'
-    setFormData(prevData => ({ ...prevData, startTime: time }));
+    setFormData((prevData) => ({ ...prevData, startTime: time }));
     if (errors.startTime) {
-      setErrors(prevErrors => ({ ...prevErrors, startTime: undefined }));
+      setErrors((prevErrors) => ({ ...prevErrors, startTime: undefined }));
     }
   };
 
@@ -245,113 +248,138 @@ function StartTrip() {
   return (
     <>
       {/* Main content area using USWDS layout utilities */}
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
-        {/* Container to constrain width on larger screens */}
-        <div className="width-full maxw-mobile-lg text-left">
-          
-          {/* --- Embedded Step Indicator --- */}
-          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-            <StepIndicator 
-              headingLevel="h4" 
-              ofText="of" 
-              stepText="Step"
-              className="usa-step-indicator margin-bottom-0"
-              showLabels={false}
-            >
-              <StepIndicatorStep label="Start Trip" status="current" />
-              <StepIndicatorStep label="Log Catch" />
-              <StepIndicatorStep label="End Trip" />
-              <StepIndicatorStep label="Review and Submit" />
-            </StepIndicator>
-          </div>
-
-          {/* USWDS Form component */}
-          <Form onSubmit={handleSubmit} large className="margin-top-3">
-            {/* Trip Date - USWDS DatePicker */}
-            {/* FormGroup adds spacing and connects label/input/error */}
-            {/* [Lesson 2.1:START] Add Date Picker Input */}
-            <FormGroup error={submitted && errors.tripDate}>
-              {/* Label with required indicator */}
-              <Label htmlFor="tripDate" error={submitted && errors.tripDate}>
-                Date<span className="text-secondary-vivid margin-left-05">*</span>
-              </Label>
-              {/* Hint text for date format */}
-              <div className="usa-hint" id="tripDate-hint">
-                mm/dd/yyyy
+      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
+        <Grid row>
+          <Grid col="fill">
+            {/* Container to constrain width on larger screens */}
+            <div className="width-full text-left">
+              {/* --- Embedded Step Indicator --- */}
+              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+                <StepIndicator
+                  headingLevel="h4"
+                  ofText="of"
+                  stepText="Step"
+                  className="usa-step-indicator margin-bottom-0"
+                  showLabels={false}
+                >
+                  <StepIndicatorStep label="Start Trip" status="current" />
+                  <StepIndicatorStep label="Log Catch" />
+                  <StepIndicatorStep label="End Trip" />
+                  <StepIndicatorStep label="Review and Submit" />
+                </StepIndicator>
               </div>
-              <DatePicker
-                id="tripDate"
-                name="tripDate"
-                defaultValue={formData.tripDate} // Use formatted date for default
-                onChange={handleDateChange} // Use specific handler
-                aria-describedby="tripDate-hint"
-                // Apply error styling if submitted and error exists
-                className={submitted && errors.tripDate ? "usa-input--error" : ""}
-              />
-              {/* Error message displayed below input */}
-              {/* [Lesson 5.2:START] Display Trip Date Error */}
-              <ErrorMessage id="tripDate-error-message">
-                {(submitted && errors.tripDate) || "\u00A0"} {/* Non-breaking space for layout */}
-              </ErrorMessage>
-              {/* [Lesson 5.2:END] */}
-            </FormGroup>
-            {/* [Lesson 2.1:END] */}
 
-            {/* Trip Start Time - USWDS TimePicker */}
-            {/* [Lesson 2.2:START] Add Time Picker Input */}
-            <FormGroup error={submitted && errors.startTime}>
-              <Label htmlFor="startTime" error={submitted && errors.startTime}>
-                Time<span className="text-secondary-vivid margin-left-05">*</span>
-              </Label>
-              <TimePicker
-                id="time"
-                name="time"
-                defaultValue={formData.startTime}
-                onChange={handleTimeChange} // Use specific handler
-                minTime="00:00"
-                maxTime="23:30"
-                step={15}
-                validationStatus={submitted && errors.startTime ? "error" : undefined}
-                className={submitted && errors.startTime ? "usa-input--error" : ""}
-                aria-describedby="startTime-error-message"
-              />
-              {/* [Lesson 5.3:START] Display Start Time Error */}
-              <ErrorMessage id="startTime-error-message">
-                {(submitted && errors.startTime) || "\u00A0"}
-              </ErrorMessage>
-              {/* [Lesson 5.3:END] */}
-            </FormGroup>
-            {/* [Lesson 2.2:END] */}
+              {/* USWDS Form component */}
+              <Form onSubmit={handleSubmit} large className="margin-top-3">
+                {/* Trip Date - USWDS DatePicker */}
+                {/* FormGroup adds spacing and connects label/input/error */}
+                <FormGroup error={submitted && errors.tripDate}>
+                  {/* Label with required indicator */}
+                  <Label
+                    htmlFor="tripDate"
+                    error={submitted && errors.tripDate}
+                    hint=" mm/dd/yyyy"
+                    className="input-date-label"
+                    requiredMarker
+                  >
+                    Date
+                  </Label>
+                  <DatePicker
+                    id="tripDate"
+                    name="tripDate"
+                    defaultValue={formData.tripDate} // Use formatted date for default
+                    onChange={handleDateChange} // Use specific handler
+                    aria-describedby="tripDate-hint"
+                    // Apply error styling if submitted and error exists
+                    className={
+                      submitted && errors.tripDate ? "usa-input--error" : ""
+                    }
+                  />
+                  {submitted && errors.tripDate && (
+                    <ErrorMessage
+                      id="tripDate-error-message"
+                      className="font-sans-2xs"
+                    >
+                      {errors.tripDate}
+                    </ErrorMessage>
+                  )}
+                </FormGroup>
 
-            {/* Weather Conditions - USWDS Select */}
-            {/* [Lesson 2.3:START] Add Weather Select Input */}
-            <FormGroup error={submitted && errors.weather}>
-              <Label htmlFor="weather" error={submitted && errors.weather}>
-                Weather<span className="text-secondary-vivid margin-left-05">*</span>
-              </Label>
-              <Select
-                id="weather"
-                name="weather"
-                value={formData.weather}
-                onChange={handleInputChange} // Standard handler works here
-                validationStatus={submitted && errors.weather ? "error" : undefined}
-                aria-describedby="weather-error-message"
-              >
-                <option value="">-Select-</option>
-                <option value="Sunny">Sunny</option>
-                <option value="Cloudy">Cloudy</option>
-                <option value="Rainy">Rainy</option>
-              </Select>
-              {/* [Lesson 5.4:START] Display Weather Error */}
-              <ErrorMessage id="weather-error-message">
-                {(submitted && errors.weather) || "\u00A0"}
-              </ErrorMessage>
-              {/* [Lesson 5.4:END] */}
-            </FormGroup>
-            {/* [Lesson 2.3:END] */}
-          </Form>
-        </div>
-      </div>
+                {/* Trip Start Time - USWDS TimePicker */}
+                <FormGroup error={submitted && errors.startTime}>
+                  <Label
+                    htmlFor="startTime"
+                    error={submitted && errors.startTime}
+                    className="input-time-label"
+                    requiredMarker
+                  >
+                    Time
+                  </Label>
+
+                  <TimePicker
+                    id="startTime"
+                    name="startTime"
+                    defaultValue={formData.startTime}
+                    onChange={handleTimeChange} // Use specific handler
+                    minTime="00:00"
+                    maxTime="23:45"
+                    step={15}
+                    validationStatus={
+                      submitted && errors.startTime ? "error" : undefined
+                    }
+                    className={
+                      submitted && errors.startTime ? "usa-input--error" : ""
+                    }
+                    aria-describedby="startTime-error-message"
+                  />
+                  {submitted && errors.startTime && (
+                    <ErrorMessage
+                      id="startTime-error-message"
+                      className="font-sans-2xs"
+                    >
+                      {errors.startTime}
+                    </ErrorMessage>
+                  )}
+                </FormGroup>
+
+                {/* Weather Conditions - USWDS Select */}
+                <FormGroup error={submitted && errors.weather}>
+                  <Label
+                    htmlFor="weather"
+                    error={submitted && errors.weather}
+                    requiredMarker
+                  >
+                    Weather
+                  </Label>
+                  <Select
+                    id="weather"
+                    name="weather"
+                    value={formData.weather}
+                    onChange={handleInputChange} // Standard handler works here
+                    validationStatus={
+                      submitted && errors.weather ? "error" : undefined
+                    }
+                    aria-describedby="weather-error-message"
+                  >
+                    <option value="">-Select-</option>
+                    <option value="Sunny">Sunny</option>
+                    <option value="Cloudy">Cloudy</option>
+                    <option value="Rainy">Rainy</option>
+                  </Select>
+                  {submitted && errors.weather && (
+                    <ErrorMessage
+                      id="weather-error-message"
+                      className="font-sans-2xs"
+                    >
+                      {errors.weather}
+                    </ErrorMessage>
+                  )}
+                </FormGroup>
+              </Form>
+            </div>
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       {/* Inline Footer using USWDS utilities */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">

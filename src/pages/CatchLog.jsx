@@ -1,20 +1,24 @@
 import "../index.css";
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
-  Form,
-  Label,
-  TextInput,
-  FormGroup,
-  ErrorMessage,
-  TimePicker,
-  Select,
   Button,
+  ErrorMessage,
+  Form,
+  FormGroup,
+  Grid,
+  GridContainer,
   Icon,
+  Label,
+  Select,
   StepIndicator,
   StepIndicatorStep,
+  TextInput,
+  TimePicker,
 } from "@trussworks/react-uswds";
-import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Constants for field names used in validation messages
 const FIELD_SPECIES = "Species";
@@ -354,7 +358,7 @@ function CatchLog() {
       try {
         const Catch = app.stores["trip"].getCollection("Catch");
         // Remove from RADFish/IndexedDB
-        await Catch.remove(catchToDelete.id);
+        await Catch.delete({id: catchToDelete.id});
         // Update local state to remove from UI
         setCatches(prev => prev.filter((_, i) => i !== index));
       } catch (error) {

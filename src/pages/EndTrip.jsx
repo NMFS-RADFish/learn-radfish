@@ -1,18 +1,22 @@
 import "../index.css";
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
+  Button,
+  ErrorMessage,
   Form,
   FormGroup,
-  ErrorMessage,
-  TimePicker,
-  Select,
+  Grid,
+  GridContainer,
   Label,
-  Button,
+  Select,
   StepIndicator,
   StepIndicatorStep,
+  TimePicker,
 } from "@trussworks/react-uswds";
-import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Field name constants
 const FIELD_WEATHER = "Weather condition";
