@@ -71,7 +71,7 @@ function StartTrip() {
   // Initialized empty for new trips.
   const [formData, setFormData] = useState({
     tripDate: "",
-    weather: "",
+    startWeather: "",
     startTime: "",
   });
   // useState hook to store the ID of the trip being edited, if any.
@@ -108,7 +108,7 @@ function StartTrip() {
           const formattedDate = formatToYYYYMMDD(currentTrip.tripDate || "");
           setFormData({
             tripDate: formattedDate,
-            weather: currentTrip.weather || "",
+            startWeather: currentTrip.startWeather || "",
             startTime: currentTrip.startTime || "",
           });
         } else {
@@ -117,7 +117,7 @@ function StartTrip() {
             `Trip with ID ${tripIdFromState} not found. Starting new trip form.`,
           );
           setCurrentTripId(null);
-          setFormData({ tripDate: "", weather: "", startTime: "" });
+          setFormData({ tripDate: "", startWeather: "", startTime: "" });
         }
       } catch (error) {
         // Handle errors during data fetching
@@ -132,7 +132,6 @@ function StartTrip() {
     loadExistingTrip();
   }, [app, tripIdFromState]); // Dependencies: re-run if app or tripId changes
 
-  // --- Event Handlers ---
   // Handles changes for standard input fields (Select)
   const handleInputChange = (e) => {
     if (e && e.target) {
@@ -177,8 +176,8 @@ function StartTrip() {
     const dateError = validateRequired(formData.tripDate, FIELD_DATE);
     if (dateError) newErrors.tripDate = dateError;
 
-    const weatherError = validateRequired(formData.weather, FIELD_WEATHER);
-    if (weatherError) newErrors.weather = weatherError;
+    const weatherError = validateRequired(formData.startWeather, FIELD_WEATHER);
+    if (weatherError) newErrors.startWeather = weatherError;
 
     const timeError = validateRequired(formData.startTime, FIELD_START_TIME);
     if (timeError) newErrors.startTime = timeError;
@@ -193,30 +192,27 @@ function StartTrip() {
     setSubmitted(true); // Mark form as submitted to show errors
 
     const newErrors = validateForm();
-    /* [Lesson 5.1:START] Set validation errors */
     setErrors(newErrors);
-    /* [Lesson 5.1:END] */
 
     // Proceed only if validation passes
     if (Object.keys(newErrors).length === 0) {
       try {
         // Access RADFish store and collection
-        /* [Lesson 3.1:START] Declare the trip store and form collection */
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
-        /* [Lesson 3.1:END] */
+
         let navigateToId = currentTripId;
 
         // Prepare data to be saved
         const tripData = {
           tripDate: formData.tripDate,
-          weather: formData.weather,
+          startWeather: formData.startWeather,
           startTime: formData.startTime,
           status: "in-progress", // Set status for new/updated trip
           step: 2 // Update step number
         };
 
-        /* [Lesson 3.2:START] Update the form if it exists, else create a new form */
+        /* Update the form if it exists, else create a new form */
         if (currentTripId) {
           // --- Update existing trip ---
           // Merge existing ID with new data and update in IndexedDB
@@ -225,7 +221,7 @@ function StartTrip() {
           // --- Create new trip ---
           const newTripId = crypto.randomUUID(); // Generate a unique ID
           // Add ID to data and create new record in IndexedDB
-          await Form.create({ id: newTripId, ...tripData, endWeather: "", endTime: "" });
+          await Form.create({ id: newTripId, ...tripData, endTime: "", endWeather: "" });
           navigateToId = newTripId; // Store the new ID for navigation
           setCurrentTripId(newTripId); // Update state with the new ID
         }
@@ -270,16 +266,12 @@ function StartTrip() {
               </div>
 
               {/* USWDS Form component */}
-              <Form onSubmit={handleSubmit} large className="margin-top-3">
-                {/* Trip Date - USWDS DatePicker */}
-                {/* FormGroup adds spacing and connects label/input/error */}
+              <Form onSubmit={handleSubmit} large>
                 <FormGroup error={submitted && errors.tripDate}>
-                  {/* Label with required indicator */}
                   <Label
                     htmlFor="tripDate"
                     error={submitted && errors.tripDate}
                     hint=" mm/dd/yyyy"
-                    className="input-date-label"
                     requiredMarker
                   >
                     Date
@@ -289,15 +281,18 @@ function StartTrip() {
                     name="tripDate"
                     defaultValue={formData.tripDate} // Use formatted date for default
                     onChange={handleDateChange} // Use specific handler
-                    aria-describedby="tripDate-hint"
-                    // Apply error styling if submitted and error exists
-                    className={
-                      submitted && errors.tripDate ? "usa-input--error" : ""
+                    validationStatus={
+                      submitted && errors.tripDate ? "error" : undefined
                     }
+                    aria-describedby="tripDateHint tripDateErrorMessage"
+                    required
                   />
+                  <span id="tripDateHint" className="usa-sr-only">
+                    Please enter or select the date of your fishing trip.
+                  </span>
                   {submitted && errors.tripDate && (
                     <ErrorMessage
-                      id="tripDate-error-message"
+                      id="tripDateErrorMessage"
                       className="font-sans-2xs"
                     >
                       {errors.tripDate}
@@ -324,14 +319,14 @@ function StartTrip() {
                     minTime="00:00"
                     maxTime="23:45"
                     step={15}
-                    validationStatus={
-                      submitted && errors.startTime ? "error" : undefined
-                    }
                     className={
                       submitted && errors.startTime ? "usa-input--error" : ""
                     }
-                    aria-describedby="startTime-error-message"
+                    aria-describedby="startTimeInstructions"
                   />
+                  <span id="startTimeInstructions" className="usa-sr-only">
+                    Please enter the time you started fishing.
+                  </span>
                   {submitted && errors.startTime && (
                     <ErrorMessage
                       id="startTime-error-message"
@@ -343,35 +338,38 @@ function StartTrip() {
                 </FormGroup>
 
                 {/* Weather Conditions - USWDS Select */}
-                <FormGroup error={submitted && errors.weather}>
+                <FormGroup error={submitted && errors.startWeather}>
                   <Label
-                    htmlFor="weather"
-                    error={submitted && errors.weather}
+                    htmlFor="startWeather"
+                    error={submitted && errors.startWeather}
                     requiredMarker
                   >
                     Weather
                   </Label>
                   <Select
-                    id="weather"
-                    name="weather"
-                    value={formData.weather}
+                    id="startWeather"
+                    name="startWeather"
+                    value={formData.startWeather}
                     onChange={handleInputChange} // Standard handler works here
                     validationStatus={
-                      submitted && errors.weather ? "error" : undefined
+                      submitted && errors.startWeather ? "error" : undefined
                     }
-                    aria-describedby="weather-error-message"
+                    aria-describedby="startWeatherHint"
                   >
                     <option value="">-Select-</option>
                     <option value="Sunny">Sunny</option>
                     <option value="Cloudy">Cloudy</option>
                     <option value="Rainy">Rainy</option>
                   </Select>
-                  {submitted && errors.weather && (
+                  <span id="startWeatherHint" className="usa-sr-only">
+                    Please select the weather condition at the start of your fishing trip.
+                  </span>
+                  {submitted && errors.startWeather && (
                     <ErrorMessage
-                      id="weather-error-message"
+                      id="startWeather-error-message"
                       className="font-sans-2xs"
                     >
-                      {errors.weather}
+                      {errors.startWeather}
                     </ErrorMessage>
                   )}
                 </FormGroup>

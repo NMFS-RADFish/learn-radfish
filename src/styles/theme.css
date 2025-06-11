@@ -58,19 +58,6 @@ USWDS COMPONENT OVERRIDES
   margin: 0;
 }
 
-/* Fit error border to DatePicker */
-.input-date-label + .usa-input--error {
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.input-date-label
-  + .usa-input--error
-  > .usa-date-picker__wrapper
-  > input {
-  margin-top: 0;
-}
-
 /* Fit error border to TimePicker */
 .input-time-label + div > .usa-input--error {
   padding-top: 0;

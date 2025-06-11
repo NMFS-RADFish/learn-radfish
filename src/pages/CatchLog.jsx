@@ -240,10 +240,9 @@ function CatchLog() {
   const handleAddCatch = async (e) => {
     e.preventDefault();
     setSubmitted(true);
+
     const formErrors = validateForm();
-    /* [Lesson 5.5:START] Set validation errors for new catch */
     setErrors(formErrors);
-    /* [Lesson 5.5:END] */
 
     // Proceed only if no errors and tripId exists
     if (Object.keys(formErrors).length === 0 && tripId) {
@@ -286,9 +285,7 @@ function CatchLog() {
     
     // Validate all recorded catches first
     const recordedErrors = validateRecordedCatches();
-    /* [Lesson 5.12:START] Set validation errors for recorded catches */
     setRecordedCatchErrors(recordedErrors);
-    /* [Lesson 5.12:END] */
 
     // Only proceed if there are no errors in the recorded catches list
     if (Object.keys(recordedErrors).length === 0) {
@@ -416,9 +413,11 @@ function CatchLog() {
                   ))}
                 </Select>
                 {/* [Lesson 5.6:START] Display Species Error */}
-                <ErrorMessage id="species-error-message">
-                  {(submitted && errors.species) || "\u00A0"}
-                </ErrorMessage>
+                {submitted && errors.species && (
+                  <ErrorMessage id="species-error-message">
+                    {submitted && errors.species}
+                  </ErrorMessage>
+                )}
                 {/* [Lesson 5.6:END] */}
               </FormGroup>
 

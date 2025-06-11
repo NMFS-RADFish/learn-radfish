@@ -223,9 +223,11 @@ function EndTrip() {
                 aria-describedby="endTime-error-message"
               />
               {/* [Lesson 5.20:START] Display End Time Error */}
+              {submitted && errors.endTime && (
               <ErrorMessage id="endTime-error-message">
-                {(submitted && errors.endTime) || "\u00A0"}
+                {submitted && errors.endTime}
               </ErrorMessage>
+              )}
               {/* [Lesson 5.20:END] */}
             </FormGroup>
 

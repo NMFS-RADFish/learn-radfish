@@ -351,7 +351,7 @@ function ReviewSubmit() {
                   <div className="width-10 text-bold font-sans-xs">Weather</div>
                   <div className="display-flex flex-align-center">
                     <span className="text-base-dark font-sans-sm">
-                      {trip.weather}
+                      {trip.startWeather}
                     </span>
                     <span className="margin-x-1 text-base-dark">→</span>
                     <span className="text-base-dark font-sans-sm">

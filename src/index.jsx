@@ -33,25 +33,30 @@ const app = new Application({
                 required: true,
                 default: 1 // Track the current step (1: Start, 2: Catch, 3: End, 4: Review)
               },
-              tripDate: {
-                type: "string",
-              },
-              weather: {
-                type: "string",
-              },
-              startTime: {
-                type: "string",
-              },
-              endWeather: {
-                type: "string",
-              },
-              endTime: {
-                type: "string",
-              },
               status: {
                 type: "string",
                 required: true,
                 default: "none", // none, in-progress, Not Submitted, submitted
+              },
+              tripDate: {
+                type: "string",
+                required: true,
+              },
+              startTime: {
+                type: "string",
+                required: true,
+              },
+              startWeather: {
+                type: "string",
+                required: true,
+              },
+              endWeather: {
+                type: "string",
+                required: true,
+              },
+              endTime: {
+                type: "string",
+                required: true,
               },
             },
           },
@@ -94,7 +99,7 @@ const app = new Application({
         },
       },
     },
-  }
+  },
 });
 
 app.on("ready", async () => {
