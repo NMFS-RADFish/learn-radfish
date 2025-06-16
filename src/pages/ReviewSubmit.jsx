@@ -45,6 +45,8 @@ function ReviewSubmit() {
   const [trip, setTrip] = useState(null);
   // Stores the aggregated catch data (grouped by species) for display in the table
   const [aggregatedCatches, setAggregatedCatches] = useState([]);
+  // Stores the catch data for API submission
+  const [catches, setCatches] = useState([]);
   // Loading state while fetching data
   const [loading, setLoading] = useState(true);
   // Error state for data fetching issues
@@ -90,6 +92,9 @@ function ReviewSubmit() {
         // Fetch all catches associated with this trip
         const tripCatches = await Catch.find({ tripId: selectedTrip.id });
         /* [Lesson 6.1:END] */
+
+        // Store catches for API submission
+        setCatches(tripCatches);
 
         // Aggregate catch data for the summary table
         /* [Lesson 6.2:START] Call the aggregation function */
@@ -179,13 +184,18 @@ function ReviewSubmit() {
    * @returns {string} The formatted time string (e.g., "1:30 PM"), or "" if input is invalid.
    */
   const format24HourTo12Hour = (timeString) => {
-    if (!timeString || typeof timeString !== 'string' || !timeString.includes(':')) return "";
+    if (
+      !timeString ||
+      typeof timeString !== "string" ||
+      !timeString.includes(":")
+    )
+      return "";
 
     try {
       // Parse hours and minutes
       const [hoursStr, minutesStr] = timeString.split(":");
       let hours = parseInt(hoursStr, 10);
-      const minutes = minutesStr.padStart(2, '0'); // Ensure minutes are two digits
+      const minutes = minutesStr.padStart(2, "0"); // Ensure minutes are two digits
 
       // Validate parsed values
       if (isNaN(hours) || hours < 0 || hours > 23) return "";
@@ -214,25 +224,70 @@ function ReviewSubmit() {
   const handleSubmit = async () => {
     if (!trip) return; // Guard clause if trip data isn't loaded
 
-    try {
-      const tripStore = app.stores["trip"];
-      const Form = tripStore.getCollection("Form");
-      // Determine final status: "submitted" if online, "Not Submitted" if offline
-      const finalStatus = isOffline ? "Not Submitted" : "submitted";
+    const tripStore = app.stores["trip"];
+    const Form = tripStore.getCollection("Form");
 
-      // Update the trip record in RADFish/IndexedDB
-      await Form.update({
-        id: trip.id,
-        status: finalStatus,
-        step: 4, // Mark as completed step 4 (review)
-      });
+    if (isOffline) {
+      // Offline: Save status as "Not Submitted" locally
+      try {
+        await Form.update({
+          id: trip.id,
+          status: "Not Submitted",
+          step: 4, // Mark as completed step 4 (review)
+        });
+        navigate("/offline-confirm");
+      } catch (error) {
+        console.error("Error saving trip offline:", error);
+        setError(
+          "Failed to save trip for offline submission. Please try again.",
+        );
+      }
+    } else {
+      // Online: Attempt to submit to the backend
+      try {
+        // Prepare submission data with trip and associated catches
+        const submissionData = {
+          trip: trip,
+          catches: catches
+        };
 
-      // Navigate to the relevant confirmation screen
-      navigate(isOffline ? "/offline-confirm" : "/online-confirm");
-    } catch (error) {
-      console.error("Error submitting trip:", error);
-      // Consider adding user feedback here (e.g., using a toast notification)
-      setError("Failed to submit trip. Please try again.");
+        const response = await fetch("/api/trips", {
+          // Assuming '/api/trips' is your JSON server endpoint
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        });
+
+        if (!response.ok) {
+          const status = response.status;
+          const statusText = response.statusText
+            ? response.statusText.trim()
+            : "";
+          const errorDetail = statusText
+            ? `${status} ${statusText}`
+            : `${status} Server error occurred`;
+
+          console.error("Server submission failed:", errorDetail);
+          setError(`Server submission failed: ${errorDetail}`);
+          return;
+        }
+
+        // If server submission is successful, update local status to "submitted"
+        await Form.update({
+          id: trip.id,
+          status: "submitted",
+          step: 4,
+        });
+        navigate("/online-confirm");
+      } catch (error) {
+        // Catch network errors or other issues with the fetch call
+        console.error("Error submitting trip online:", error);
+        setError(
+          "Failed to submit trip. Check your internet connection or try saving offline.",
+        );
+      }
     }
   };
 
@@ -295,12 +350,16 @@ function ReviewSubmit() {
 
   // Display error message if fetching failed
   if (error) {
-    return <div className="padding-5 text-center text-error">Error: {error}</div>;
+    return (
+      <div className="padding-5 text-center text-error">Error: {error}</div>
+    );
   }
 
   // Display message if trip data is unexpectedly missing after loading
   if (!trip) {
-    return <div className="padding-5 text-center">Trip data not available.</div>;
+    return (
+      <div className="padding-5 text-center">Trip data not available.</div>
+    );
   }
 
   // Get dynamic footer button properties
@@ -435,7 +494,11 @@ function ReviewSubmit() {
               outline
               type="button"
               // Adjust width based on whether the Next button is also shown
-              className={footerProps.showNextButton ? "width-card-lg bg-white" : "width-full bg-white"}
+              className={
+                footerProps.showNextButton
+                  ? "width-card-lg bg-white"
+                  : "width-full bg-white"
+              }
               onClick={() =>
                 navigate(footerProps.backPath, footerProps.backNavState)
               }
@@ -461,5 +524,3 @@ function ReviewSubmit() {
 }
 
 export default ReviewSubmit;
-
-

@@ -185,9 +185,9 @@ function EndTrip() {
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
-        <div className="width-full maxw-mobile-lg text-left">
-          
+      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
+        <Grid row>
+          <Grid col="fill">
           {/* --- Embedded Step Indicator --- */}
           <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
             <StepIndicator 
@@ -207,8 +207,8 @@ function EndTrip() {
           <Form onSubmit={handleSubmit} large className="margin-top-3">
             {/* Trip End Time */}
             <FormGroup error={submitted && errors.endTime}>
-              <Label htmlFor="endTime" error={submitted && errors.endTime}>
-                Time<span className="text-secondary-vivid margin-left-05">*</span>
+              <Label htmlFor="endTime" error={submitted && errors.endTime} className="input-time-label" requiredMarker>
+                Time
               </Label>
               <TimePicker
                 id="time"
@@ -223,18 +223,16 @@ function EndTrip() {
                 aria-describedby="endTime-error-message"
               />
               {/* [Lesson 5.20:START] Display End Time Error */}
-              {submitted && errors.endTime && (
               <ErrorMessage id="endTime-error-message">
-                {submitted && errors.endTime}
+                {errors.endTime}
               </ErrorMessage>
-              )}
               {/* [Lesson 5.20:END] */}
             </FormGroup>
 
             {/* Weather Conditions Select */}
             <FormGroup error={submitted && errors.endWeather}>
-              <Label htmlFor="endWeather" error={submitted && errors.endWeather}>
-                Weather<span className="text-secondary-vivid margin-left-05">*</span>
+              <Label htmlFor="endWeather" error={submitted && errors.endWeather} requiredMarker>
+                Weather
               </Label>
               <Select
                 id="endWeather"
@@ -251,13 +249,14 @@ function EndTrip() {
               </Select>
               {/* [Lesson 5.21:START] Display End Weather Error */}
               <ErrorMessage id="endWeather-error-message">
-                {(submitted && errors.endWeather) || "\u00A0"}
+                {errors.endWeather}
               </ErrorMessage>
               {/* [Lesson 5.21:END] */}
             </FormGroup>
           </Form>
-        </div>
-      </div>
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">

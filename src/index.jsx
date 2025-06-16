@@ -6,7 +6,6 @@ import { Application } from "@nmfs-radfish/radfish";
 import { IndexedDBConnector } from "@nmfs-radfish/radfish/storage";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-// Create RADFish Application instance with IndexedDB store
 const app = new Application({
   serviceWorker: {
     url:
@@ -31,12 +30,12 @@ const app = new Application({
               step: {
                 type: "number",
                 required: true,
-                default: 1 // Track the current step (1: Start, 2: Catch, 3: End, 4: Review)
+                default: 1
               },
               status: {
                 type: "string",
                 required: true,
-                default: "none", // none, in-progress, Not Submitted, submitted
+                default: "none",
               },
               tripDate: {
                 type: "string",

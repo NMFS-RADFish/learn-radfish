@@ -43,25 +43,10 @@ const FIELD_DATE = "Trip date";
 const FIELD_WEATHER = "Weather condition";
 const FIELD_START_TIME = "Start time";
 
-/**
- * StartTrip Component
- *
- * This component handles the first step of logging a fishing trip:
- * entering the date, start time, and weather conditions.
- * It demonstrates:
- *  - Using React Hooks (useState, useEffect) for form state and side effects.
- *  - Using React Router Hooks (useNavigate, useLocation) for navigation and state passing.
- *  - Using RADFish Hooks (useApplication) to interact with the RADFish instance.
- *  - Basic form validation.
- *  - Creating or updating trip data in RADFish IndexedDB store.
- *  - Using USWDS React components for the form UI.
- */
+
 function StartTrip() {
-  // React Router hook for programmatic navigation
   const navigate = useNavigate();
-  // React Router hook to access location state (like tripId passed from Home)
   const location = useLocation();
-  // Extract tripId from location state if it exists (for editing an existing trip)
   const tripIdFromState = location.state?.tripId;
   // RADFish hook to get the application instance, needed for store access
   const app = useApplication();
@@ -154,7 +139,6 @@ function StartTrip() {
 
   // Handles changes specifically for the USWDS TimePicker component
   const handleTimeChange = (time) => {
-    // Assumes only one time picker, defaults name to 'startTime'
     setFormData((prevData) => ({ ...prevData, startTime: time }));
     if (errors.startTime) {
       setErrors((prevErrors) => ({ ...prevErrors, startTime: undefined }));
@@ -225,7 +209,6 @@ function StartTrip() {
           navigateToId = newTripId; // Store the new ID for navigation
           setCurrentTripId(newTripId); // Update state with the new ID
         }
-        /* [Lesson 3.2:END] */
         // Navigate to the next step (CatchLog), passing the tripId via state
         navigate(`/catch`, { state: { tripId: navigateToId } });
       } catch (error) {
@@ -247,7 +230,6 @@ function StartTrip() {
       <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
         <Grid row>
           <Grid col="fill">
-            {/* Container to constrain width on larger screens */}
             <div className="width-full text-left">
               {/* --- Embedded Step Indicator --- */}
               <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
@@ -381,7 +363,6 @@ function StartTrip() {
 
       {/* Inline Footer using USWDS utilities */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
-        {/* Container for footer content, centered and max-width */}
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           {/* Back Button */}
           <Button

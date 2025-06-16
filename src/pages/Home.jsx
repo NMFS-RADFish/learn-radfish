@@ -15,15 +15,6 @@ const LABEL_IN_PROGRESS = "IN PROGRESS";
 const LABEL_READY_TO_SUBMIT = "READY TO SUBMIT";
 const LABEL_NOT_STARTED = "NOT STARTED";
 
-/**
- * HomePage Component
- *
- * This component displays a list of fishing trips with their status and statistics.
- * It demonstrates:
- *  - Using RADFish hooks (useApplication, useOfflineStatus)
- *  - Working with IndexedDB via RADFish collections
- *  - Displaying data in a responsive layout with USWDS utility classes
- */
 function HomePage() {
   // RADFish hooks
   const app = useApplication(); // Access the RADFish application instance
@@ -35,7 +26,6 @@ function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Navigation
   const navigate = useNavigate();
 
   /**
