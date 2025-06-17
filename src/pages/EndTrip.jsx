@@ -1,18 +1,17 @@
 import "../index.css";
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
-  Form,
-  FormGroup,
-  ErrorMessage,
-  TimePicker,
-  Select,
-  Label,
   Button,
+  Form,
+  Grid,
+  GridContainer,
   StepIndicator,
   StepIndicatorStep,
 } from "@trussworks/react-uswds";
-import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Field name constants
 const FIELD_WEATHER = "Weather condition";
@@ -178,67 +177,33 @@ function EndTrip() {
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
-        <div className="width-full maxw-mobile-lg text-left">
-          
-          {/* --- Embedded Step Indicator --- */}
-          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-            <StepIndicator 
-              headingLevel="h4" 
-              ofText="of" 
-              stepText="Step"
-              className="usa-step-indicator margin-bottom-0"
-              showLabels={false}
-            >
-              <StepIndicatorStep label="Start Trip" status="complete" />
-              <StepIndicatorStep label="Log Catch" status="complete" />
-              <StepIndicatorStep label="End Trip" status="current" />
-              <StepIndicatorStep label="Review and Submit" />
-            </StepIndicator>
-          </div>
-
-          <Form onSubmit={handleSubmit} large className="margin-top-3">
-            {/* Trip End Time */}
-            <FormGroup error={submitted && errors.endTime}>
-              <Label htmlFor="endTime" error={submitted && errors.endTime}>
-                Time<span className="text-secondary-vivid margin-left-05">*</span>
-              </Label>
-              <TimePicker
-                id="time"
-                name="time"
-                defaultValue={formData.endTime}
-                onChange={(time) => handleTimeChange(time)}
-                minTime="00:00"
-                maxTime="23:30"
-                step={15}
-                validationStatus={submitted && errors.endTime ? "error" : undefined}
-                className={submitted && errors.endTime ? "usa-input--error" : ""}
-                aria-describedby="endTime-error-message"
-              />
-            </FormGroup>
-
-            {/* Weather Conditions Select */}
-            <FormGroup error={submitted && errors.endWeather}>
-              <Label htmlFor="endWeather" error={submitted && errors.endWeather}>
-                Weather<span className="text-secondary-vivid margin-left-05">*</span>
-              </Label>
-              <Select
-                id="endWeather"
-                name="endWeather"
-                value={formData.endWeather}
-                onChange={handleInputChange}
-                validationStatus={submitted && errors.endWeather ? "error" : undefined}
-                aria-describedby="endWeather-error-message"
+      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
+        <Grid row>
+          <Grid col="fill">
+            {/* --- Embedded Step Indicator --- */}
+            <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+              <StepIndicator
+                headingLevel="h4"
+                ofText="of"
+                stepText="Step"
+                className="usa-step-indicator margin-bottom-0"
+                showLabels={false}
               >
-                <option value="">-Select-</option>
-                <option value="Sunny">Sunny</option>
-                <option value="Cloudy">Cloudy</option>
-                <option value="Rainy">Rainy</option>
-              </Select>
-            </FormGroup>
-          </Form>
-        </div>
-      </div>
+                <StepIndicatorStep label="Start Trip" status="complete" />
+                <StepIndicatorStep label="Log Catch" status="complete" />
+                <StepIndicatorStep label="End Trip" status="current" />
+                <StepIndicatorStep label="Review and Submit" />
+              </StepIndicator>
+            </div>
+
+            <Form onSubmit={handleSubmit} large className="margin-top-3">
+              {/* Trip End Time */}
+
+              {/* Weather Conditions Select */}
+            </Form>
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
