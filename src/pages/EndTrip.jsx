@@ -17,12 +17,6 @@ import {
 const FIELD_WEATHER = "Weather condition";
 const FIELD_END_TIME = "End time";
 
-/**
- * EndTrip Component
- *
- * Handles the third step of logging a fishing trip:
- * entering the end time and weather conditions.
- */
 function EndTrip() {
   const navigate = useNavigate();
   const location = useLocation();
