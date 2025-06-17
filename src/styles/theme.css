@@ -50,10 +50,6 @@ USWDS COMPONENT OVERRIDES
   margin-right: 0;
 }
 
-.usa-form-group > #time-label {
-  margin-top: -1rem;
-}
-
 .usa-combo-box.usa-combo-box {
   width: 100%;
 }
@@ -62,13 +58,28 @@ USWDS COMPONENT OVERRIDES
   margin: 0;
 }
 
+/* Fit error border to TimePicker */
+.input-time-label+div>.usa-input--error {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.input-time-label+div>.usa-input--error>.usa-combo-box__input {
+  margin-top: 0;
+}
+
+/* Remove margin-top from TimePicker input */
+.input-time-label+div {
+  margin-top: 0;
+}
+
 .usa-logo.usa-logo {
   margin-top: 0;
   margin-bottom: 0;
 }
 
 @media (min-width: 64em) {
-  .usa-nav__primary > .usa-nav__primary-item > a.usa-nav__link {
+  .usa-nav__primary>.usa-nav__primary-item>a.usa-nav__link {
     padding: 10px;
   }
 
@@ -79,6 +90,6 @@ USWDS COMPONENT OVERRIDES
 
 @media (min-width: 480px) {
   .usa-logo.usa-logo {
-      margin-left: 0;
+    margin-left: 0;
   }
 }
