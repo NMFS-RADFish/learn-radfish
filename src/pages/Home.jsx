@@ -2,7 +2,7 @@ import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@trussworks/react-uswds";
+import { Button, Grid } from "@trussworks/react-uswds";
 
 // Status constants
 const STATUS_SUBMITTED = "submitted";
@@ -15,15 +15,6 @@ const LABEL_IN_PROGRESS = "IN PROGRESS";
 const LABEL_READY_TO_SUBMIT = "READY TO SUBMIT";
 const LABEL_NOT_STARTED = "NOT STARTED";
 
-/**
- * HomePage Component
- *
- * This component displays a list of fishing trips with their status and statistics.
- * It demonstrates:
- *  - Using RADFish hooks (useApplication, useOfflineStatus)
- *  - Working with IndexedDB via RADFish collections
- *  - Displaying data in a responsive layout with USWDS utility classes
- */
 function HomePage() {
   // RADFish hooks
   const app = useApplication(); // Access the RADFish application instance
@@ -35,7 +26,6 @@ function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Navigation
   const navigate = useNavigate();
 
   /**
@@ -221,71 +211,85 @@ function HomePage() {
 
   return (
     <>
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2 text-center">
-        <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
+      <Grid row>
+        <Grid col="fill">
+          <h1 className="font-heading-xl text-center margin-0">
+            Hi, Captain
+          </h1>
 
-        <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
-          Recent Trips
-        </h2>
+          <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
+            Recent Trips
+          </h2>
 
-        {trips.length === 0 ? (
-          <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
-            <p className="text-base margin-0 text-center">
-              No trips found. Start a new trip to record your fishing activity.
-            </p>
-          </div>
-        ) : (
           <div className="width-full maxw-mobile-lg margin-x-auto margin-bottom-5">
-            {trips.map((trip) => (
-              <div
-                key={trip.id}
-                className="display-flex flex-column width-full border-radius-md bg-white shadow-2 overflow-hidden margin-bottom-2 cursor-pointer hover:shadow-4 hover:transform-"
-                onClick={() => handleTripClick(trip)}
-              >
-                <div
-                  className={`display-flex flex-justify flex-align-center padding-y-2 padding-x-2 text-white radius-top-md ${getHeaderClass(trip)}`}
-                >
-                  <div className="text-white font-ui-md text-bold">
-                    {formatDate(trip.tripDate)}
-                  </div>
-                  <div className="text-white font-ui-md text-bold">
-                    {getStatusLabel(trip)}
-                  </div>
-                </div>
-
-                <div className="padding-2 bg-white radius-bottom-md">
-                  <div className="grid-row">
-                    <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">
-                        Fish Count
-                      </div>
-                      <div className="font-ui-lg text-bold">
-                        {tripStats[trip.id]?.totalCount || 0}
-                      </div>
-                    </div>
-                    <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">
-                        Total Weight
-                      </div>
-                      <div className="font-ui-lg text-bold">
-                        {tripStats[trip.id]?.totalWeight || 0} lbs
-                      </div>
-                    </div>
-                    <div className="grid-col-4 display-flex flex-column padding-y-1 stat-grid-column">
-                      <div className="font-ui-xs text-base-dark margin-bottom-1">
-                        Avg. Length
-                      </div>
-                      <div className="font-ui-lg text-bold">
-                        {tripStats[trip.id]?.avgLength || 0} in
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            {trips.length === 0 ? (
+              <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
+                <p className="text-base margin-0 text-center">
+                  No trips found. Start a new trip to record your fishing
+                  activity.
+                </p>
               </div>
-            ))}
+            ) : (
+              trips.map((trip) => (
+                <div
+                  key={trip.id}
+                  className="display-flex flex-column width-full border-radius-md bg-white shadow-2 overflow-hidden margin-bottom-2 cursor-pointer hover:shadow-4 hover:transform-"
+                  onClick={() => handleTripClick(trip)}
+                >
+                  <div
+                    className={`display-flex flex-justify flex-align-center padding-y-2 padding-x-2 text-white radius-top-md ${getHeaderClass(trip)}`}
+                  >
+                    <div className="text-white font-ui-md text-bold">
+                      {formatDate(trip.tripDate)}
+                    </div>
+                    <div className="text-white font-ui-md text-bold">
+                      {getStatusLabel(trip)}
+                    </div>
+                  </div>
+
+                  <div className="padding-2 bg-white radius-bottom-md">
+                    <Grid row>
+                      <Grid
+                        col={4}
+                        className="display-flex flex-column padding-y-1 stat-grid-column"
+                      >
+                        <div className="font-ui-xs text-base-dark margin-bottom-1">
+                          Fish Count
+                        </div>
+                        <div className="font-ui-lg text-bold">
+                          {tripStats[trip.id]?.totalCount || 0}
+                        </div>
+                      </Grid>
+                      <Grid
+                        col={4}
+                        className="display-flex flex-column padding-y-1 stat-grid-column"
+                      >
+                        <div className="font-ui-xs text-base-dark margin-bottom-1">
+                          Total Weight
+                        </div>
+                        <div className="font-ui-lg text-bold">
+                          {tripStats[trip.id]?.totalWeight || 0} lbs
+                        </div>
+                      </Grid>
+                      <Grid
+                        col={4}
+                        className="display-flex flex-column padding-y-1 stat-grid-column"
+                      >
+                        <div className="font-ui-xs text-base-dark margin-bottom-1">
+                          Avg. Length
+                        </div>
+                        <div className="font-ui-lg text-bold">
+                          {tripStats[trip.id]?.avgLength || 0} in
+                        </div>
+                      </Grid>
+                    </Grid>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-        )}
-      </div>
+        </Grid>
+      </Grid>
 
       {/* Sticky footer with "Start New Trip" button */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
