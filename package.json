@@ -1,7 +1,7 @@
 {
   "version": "0.11.1",
   "dependencies": {
-    "@nmfs-radfish/radfish": "^1.1.0-rc.2",
+    "@nmfs-radfish/radfish": "^1.1.1",
     "@nmfs-radfish/react-radfish": "^1.0.0",
     "@testing-library/user-event": "^14.5.2",
     "@trussworks/react-uswds": "^9.0.0",
@@ -25,7 +25,7 @@
     "start": "vite",
     "build": "vite build",
     "prebuild": "rm -rf dist",
-    "server": "json-server --watch db.json --port 3001",
+    "server": "json-server --watch db.json --port 3002",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:e2e": "concurrently --kill-others --success first \"npm start\" \"vitest './src/__tests__/e2e/integration.e2e.test.jsx'\"",
     "lint": "eslint src",
