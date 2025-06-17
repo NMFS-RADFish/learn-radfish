@@ -19,23 +19,23 @@ function App({ application }) {
         Skip to main content
       </a>
       <BrowserRouter>
-          <header className="sticky-header">
-            <Header isExpanded={isExpanded} setExpanded={setExpanded} />
-          </header>
-          <main id="main-content" className="padding-bottom-15">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/start" element={<StartTrip />} />
-              <Route path="/catch" element={<CatchLog />} />
-              <Route path="/end" element={<EndTrip />} />
-              <Route path="/review" element={<ReviewSubmit />} />
-              <Route path="/online-confirm" element={<OnlineConfirmation />} />
-              <Route
-                path="/offline-confirm"
-                element={<OfflineConfirmation />}
-              />
-            </Routes>
-          </main>
+        <header className="sticky-header">
+          <Header isExpanded={isExpanded} setExpanded={setExpanded} />
+        </header>
+        <main id="main-content" className="padding-bottom-15">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/start" element={<StartTrip />} />
+            <Route path="/catch" element={<CatchLog />} />
+            <Route path="/end" element={<EndTrip />} />
+            <Route path="/review" element={<ReviewSubmit />} />
+            <Route path="/online-confirm" element={<OnlineConfirmation />} />
+            <Route
+              path="/offline-confirm"
+              element={<OfflineConfirmation />}
+            />
+          </Routes>
+        </main>
       </BrowserRouter>
     </Application>
   );

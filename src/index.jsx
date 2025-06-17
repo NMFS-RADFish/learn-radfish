@@ -43,9 +43,9 @@ const app = new Application({
 });
 
 app.on("ready", async () => {
-    root.render(
-      <React.StrictMode>
-        <App application={app} />
-      </React.StrictMode>,
-    );
+  root.render(
+    <React.StrictMode>
+      <App application={app} />
+    </React.StrictMode>,
+  );
 });

@@ -56,12 +56,12 @@ export default defineConfig((env) => ({
     open: true,
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://localhost:3002',
+      "/api": {
+        target: "http://localhost:3002",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
   test: {
     globals: true,
