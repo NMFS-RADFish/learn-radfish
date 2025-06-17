@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   useApplication,
-  Table,
 } from "@nmfs-radfish/react-radfish";
 import {
   Button,
@@ -323,33 +322,7 @@ function ReviewSubmit() {
               <div className="padding-0">
                 {aggregatedCatches.length > 0 ? (
                   // RADFish Table component for displaying aggregated catches
-                  <Table
-                    // Map aggregated data to the format expected by the Table component
-                    data={aggregatedCatches.map((item, index) => ({
-                      id: index, // Use index as ID for the table row
-                      species: item.species,
-                      count: item.count,
-                      totalWeight: `${item.totalWeight} lbs`, // Add units
-                      avgLength: `${item.avgLength} in`, // Add units
-                    }))}
-                    // Define table columns: key corresponds to data keys, label is header text
-                    columns={[
-                      { key: "species", label: "Species", sortable: true },
-                      { key: "count", label: "Count", sortable: true },
-                      {
-                        key: "totalWeight",
-                        label: "Total Weight",
-                        sortable: true,
-                      },
-                      {
-                        key: "avgLength",
-                        label: "Avg. Length",
-                        sortable: true,
-                      },
-                    ]}
-                    // Enable striped rows for better readability
-                    striped
-                  />
+                  <></>
                 ) : (
                   // Display message if no catches were recorded
                   <p className="padding-2 text-base-dark">

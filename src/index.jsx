@@ -8,10 +8,7 @@ import { IndexedDBConnector } from "@nmfs-radfish/radfish/storage";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 const app = new Application({
   serviceWorker: {
-    url:
-      import.meta.env.MODE === "development"
-        ? "/mockServiceWorker.js"
-        : "/service-worker.js",
+    url: "/service-worker.js",
   },
   mocks: {
     handlers: import("../mocks/browser.js"),
