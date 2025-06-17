@@ -1,19 +1,15 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
-  Form,
-  FormGroup,
-  ErrorMessage,
-  TimePicker,
-  Select,
-  Label,
-  DatePicker,
   Button,
+  Form,
+  Grid,
+  GridContainer,
   StepIndicator,
   StepIndicatorStep,
 } from "@trussworks/react-uswds";
-import { useApplication } from "@nmfs-radfish/react-radfish";
 
 // Utility to format a date string to YYYY-MM-DD for the DatePicker default value
 const formatToYYYYMMDD = (dateString) => {
@@ -91,7 +87,7 @@ function StartTrip() {
         setIsLoading(false);
         return;
       }
-      
+
       setIsLoading(true);
       try {
         // Access the 'trip' store and 'Form' collection from RADFish
@@ -194,20 +190,8 @@ function StartTrip() {
     // Proceed only if validation passes
     if (Object.keys(newErrors).length === 0) {
       try {
-        // Access RADFish store and collection
         let navigateToId = currentTripId;
 
-        // Prepare data to be saved
-        const tripData = {
-          tripDate: formData.tripDate,
-          weather: formData.weather,
-          startTime: formData.startTime,
-          status: "in-progress", // Set status for new/updated trip
-          step: 2 // Update step number
-        };
-
-        // Navigate to the next step (CatchLog), passing the tripId via state
-        navigate(`/catch`, { state: { tripId: navigateToId } });
       } catch (error) {
         console.error("Error saving trip data:", error, "Trip ID:", currentTripId);
       }
@@ -224,37 +208,34 @@ function StartTrip() {
   return (
     <>
       {/* Main content area using USWDS layout utilities */}
-      <div className="display-flex flex-column flex-align-center padding-y-4 padding-x-2">
-        {/* Container to constrain width on larger screens */}
-        <div className="width-full maxw-mobile-lg text-left">
-          
-          {/* --- Embedded Step Indicator --- */}
-          <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-            <StepIndicator 
-              headingLevel="h4" 
-              ofText="of" 
-              stepText="Step"
-              className="usa-step-indicator margin-bottom-0"
-              showLabels={false}
-            >
-              <StepIndicatorStep label="Start Trip" status="current" />
-              <StepIndicatorStep label="Log Catch" />
-              <StepIndicatorStep label="End Trip" />
-              <StepIndicatorStep label="Review and Submit" />
-            </StepIndicator>
-          </div>
+      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
+        <Grid row>
+          <Grid col="fill">
+            <div className="width-full text-left">
+              {/* --- Embedded Step Indicator --- */}
+              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
+                <StepIndicator
+                  headingLevel="h4"
+                  ofText="of"
+                  stepText="Step"
+                  className="usa-step-indicator margin-bottom-0"
+                  showLabels={false}
+                >
+                  <StepIndicatorStep label="Start Trip" status="current" />
+                  <StepIndicatorStep label="Log Catch" />
+                  <StepIndicatorStep label="End Trip" />
+                  <StepIndicatorStep label="Review and Submit" />
+                </StepIndicator>
+              </div>
 
-          {/* USWDS Form component */}
-          <Form onSubmit={handleSubmit} large className="margin-top-3">
-            {/* Trip Date - USWDS DatePicker */}
-            {/* FormGroup adds spacing and connects label/input/error */}
+              {/* USWDS Form component */}
+              <Form onSubmit={handleSubmit} large className="margin-top-3">
 
-            {/* Trip Start Time - USWDS TimePicker */}
-
-            {/* Weather Conditions - USWDS Select */}
-          </Form>
-        </div>
-      </div>
+              </Form>
+            </div>
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       {/* Inline Footer using USWDS utilities */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
