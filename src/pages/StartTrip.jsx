@@ -52,7 +52,7 @@ function StartTrip() {
   // Initialized empty for new trips.
   const [formData, setFormData] = useState({
     tripDate: "",
-    weather: "",
+    startWeather: "",
     startTime: "",
   });
   // useState hook to store the ID of the trip being edited, if any.
@@ -88,14 +88,14 @@ function StartTrip() {
           const formattedDate = formatToYYYYMMDD(currentTrip.tripDate || "");
           setFormData({
             tripDate: formattedDate,
-            weather: currentTrip.weather || "",
+            startWeather: currentTrip.startWeather || "",
             startTime: currentTrip.startTime || "",
           });
         } else {
           // If trip not found (e.g., invalid ID passed), treat as a new trip
           console.warn(`Trip with ID ${tripIdFromState} not found. Starting new trip form.`);
           setCurrentTripId(null);
-          setFormData({ tripDate: "", weather: "", startTime: "" });
+          setFormData({ tripDate: "", startWeather: "", startTime: "" });
         }
       } catch (error) {
         // Handle errors during data fetching
@@ -155,7 +155,7 @@ function StartTrip() {
     if (dateError) newErrors.tripDate = dateError;
 
     const weatherError = validateRequired(formData.startWeather, FIELD_START_WEATHER);
-    if (weatherError) newErrors.weather = weatherError;
+    if (weatherError) newErrors.startWeather = weatherError;
 
     const timeError = validateRequired(formData.startTime, FIELD_START_TIME);
     if (timeError) newErrors.startTime = timeError;

@@ -318,6 +318,7 @@ function CatchLog() {
 
     // Validate all recorded catches first
     const recordedErrors = validateRecordedCatches();
+    setRecordedCatchErrors(recordedErrors);
 
     // Only proceed if there are no errors in the recorded catches list
     if (Object.keys(recordedErrors).length === 0) {
