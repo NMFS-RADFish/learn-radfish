@@ -34,22 +34,9 @@ const formatToYYYYMMDD = (dateString) => {
 
 // Constants for field names used in validation messages
 const FIELD_DATE = "Trip date";
-const FIELD_WEATHER = "Weather condition";
+const FIELD_START_WEATHER = "Start weather";
 const FIELD_START_TIME = "Start time";
 
-/**
- * StartTrip Component
- *
- * This component handles the first step of logging a fishing trip:
- * entering the date, start time, and weather conditions.
- * It demonstrates:
- *  - Using React Hooks (useState, useEffect) for form state and side effects.
- *  - Using React Router Hooks (useNavigate, useLocation) for navigation and state passing.
- *  - Using RADFish Hooks (useApplication) to interact with the RADFish instance.
- *  - Basic form validation.
- *  - Creating or updating trip data in RADFish IndexedDB store.
- *  - Using USWDS React components for the form UI.
- */
 function StartTrip() {
   // React Router hook for programmatic navigation
   const navigate = useNavigate();
@@ -72,8 +59,6 @@ function StartTrip() {
   const [currentTripId, setCurrentTripId] = useState(tripIdFromState || null);
   // useState hook to store validation errors for form fields.
   const [errors, setErrors] = useState({});
-  // useState hook to track if the form has been submitted (to trigger error display).
-  const [submitted, setSubmitted] = useState(false);
   // useState hook to show a loading indicator while fetching existing trip data.
   const [isLoading, setIsLoading] = useState(!!tripIdFromState); // True if editing
 
@@ -164,13 +149,12 @@ function StartTrip() {
     return null;
   };
 
-  // Validates all fields in the form
   const validateForm = () => {
     const newErrors = {};
     const dateError = validateRequired(formData.tripDate, FIELD_DATE);
     if (dateError) newErrors.tripDate = dateError;
 
-    const weatherError = validateRequired(formData.weather, FIELD_WEATHER);
+    const weatherError = validateRequired(formData.startWeather, FIELD_START_WEATHER);
     if (weatherError) newErrors.weather = weatherError;
 
     const timeError = validateRequired(formData.startTime, FIELD_START_TIME);
@@ -182,12 +166,10 @@ function StartTrip() {
   // --- Form Submission ---
   // Handles the form submission (saving data and navigating)
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default browser form submission
-    setSubmitted(true); // Mark form as submitted to show errors
+    e.preventDefault();
 
     const newErrors = validateForm();
 
-    // Proceed only if validation passes
     if (Object.keys(newErrors).length === 0) {
       try {
         let navigateToId = currentTripId;

@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
   Button,
+  ErrorMessage,
   Form,
   FormGroup,
   Grid,
@@ -94,8 +95,6 @@ function CatchLog() {
   });
   // State for the list of catches already recorded for this trip
   const [catches, setCatches] = useState([]);
-  // State to track if the *new catch form* has been submitted
-  const [submitted, setSubmitted] = useState(false);
   // State for validation errors in the *new catch form*
   const [errors, setErrors] = useState({});
   // State to store validation errors for each recorded catch {index: {field: message}}
@@ -120,7 +119,6 @@ function CatchLog() {
         // Access RADFish collections
         const tripStore = app.stores["trip"];
         const Form = tripStore.getCollection("Form");
-        const Catch = tripStore.getCollection("Catch");
 
         // Verify the trip exists
         const existingTrips = await Form.find({ id: tripId });
@@ -130,14 +128,22 @@ function CatchLog() {
           return;
         }
 
-        // Fetch catches associated with this tripId
-        const existingCatches = await Catch.find({ tripId: tripId });
-        if (existingCatches.length > 0) {
-          // Sort catches by creation date (most recent first)
-          setCatches(
-            existingCatches.sort(
-              (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-            ),
+        try {
+          const Catch = tripStore.getCollection("Catch");
+          // Fetch catches associated with this tripId
+          const existingCatches = await Catch.find({ tripId: tripId });
+          if (existingCatches.length > 0) {
+            // Sort catches by creation date (most recent first)
+            setCatches(
+              existingCatches.sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+              ),
+            );
+          }
+        } catch (catchCollectionError) {
+          // Catch collection doesn't exist yet - this is expected in early lessons
+          console.warn(
+            "Catch collection not yet defined - proceeding without loading catches",
           );
         }
       } catch (error) {
@@ -268,19 +274,17 @@ function CatchLog() {
   // Handles adding the *new* catch from the top form
   const handleAddCatch = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
 
     const formErrors = {};
 
-    // Proceed only if no errors and tripId exists
     if (Object.keys(formErrors).length === 0 && tripId) {
       try {
         const Catch = app.stores["trip"].getCollection("Catch");
+
         const newCatchData = {
           ...currentCatch,
           id: crypto.randomUUID(),
           tripId: tripId,
-          // Ensure numeric types are stored correctly
           weight: Number(currentCatch.weight),
           length: Number(currentCatch.length),
           latitude: currentCatch.latitude
@@ -292,7 +296,6 @@ function CatchLog() {
           createdAt: new Date().toISOString(),
         };
 
-        // Reset the form
         setCurrentCatch({
           species: "",
           weight: "",
@@ -301,12 +304,10 @@ function CatchLog() {
           longitude: "",
           time: "",
         });
-        setCatchTimeKey((prevKey) => prevKey + 1); // Reset TimePicker
-        setSubmitted(false); // Reset submission status
-        setErrors({}); // Clear errors
+        setCatchTimeKey((prevKey) => prevKey + 1);
+        setErrors({});
       } catch (error) {
         console.error("Error adding catch:", error);
-        // Add user feedback here
       }
     }
   };
@@ -452,11 +453,8 @@ function CatchLog() {
                   className="margin-top-3 width-full"
                 >
                   {/* Species Dropdown */}
-                  <FormGroup >
-                    <Label
-                      htmlFor="species"
-                      requiredMarker
-                    >
+                  <FormGroup>
+                    <Label htmlFor="species" requiredMarker>
                       Species
                     </Label>
                     <Select
@@ -478,10 +476,10 @@ function CatchLog() {
                   <div className="display-flex gap-2 width-full">
                     {/* Weight Input*/}
                     <div className="flex-1">
-                      <FormGroup error={submitted && errors.weight}>
+                      <FormGroup error={errors.weight}>
                         <Label
                           htmlFor="weight"
-                          error={submitted && errors.weight}
+                          error={errors.weight}
                           requiredMarker
                         >
                           Weight
@@ -495,29 +493,23 @@ function CatchLog() {
                           type="number"
                           value={currentCatch.weight}
                           onChange={handleInputChange}
-                          validationStatus={
-                            submitted && errors.weight ? "error" : undefined
-                          }
-                          aria-describedby={
-                            submitted && errors.weight
-                              ? "weight-error-message"
-                              : undefined
-                          }
+                          validationStatus={errors.weight ? "error" : undefined}
+                          aria-describedby="weight-error-message"
                         />
                         <ErrorMessage
                           id="weight-error-message"
                           className="font-sans-2xs"
                         >
-                          {submitted && errors.weight}
+                          {errors.weight}
                         </ErrorMessage>
                       </FormGroup>
                     </div>
                     {/* Length Input */}
                     <div className="flex-1">
-                      <FormGroup error={submitted && errors.length}>
+                      <FormGroup error={errors.length}>
                         <Label
                           htmlFor="length"
-                          error={submitted && errors.length}
+                          error={errors.length}
                           requiredMarker
                         >
                           Length
@@ -531,30 +523,24 @@ function CatchLog() {
                           type="number"
                           value={currentCatch.length}
                           onChange={handleInputChange}
-                          validationStatus={
-                            submitted && errors.length ? "error" : undefined
-                          }
-                          aria-describedby={
-                            submitted && errors.length
-                              ? "length-error-message"
-                              : undefined
-                          }
+                          validationStatus={errors.length ? "error" : undefined}
+                          aria-describedby="length-error-message"
                         />
                         <ErrorMessage
                           id="length-error-message"
                           className="font-sans-2xs"
                         >
-                          {submitted && errors.length}
+                          {errors.length}
                         </ErrorMessage>
                       </FormGroup>
                     </div>
                   </div>
 
                   {/* Catch Time Input */}
-                  <FormGroup error={submitted && errors.time}>
+                  <FormGroup error={errors.time}>
                     <Label
                       htmlFor="catchTime"
-                      error={submitted && errors.time}
+                      error={errors.time}
                       className="input-time-label"
                       requiredMarker
                     >
@@ -569,23 +555,15 @@ function CatchLog() {
                       minTime="00:00"
                       maxTime="23:30"
                       step={15}
-                      validationStatus={
-                        submitted && errors.time ? "error" : undefined
-                      }
-                      className={
-                        submitted && errors.time ? "usa-input--error" : ""
-                      }
-                      aria-describedby={
-                        submitted && errors.time
-                          ? "time-error-message"
-                          : undefined
-                      }
+                      validationStatus={errors.time ? "error" : undefined}
+                      className={errors.time ? "usa-input--error" : ""}
+                      aria-describedby="time-error-message"
                     />
                     <ErrorMessage
                       id="time-error-message"
                       className="font-sans-2xs"
                     >
-                      {submitted && errors.time}
+                      {errors.time}
                     </ErrorMessage>
                   </FormGroup>
 
@@ -593,11 +571,8 @@ function CatchLog() {
                   <div className="display-flex gap-2 width-full">
                     {/* Latitude Input */}
                     <div className="flex-1">
-                      <FormGroup error={submitted && errors.latitude}>
-                        <Label
-                          htmlFor="latitude"
-                          error={submitted && errors.latitude}
-                        >
+                      <FormGroup error={errors.latitude}>
+                        <Label htmlFor="latitude" error={errors.latitude}>
                           Latitude
                         </Label>
                         <span className="usa-hint display-block text-left">
@@ -610,29 +585,22 @@ function CatchLog() {
                           value={currentCatch.latitude}
                           onChange={handleInputChange}
                           validationStatus={
-                            submitted && errors.latitude ? "error" : undefined
+                            errors.latitude ? "error" : undefined
                           }
-                          aria-describedby={
-                            submitted && errors.latitude
-                              ? "latitude-error-message"
-                              : undefined
-                          }
+                          aria-describedby="latitude-error-message"
                         />
                         <ErrorMessage
                           id="latitude-error-message"
                           className="font-sans-2xs"
                         >
-                          {submitted && errors.latitude}
+                          {errors.latitude}
                         </ErrorMessage>
                       </FormGroup>
                     </div>
                     {/* Longitude Input */}
                     <div className="flex-1">
-                      <FormGroup error={submitted && errors.longitude}>
-                        <Label
-                          htmlFor="longitude"
-                          error={submitted && errors.longitude}
-                        >
+                      <FormGroup error={errors.longitude}>
+                        <Label htmlFor="longitude" error={errors.longitude}>
                           Longitude
                         </Label>
                         <span className="usa-hint display-block text-left">
@@ -645,19 +613,15 @@ function CatchLog() {
                           value={currentCatch.longitude}
                           onChange={handleInputChange}
                           validationStatus={
-                            submitted && errors.longitude ? "error" : undefined
+                            errors.longitude ? "error" : undefined
                           }
-                          aria-describedby={
-                            submitted && errors.longitude
-                              ? "longitude-error-message"
-                              : undefined
-                          }
+                          aria-describedby="longitude-error-message"
                         />
                         <ErrorMessage
                           id="longitude-error-message"
                           className="font-sans-2xs"
                         >
-                          {submitted && errors.longitude}
+                          {errors.longitude}
                         </ErrorMessage>
                       </FormGroup>
                     </div>
@@ -707,17 +671,16 @@ function CatchLog() {
                                   className="text-secondary hover:bg-base-lightest border-radius-sm padding-05 display-flex flex-align-center"
                                   aria-label="Delete this catch"
                                 >
-                                  Delete <Icon.Delete size={3} aria-hidden="true" />
+                                  Delete{" "}
+                                  <Icon.Delete size={3} aria-hidden="true" />
                                 </Button>
                               </div>
 
                               {/* Recorded Catch Form Fields */}
-                              <FormGroup
-                                error={!!catchErrors.species}
-                              >
+                              <FormGroup error={catchErrors.species}>
                                 <Label
                                   htmlFor={`recorded-species-${index}`}
-                                  error={!!catchErrors.species}
+                                  error={catchErrors.species}
                                   requiredMarker
                                 >
                                   Species
@@ -737,11 +700,7 @@ function CatchLog() {
                                   validationStatus={
                                     catchErrors.species ? "error" : undefined
                                   }
-                                  aria-describedby={
-                                    catchErrors.species
-                                      ? `recorded-species-${index}-error-message`
-                                      : undefined
-                                  }
+                                  aria-describedby={`recorded-species-${index}-error-message`}
                                 >
                                   <option value="">-Select-</option>
                                   {SPECIES_OPTIONS.map((species) => (
@@ -757,20 +716,16 @@ function CatchLog() {
                                 >
                                   {catchErrors.species}
                                 </ErrorMessage>
-
                               </FormGroup>
-
 
                               {/* Recorded Weight/Length Row */}
                               <div className="display-flex gap-2 width-full">
                                 {/* Recorded Weight */}
                                 <div className="flex-1">
-                                  <FormGroup
-                                    error={!!catchErrors.weight}
-                                  >
+                                  <FormGroup error={catchErrors.weight}>
                                     <Label
                                       htmlFor={`recorded-weight-${index}`}
-                                      error={!!catchErrors.weight}
+                                      error={catchErrors.weight}
                                       requiredMarker
                                     >
                                       Weight
@@ -793,11 +748,7 @@ function CatchLog() {
                                       validationStatus={
                                         catchErrors.weight ? "error" : undefined
                                       }
-                                      aria-describedby={
-                                        catchErrors.weight
-                                          ? `recorded-weight-${index}-error-message`
-                                          : undefined
-                                      }
+                                      aria-describedby={`recorded-weight-${index}-error-message`}
                                     />
 
                                     <ErrorMessage
@@ -806,17 +757,14 @@ function CatchLog() {
                                     >
                                       {catchErrors.weight}
                                     </ErrorMessage>
-
                                   </FormGroup>
                                 </div>
                                 {/* Recorded Length */}
                                 <div className="flex-1">
-                                  <FormGroup
-                                    error={!!catchErrors.length}
-                                  >
+                                  <FormGroup error={catchErrors.length}>
                                     <Label
                                       htmlFor={`recorded-length-${index}`}
-                                      error={!!catchErrors.length}
+                                      error={catchErrors.length}
                                       requiredMarker
                                     >
                                       Length
@@ -839,11 +787,7 @@ function CatchLog() {
                                       validationStatus={
                                         catchErrors.length ? "error" : undefined
                                       }
-                                      aria-describedby={
-                                        catchErrors.length
-                                          ? `recorded-length-${index}-error-message`
-                                          : undefined
-                                      }
+                                      aria-describedby={`recorded-length-${index}-error-message`}
                                     />
 
                                     <ErrorMessage
@@ -852,16 +796,15 @@ function CatchLog() {
                                     >
                                       {catchErrors.length}
                                     </ErrorMessage>
-
                                   </FormGroup>
                                 </div>
                               </div>
 
                               {/* Recorded Time */}
-                              <FormGroup error={submitted && catchErrors.time}>
+                              <FormGroup error={catchErrors.time}>
                                 <Label
                                   htmlFor={`recorded-time-${index}`}
-                                  error={!!catchErrors.time}
+                                  error={catchErrors.time}
                                   className="input-time-label"
                                   requiredMarker
                                 >
@@ -878,41 +821,30 @@ function CatchLog() {
                                   maxTime="23:45"
                                   step={15}
                                   className={
-                                    submitted && catchErrors.time
-                                      ? "usa-input--error"
-                                      : ""
+                                    catchErrors.time ? "usa-input--error" : ""
                                   }
                                   validationStatus={
-                                    submitted && catchErrors.time
-                                      ? "error"
-                                      : undefined
+                                    catchErrors.time ? "error" : undefined
                                   }
-                                  aria-describedby={
-                                    catchErrors.time
-                                      ? `recorded-time-${index}-error-message`
-                                      : undefined
-                                  }
+                                  aria-describedby={`recorded-time-${index}-error-message`}
                                 />
 
                                 <ErrorMessage
                                   id={`recorded-time-${index}-error-message`}
                                   className="font-sans-2xs"
                                 >
-                                  {submitted && catchErrors.time}
+                                  {catchErrors.time}
                                 </ErrorMessage>
-
                               </FormGroup>
 
                               {/* Recorded Coordinates Row */}
                               <div className="display-flex gap-2 width-full">
                                 {/* Recorded Latitude */}
                                 <div className="flex-1">
-                                  <FormGroup
-                                    error={!!catchErrors.latitude}
-                                  >
+                                  <FormGroup error={catchErrors.latitude}>
                                     <Label
                                       htmlFor={`recorded-latitude-${index}`}
-                                      error={!!catchErrors.latitude}
+                                      error={catchErrors.latitude}
                                     >
                                       Latitude
                                     </Label>
@@ -937,30 +869,23 @@ function CatchLog() {
                                           ? "error"
                                           : undefined
                                       }
-                                      aria-describedby={
-                                        catchErrors.latitude
-                                          ? `recorded-latitude-${index}-error-message`
-                                          : undefined
-                                      }
+                                      aria-describedby={`recorded-latitude-${index}-error-message`}
                                     />
 
                                     <ErrorMessage
                                       id={`recorded-latitude-${index}-error-message`}
                                       className="font-sans-2xs"
                                     >
-                                      {submitted && catchErrors.latitude}
+                                      {catchErrors.latitude}
                                     </ErrorMessage>
-
                                   </FormGroup>
                                 </div>
                                 {/* Recorded Longitude */}
                                 <div className="flex-1">
-                                  <FormGroup
-                                    error={!!catchErrors.longitude}
-                                  >
+                                  <FormGroup error={catchErrors.longitude}>
                                     <Label
                                       htmlFor={`recorded-longitude-${index}`}
-                                      error={!!catchErrors.longitude}
+                                      error={catchErrors.longitude}
                                     >
                                       Longitude
                                     </Label>
@@ -985,20 +910,15 @@ function CatchLog() {
                                           ? "error"
                                           : undefined
                                       }
-                                      aria-describedby={
-                                        catchErrors.longitude
-                                          ? `recorded-longitude-${index}-error-message`
-                                          : undefined
-                                      }
+                                      aria-describedby={`recorded-longitude-${index}-error-message`}
                                     />
 
                                     <ErrorMessage
                                       id={`recorded-longitude-${index}-error-message`}
                                       className="font-sans-2xs"
                                     >
-                                      {submitted && catchErrors.longitude}
+                                      {catchErrors.longitude}
                                     </ErrorMessage>
-
                                   </FormGroup>
                                 </div>
                               </div>
@@ -1014,7 +934,6 @@ function CatchLog() {
           </Grid>
         </Grid>
       </GridContainer>
-
 
       {/* Footer uses USWDS utilities */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">

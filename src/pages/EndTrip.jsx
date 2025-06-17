@@ -30,7 +30,6 @@ function EndTrip() {
   });
 
   const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load existing trip data based on state tripId
@@ -137,7 +136,6 @@ function EndTrip() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
 
     const newErrors = validateForm();
 
