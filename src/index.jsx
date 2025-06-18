@@ -10,9 +10,6 @@ const app = new Application({
   serviceWorker: {
     url: "/service-worker.js",
   },
-  mocks: {
-    handlers: import("../mocks/browser.js"),
-  },
   stores: {
     trip: {
       connector: new IndexedDBConnector("learn-radfish"),
