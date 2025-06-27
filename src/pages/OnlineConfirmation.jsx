@@ -7,7 +7,7 @@ function OnlineConfirmation() {
   const navigate = useNavigate();
   return (
     <>
-      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
+      <GridContainer className="padding-y-4 tablet:padding-x-0 tablet:width-mobile-lg">
         <Grid row>
           <Grid col="fill">
             <div className="text-center">

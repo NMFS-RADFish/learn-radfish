@@ -221,7 +221,7 @@ function HomePage() {
 
   return (
     <>
-      <GridContainer className="padding-y-4 padding-x-2 text-center">
+      <GridContainer className="padding-y-4 text-center tablet:padding-x-0 tablet:width-mobile-lg">
         <Grid row>
           <Grid col="fill">
             <h1 className="font-heading-xl text-center margin-0">
