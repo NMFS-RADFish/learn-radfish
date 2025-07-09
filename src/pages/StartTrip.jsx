@@ -10,32 +10,7 @@ import {
   StepIndicator,
   StepIndicatorStep,
 } from "@trussworks/react-uswds";
-
-// Utility to format a date string to YYYY-MM-DD for the DatePicker default value
-const formatToYYYYMMDD = (dateString) => {
-  if (!dateString || typeof dateString !== 'string') {
-    return '';
-  }
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid date string could not be parsed: ${dateString}`);
-      return '';
-    }
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  } catch (error) {
-    console.error(`Error formatting date string: ${dateString}`, error);
-    return '';
-  }
-};
-
-// Constants for field names used in validation messages
-const FIELD_DATE = "Trip date";
-const FIELD_START_WEATHER = "Start weather";
-const FIELD_START_TIME = "Start time";
+import { validateRequired, formatToYYYYMMDD, FIELD_NAMES } from "../utils/validation";
 
 function StartTrip() {
   // React Router hook for programmatic navigation
@@ -141,23 +116,15 @@ function StartTrip() {
   };
 
   // --- Validation ---
-  // Simple required field validation
-  const validateRequired = (value, fieldName) => {
-    if (!value || String(value).trim() === "") {
-      return `${fieldName} is required`;
-    }
-    return null;
-  };
-
   const validateForm = () => {
     const newErrors = {};
-    const dateError = validateRequired(formData.tripDate, FIELD_DATE);
+    const dateError = validateRequired(formData.tripDate, FIELD_NAMES.DATE);
     if (dateError) newErrors.tripDate = dateError;
 
-    const weatherError = validateRequired(formData.startWeather, FIELD_START_WEATHER);
+    const weatherError = validateRequired(formData.startWeather, FIELD_NAMES.START_WEATHER);
     if (weatherError) newErrors.startWeather = weatherError;
 
-    const timeError = validateRequired(formData.startTime, FIELD_START_TIME);
+    const timeError = validateRequired(formData.startTime, FIELD_NAMES.START_TIME);
     if (timeError) newErrors.startTime = timeError;
 
     return newErrors;

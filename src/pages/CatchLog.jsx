@@ -19,58 +19,14 @@ import {
   TextInput,
   TimePicker,
 } from "@trussworks/react-uswds";
-
-// Constants for field names used in validation messages
-const FIELD_SPECIES = "Species";
-const FIELD_WEIGHT = "Weight";
-const FIELD_LENGTH = "Length";
-const FIELD_LATITUDE = "Latitude";
-const FIELD_LONGITUDE = "Longitude";
-const FIELD_TIME = "Catch time";
-
-// Predefined species options for the dropdown
-const SPECIES_OPTIONS = ["Yellowfin", "Bluefin", "Salmon", "Halibut"];
-
-// --- Validation Helper Functions ---
-const validateRequired = (value, fieldName) => {
-  if (!value && value !== 0) {
-    return `${fieldName} is required`;
-  }
-  return null;
-};
-
-const validateNumberRange = (value, min, max, fieldName, allowZero = true) => {
-  if (value === "" || value === null || value === undefined) return null;
-  const numValue = Number(value);
-  if (isNaN(numValue)) return `${fieldName} must be a valid number`;
-  if (!allowZero && numValue <= min)
-    return `${fieldName} must be greater than ${min}`;
-  if (allowZero && numValue < min)
-    return `${fieldName} must be at least ${min}`;
-  if (numValue > max) {
-    const minOperator = allowZero ? ">=" : ">";
-    return `${fieldName} must be ${minOperator} ${min} and <= ${max}`;
-  }
-  return null;
-};
-
-const validateLatitude = (value) => {
-  if (value === "" || value === null || value === undefined) return null;
-  const numValue = Number(value);
-  if (isNaN(numValue)) return `${FIELD_LATITUDE} must be a valid number`;
-  if (numValue < -90 || numValue > 90)
-    return `${FIELD_LATITUDE} must be between -90 and 90`;
-  return null;
-};
-
-const validateLongitude = (value) => {
-  if (value === "" || value === null || value === undefined) return null;
-  const numValue = Number(value);
-  if (isNaN(numValue)) return `${FIELD_LONGITUDE} must be a valid number`;
-  if (numValue < -180 || numValue > 180)
-    return `${FIELD_LONGITUDE} must be between -180 and 180`;
-  return null;
-};
+import { 
+  validateRequired, 
+  validateNumberRange, 
+  validateLatitude, 
+  validateLongitude, 
+  FIELD_NAMES,
+  SPECIES_OPTIONS 
+} from "../utils/validation";
 
 function CatchLog() {
   // React Router hooks
@@ -180,17 +136,17 @@ function CatchLog() {
   const validateForm = () => {
     const newErrors = {};
     // Validate required fields
-    newErrors.species = validateRequired(currentCatch.species, FIELD_SPECIES);
-    newErrors.weight = validateRequired(currentCatch.weight, FIELD_WEIGHT);
-    newErrors.length = validateRequired(currentCatch.length, FIELD_LENGTH);
-    newErrors.time = validateRequired(currentCatch.time, FIELD_TIME);
+    newErrors.species = validateRequired(currentCatch.species, FIELD_NAMES.SPECIES);
+    newErrors.weight = validateRequired(currentCatch.weight, FIELD_NAMES.WEIGHT);
+    newErrors.length = validateRequired(currentCatch.length, FIELD_NAMES.LENGTH);
+    newErrors.time = validateRequired(currentCatch.time, FIELD_NAMES.TIME);
     // Validate ranges if value exists and required check passed
     if (!newErrors.weight && currentCatch.weight) {
       newErrors.weight = validateNumberRange(
         currentCatch.weight,
         0,
         1000,
-        FIELD_WEIGHT,
+        FIELD_NAMES.WEIGHT,
         false,
       );
     }
@@ -199,7 +155,7 @@ function CatchLog() {
         currentCatch.length,
         0,
         500,
-        FIELD_LENGTH,
+        FIELD_NAMES.LENGTH,
         false,
       );
     }
@@ -224,17 +180,17 @@ function CatchLog() {
     catches.forEach((catchItem, index) => {
       const catchErrors = {};
       // Validate required fields
-      catchErrors.species = validateRequired(catchItem.species, FIELD_SPECIES);
-      catchErrors.weight = validateRequired(catchItem.weight, FIELD_WEIGHT);
-      catchErrors.length = validateRequired(catchItem.length, FIELD_LENGTH);
-      catchErrors.time = validateRequired(catchItem.time, FIELD_TIME);
+      catchErrors.species = validateRequired(catchItem.species, FIELD_NAMES.SPECIES);
+      catchErrors.weight = validateRequired(catchItem.weight, FIELD_NAMES.WEIGHT);
+      catchErrors.length = validateRequired(catchItem.length, FIELD_NAMES.LENGTH);
+      catchErrors.time = validateRequired(catchItem.time, FIELD_NAMES.TIME);
       // Validate ranges if value exists and required check passed
       if (!catchErrors.weight && catchItem.weight) {
         catchErrors.weight = validateNumberRange(
           catchItem.weight,
           0,
           1000,
-          FIELD_WEIGHT,
+          FIELD_NAMES.WEIGHT,
           false,
         );
       }
@@ -243,7 +199,7 @@ function CatchLog() {
           catchItem.length,
           0,
           500,
-          FIELD_LENGTH,
+          FIELD_NAMES.LENGTH,
           false,
         );
       }

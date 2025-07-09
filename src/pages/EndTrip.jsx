@@ -12,10 +12,7 @@ import {
   StepIndicator,
   StepIndicatorStep,
 } from "@trussworks/react-uswds";
-
-// Field name constants
-const FIELD_WEATHER = "Weather condition";
-const FIELD_END_TIME = "End time";
+import { validateRequired, FIELD_NAMES } from "../utils/validation";
 
 function EndTrip() {
   const navigate = useNavigate();
@@ -110,24 +107,16 @@ function EndTrip() {
     }
   };
 
-  // Validate a required field
-  const validateRequired = (value, fieldName) => {
-    if (!value || value.trim() === "") {
-      return `${fieldName} is required`;
-    }
-    return null;
-  };
-
   // Validate form data
   const validateForm = () => {
     const newErrors = {};
 
     // Validate weather
-    const weatherError = validateRequired(formData.endWeather, FIELD_WEATHER);
+    const weatherError = validateRequired(formData.endWeather, FIELD_NAMES.END_WEATHER);
     if (weatherError) newErrors.endWeather = weatherError;
 
     // Validate end time
-    const timeError = validateRequired(formData.endTime, FIELD_END_TIME);
+    const timeError = validateRequired(formData.endTime, FIELD_NAMES.END_TIME);
     if (timeError) newErrors.endTime = timeError;
 
     return newErrors;
