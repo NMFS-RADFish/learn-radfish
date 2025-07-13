@@ -1,17 +1,4 @@
-// Field name constants used in validation messages
-export const FIELD_NAMES = {
-  DATE: "Trip date",
-  START_WEATHER: "Start weather",
-  START_TIME: "Start time",
-  END_WEATHER: "End weather",
-  END_TIME: "End time",
-  SPECIES: "Species",
-  WEIGHT: "Weight",
-  LENGTH: "Length",
-  LATITUDE: "Latitude",
-  LONGITUDE: "Longitude",
-  TIME: "Catch time",
-};
+import { FIELD_NAMES, VALIDATION_RANGES } from './constants';
 
 // Utility to format a date string to YYYY-MM-DD for the DatePicker default value
 export const formatToYYYYMMDD = (dateString) => {
@@ -63,8 +50,9 @@ export const validateLatitude = (value) => {
   if (value === "" || value === null || value === undefined) return null;
   const numValue = Number(value);
   if (isNaN(numValue)) return `${FIELD_NAMES.LATITUDE} must be a valid number`;
-  if (numValue < -90 || numValue > 90)
-    return `${FIELD_NAMES.LATITUDE} must be between -90 and 90`;
+  const { min, max } = VALIDATION_RANGES.LATITUDE;
+  if (numValue < min || numValue > max)
+    return `${FIELD_NAMES.LATITUDE} must be between ${min} and ${max}`;
   return null;
 };
 
@@ -73,10 +61,11 @@ export const validateLongitude = (value) => {
   if (value === "" || value === null || value === undefined) return null;
   const numValue = Number(value);
   if (isNaN(numValue)) return `${FIELD_NAMES.LONGITUDE} must be a valid number`;
-  if (numValue < -180 || numValue > 180)
-    return `${FIELD_NAMES.LONGITUDE} must be between -180 and 180`;
+  const { min, max } = VALIDATION_RANGES.LONGITUDE;
+  if (numValue < min || numValue > max)
+    return `${FIELD_NAMES.LONGITUDE} must be between ${min} and ${max}`;
   return null;
 };
 
-// Predefined species options for the dropdown
-export const SPECIES_OPTIONS = ["Yellowfin", "Bluefin", "Salmon", "Halibut"]; 
+// Re-export constants for convenience
+export { FIELD_NAMES, VALIDATION_RANGES } from './constants'; 

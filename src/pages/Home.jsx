@@ -3,59 +3,27 @@ import React, { useState, useEffect } from "react";
 import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import { useNavigate } from "react-router-dom";
 import { Button, Grid } from "@trussworks/react-uswds";
-
-// Status constants
-const STATUS_SUBMITTED = "submitted";
-const STATUS_IN_PROGRESS = "in-progress";
-const STATUS_NOT_SUBMITTED = "Not Submitted";
-
-// Status label constants
-const LABEL_SUBMITTED = "SUBMITTED";
-const LABEL_IN_PROGRESS = "IN PROGRESS";
-const LABEL_READY_TO_SUBMIT = "READY TO SUBMIT";
-const LABEL_NOT_STARTED = "NOT STARTED";
+import {
+  calculateTripStats,
+  formatDate,
+  TRIP_STATUS,
+  TRIP_STATUS_LABELS,
+  STORE_NAMES,
+  COLLECTION_NAMES,
+} from "../utils";
 
 function HomePage() {
-  // RADFish hooks
-  const app = useApplication(); // Access the RADFish application instance
-  const { isOffline } = useOfflineStatus(); // Check offline status
+  const app = useApplication();
+  const { isOffline } = useOfflineStatus();
+  const navigate = useNavigate();
 
-  // React state
+  // State
   const [trips, setTrips] = useState([]);
   const [tripStats, setTripStats] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const navigate = useNavigate();
-
-  /**
-   * Calculates statistics for a trip based on its catch data
-   * @param {Array} tripCatches - Array of catch objects for a trip
-   * @returns {Object} Object containing totalCount, totalWeight, and avgLength
-   */
-  const calculateTripStats = (tripCatches) => {
-    if (!tripCatches || tripCatches.length === 0) {
-      return { totalCount: 0, totalWeight: 0, avgLength: 0 };
-    }
-
-    const totalCount = tripCatches.length;
-
-    const totalWeight = tripCatches
-      .reduce((sum, catchItem) => sum + (catchItem.weight || 0), 0)
-      .toFixed(1);
-
-    const totalLength = tripCatches.reduce(
-      (sum, catchItem) => sum + (catchItem.length || 0),
-      0,
-    );
-
-    const avgLength =
-      totalCount > 0 ? (totalLength / totalCount).toFixed(1) : 0;
-
-    return { totalCount, totalWeight, avgLength };
-  };
-
-  // Load trips and catch data on component mount
+  // Load trips on mount and when app or offline status changes
   useEffect(() => {
     const loadTripsAndCatches = async () => {
       setIsLoading(true);
@@ -69,9 +37,9 @@ function HomePage() {
         }
 
         // Get collections from the trip store
-        const tripStore = app.stores["trip"];
-        const Form = tripStore.getCollection("Form");
-        const Catch = tripStore.getCollection("Catch");
+        const tripStore = app.stores[STORE_NAMES.TRIP];
+        const Form = tripStore.getCollection(COLLECTION_NAMES.FORM);
+        const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCH);
 
         // Fetch all trips
         const allTrips = await Form.find({});
@@ -89,11 +57,20 @@ function HomePage() {
         const stats = {};
 
         for (const trip of sortedTrips) {
-          // Find all catches associated with this trip
-          const tripCatches = await Catch.find({ tripId: trip.id });
+          try {
+            // Find all catches associated with this trip
+            const tripCatches = await Catch.find({ tripId: trip.id });
 
-          // Use the calculateTripStats function to get statistics
-          stats[trip.id] = calculateTripStats(tripCatches);
+            // Use the calculateTripStats function to get statistics
+            stats[trip.id] = calculateTripStats(tripCatches);
+          } catch (catchError) {
+            // Handle case where Catch collection doesn't exist yet
+            console.warn(
+              `Could not load catches for trip ${trip.id}:`,
+              catchError,
+            );
+            stats[trip.id] = calculateTripStats([]);
+          }
         }
 
         setTripStats(stats);
@@ -106,18 +83,7 @@ function HomePage() {
     };
 
     loadTripsAndCatches();
-  }, [app, isOffline]); // Re-run if app or offline status changes
-
-  /**
-   * Format a date string to a localized date display
-   * @param {string} dateString - ISO date string
-   * @return {string} Formatted date
-   */
-  const formatDate = (dateString) => {
-    if (!dateString) return "No date";
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
+  }, [app, isOffline]);
 
   /**
    * Get human-readable status label based on trip status
@@ -125,18 +91,20 @@ function HomePage() {
    * @return {string} Status label
    */
   const getStatusLabel = (trip) => {
-    if (!trip || !trip.status) return LABEL_NOT_STARTED;
+    if (!trip || !trip.status) return TRIP_STATUS_LABELS.NOT_STARTED;
 
-    if (trip.status === STATUS_SUBMITTED) return LABEL_SUBMITTED;
-    if (trip.status === STATUS_IN_PROGRESS) {
+    if (trip.status === TRIP_STATUS.SUBMITTED)
+      return TRIP_STATUS_LABELS.SUBMITTED;
+    if (trip.status === TRIP_STATUS.IN_PROGRESS) {
       if (trip.step) {
-        return `${LABEL_IN_PROGRESS}: ${trip.step}/4`;
+        return `${TRIP_STATUS_LABELS.IN_PROGRESS}: ${trip.step}/4`;
       }
-      return LABEL_IN_PROGRESS;
+      return TRIP_STATUS_LABELS.IN_PROGRESS;
     }
-    if (trip.status === STATUS_NOT_SUBMITTED) return LABEL_READY_TO_SUBMIT;
+    if (trip.status === TRIP_STATUS.NOT_SUBMITTED)
+      return TRIP_STATUS_LABELS.READY_TO_SUBMIT;
 
-    return LABEL_NOT_STARTED;
+    return TRIP_STATUS_LABELS.NOT_STARTED;
   };
 
   /**
@@ -147,9 +115,9 @@ function HomePage() {
   const getHeaderClass = (trip) => {
     if (!trip || !trip.status) return "bg-secondary";
 
-    if (trip.status === STATUS_SUBMITTED) return "bg-green"; // Green
-    if (trip.status === STATUS_IN_PROGRESS) return "bg-accent-warm"; // Orange
-    if (trip.status === STATUS_NOT_SUBMITTED) return "bg-primary-darker"; // Blue
+    if (trip.status === TRIP_STATUS.SUBMITTED) return "bg-green"; // Green
+    if (trip.status === TRIP_STATUS.IN_PROGRESS) return "bg-accent-warm"; // Orange
+    if (trip.status === TRIP_STATUS.NOT_SUBMITTED) return "bg-primary-darker"; // Blue
 
     // Default to orange for any other status
     return "bg-accent-warm";
@@ -163,24 +131,24 @@ function HomePage() {
     // Pass tripId via React Router state (not URL parameters)
     const destinationState = { state: { tripId: trip.id } };
 
-    if (trip.status === STATUS_SUBMITTED) {
-      navigate(`/review`, destinationState);
-    } else if (trip.status === STATUS_IN_PROGRESS) {
+    if (trip.status === TRIP_STATUS.SUBMITTED) {
+      navigate("/review", destinationState);
+    } else if (trip.status === TRIP_STATUS.IN_PROGRESS) {
       // Navigate based on the step for in-progress trips
       if (trip.step === 2) {
-        navigate(`/catch`, destinationState);
+        navigate("/catch", destinationState);
       } else if (trip.step === 3) {
-        navigate(`/end`, destinationState);
+        navigate("/end", destinationState);
       } else if (trip.step === 4) {
-        navigate(`/review`, destinationState);
+        navigate("/review", destinationState);
       } else {
         // Default to start if step is missing or invalid
-        navigate(`/start`, destinationState);
+        navigate("/start", destinationState);
       }
-    } else if (trip.status === STATUS_NOT_SUBMITTED) {
-      navigate(`/review`, destinationState);
+    } else if (trip.status === TRIP_STATUS.NOT_SUBMITTED) {
+      navigate("/review", destinationState);
     } else {
-      navigate(`/start`, destinationState);
+      navigate("/start", destinationState);
     }
   };
 
@@ -213,9 +181,7 @@ function HomePage() {
     <>
       <Grid row>
         <Grid col="fill">
-          <h1 className="font-heading-xl text-center margin-0">
-            Hi, Captain
-          </h1>
+          <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
 
           <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
             Recent Trips
