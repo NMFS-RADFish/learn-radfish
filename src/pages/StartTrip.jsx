@@ -1,3 +1,4 @@
+// --- Imports ---
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useApplication } from "@nmfs-radfish/react-radfish";
@@ -12,29 +13,53 @@ import {
 import { validateRequired, FIELD_NAMES } from "../utils";
 import { useTripNavigation, useTripData } from "../hooks";
 
+// --- Component Definition ---
+/**
+ * StartTrip - First step in the trip recording workflow
+ * This component demonstrates:
+ * - Form state management with validation
+ * - Custom hooks for navigation and data management
+ * - Creating/updating trips in RADFish stores
+ * - Step-based workflow navigation
+ */
 function StartTrip() {
+  // --- RADFish Application Context ---
+  // Access to the RADFish application instance for store operations
   const app = useApplication();
+  
+  // --- Custom Hooks ---
+  // Navigation hook that handles trip-specific routing
   const { tripId, navigateHome, navigateWithTripId } = useTripNavigation();
   
-  // Form state
+  // --- State Management ---
+  // Form data state - tracks all user inputs for the start trip form
   const [formData, setFormData] = useState({
     tripDate: "",
     startWeather: "",
     startTime: "",
   });
+  
+  // Validation errors state - stores field-specific error messages
   const [errors, setErrors] = useState({});
   
-  // Trip data management
+  // --- Trip Data Management ---
+  // Custom hook for managing trip data with RADFish stores
+  // Handles both creating new trips and updating existing ones
   const { trip, isLoading, updateTrip, createTrip } = useTripData(
     tripId,
     (error) => {
+      // Error callback - redirects to home if trip loading fails
       console.warn("Trip loading error:", error);
       navigateHome();
     },
-    { formatFields: ['tripDate'] }
+    { formatFields: ['tripDate'] } // Auto-formats date fields for display
   );
   
-  // Load trip data into form when trip is loaded
+  // --- Effects ---
+  /**
+   * Populates form with existing trip data when editing
+   * This allows users to resume an in-progress trip
+   */
   useEffect(() => {
     if (trip) {
       setFormData({
@@ -45,10 +70,17 @@ function StartTrip() {
     }
   }, [trip]);
   
-  // Form validation function
+  // --- Validation ---
+  /**
+   * Validates all form fields before submission
+   * Uses centralized validation utilities for consistency
+   * @param {Object} data - Form data to validate
+   * @returns {Object} Validation errors object (empty if valid)
+   */
   const validateForm = (data) => {
     const newErrors = {};
     
+    // Validate each required field using centralized validators
     const dateError = validateRequired(data.tripDate, FIELD_NAMES.DATE);
     if (dateError) newErrors.tripDate = dateError;
     
@@ -61,42 +93,60 @@ function StartTrip() {
     return newErrors;
   };
   
-  // Handle input changes
+  // --- Event Handlers ---
+  /**
+   * Handles input field changes
+   * Updates form state and clears validation errors on change
+   * @param {Event} e - Input change event
+   */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear error for this field if it exists
+    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
   
-  // Handle time changes
+  /**
+   * Handles time picker changes
+   * @param {string} time - Selected time value
+   * @param {string} fieldName - Name of the time field
+   */
   const handleTimeChange = (time, fieldName = 'startTime') => {
     setFormData(prev => ({ ...prev, [fieldName]: time }));
     
-    // Clear error for this field if it exists
+    // Clear error for this field when user selects time
     if (errors[fieldName]) {
       setErrors(prev => ({ ...prev, [fieldName]: undefined }));
     }
   };
   
-  // Handle date changes
+  /**
+   * Handles date picker changes
+   * @param {string} date - Selected date value
+   * @param {string} fieldName - Name of the date field
+   */
   const handleDateChange = (date, fieldName = 'tripDate') => {
     setFormData(prev => ({ ...prev, [fieldName]: date || '' }));
     
-    // Clear error for this field if it exists
+    // Clear error for this field when user selects date
     if (errors[fieldName]) {
       setErrors(prev => ({ ...prev, [fieldName]: undefined }));
     }
   };
   
-  // Handle form submission
+  /**
+   * Handles form submission
+   * Creates new trip or updates existing trip in RADFish store
+   * Navigates to next step on success
+   * @param {Event} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate form
+    // Validate all form fields
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
     
@@ -106,22 +156,22 @@ function StartTrip() {
         let navigateToId = tripId;
         
         if (tripId) {
-          // Update existing trip
+          // Update existing trip when editing
           const success = await updateTrip({
             ...formData,
             status: "in-progress",
-            step: 2
+            step: 2 // Move to step 2 (Catch Log)
           });
           
           if (!success) {
             throw new Error("Failed to update trip");
           }
         } else {
-          // Create new trip
+          // Create new trip when starting fresh
           navigateToId = await createTrip({
             ...formData,
             status: "in-progress",
-            step: 2
+            step: 2 // Start at step 2 (Catch Log)
           });
           
           if (!navigateToId) {
@@ -129,7 +179,7 @@ function StartTrip() {
           }
         }
         
-        // Navigate to catch log page
+        // Navigate to catch log page with trip context
         navigateWithTripId("/catch", navigateToId);
       } catch (error) {
         console.error("Error saving trip data:", error, "Trip ID:", tripId);
@@ -137,7 +187,8 @@ function StartTrip() {
     }
   };
   
-  // Show loading message while fetching data
+  // --- Render Logic ---
+  // Show loading state while fetching existing trip data
   if (isLoading) {
     return <div className="padding-5 text-center">Loading trip...</div>;
   }
@@ -163,8 +214,9 @@ function StartTrip() {
                 </StepIndicator>
               </div>
               
+              {/* Form fields will be added here in the learning exercises */}
               <Form onSubmit={handleSubmit} large className="margin-top-3">
-
+                {/* TODO: Add form fields for tripDate, startWeather, and startTime */}
               </Form>
             </div>
           </Grid>

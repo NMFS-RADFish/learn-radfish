@@ -1,3 +1,4 @@
+// --- Imports ---
 import "../index.css";
 
 import React, { useState, useEffect } from "react";
@@ -18,27 +19,51 @@ import {
 import { validateRequired, FIELD_NAMES } from "../utils";
 import { useTripNavigation, useTripData } from "../hooks";
 
+// --- Component Definition ---
+/**
+ * EndTrip - Third step in the trip recording workflow
+ * This component demonstrates:
+ * - Loading and updating existing trip data
+ * - Form validation for trip end details
+ * - Continuing the step-based workflow
+ * - Consistent error handling patterns
+ */
 function EndTrip() {
+  // --- RADFish Application Context ---
+  // Access to the RADFish application instance for store operations
   const app = useApplication();
+  
+  // --- Custom Hooks ---
+  // Navigation hook that handles trip-specific routing
   const { tripId, navigateHome, navigateWithTripId } = useTripNavigation();
   
-  // Form state
+  // --- State Management ---
+  // Form data state - tracks end trip details
   const [formData, setFormData] = useState({
     endWeather: "",
     endTime: "",
   });
+  
+  // Validation errors state - stores field-specific error messages
   const [errors, setErrors] = useState({});
   
-  // Trip data management
+  // --- Trip Data Management ---
+  // Custom hook for managing trip data with RADFish stores
+  // Only updates existing trips (no creation needed at this step)
   const { trip, isLoading, updateTrip } = useTripData(
     tripId,
     (error) => {
+      // Error callback - redirects to home if trip not found
       console.warn("Trip loading error:", error);
       navigateHome();
     }
   );
   
-  // Load trip data into form when trip is loaded
+  // --- Effects ---
+  /**
+   * Populates form with existing end trip data
+   * Allows users to edit previously entered end details
+   */
   useEffect(() => {
     if (trip) {
       setFormData({
@@ -48,10 +73,17 @@ function EndTrip() {
     }
   }, [trip]);
   
-  // Form validation function
+  // --- Validation ---
+  /**
+   * Validates end trip form fields
+   * Uses centralized validation utilities for consistency
+   * @param {Object} data - Form data to validate
+   * @returns {Object} Validation errors object (empty if valid)
+   */
   const validateForm = (data) => {
     const newErrors = {};
     
+    // Validate required fields using centralized validators
     const weatherError = validateRequired(data.endWeather, FIELD_NAMES.END_WEATHER);
     if (weatherError) newErrors.endWeather = weatherError;
     
@@ -61,45 +93,60 @@ function EndTrip() {
     return newErrors;
   };
   
-  // Handle input changes
+  // --- Event Handlers ---
+  /**
+   * Handles input field changes
+   * Updates form state and clears validation errors on change
+   * @param {Event} e - Input change event
+   */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear error for this field if it exists
+    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
   
-  // Handle time changes
+  /**
+   * Handles time picker changes
+   * @param {string} time - Selected time value
+   * @param {string} fieldName - Name of the time field (defaults to 'endTime')
+   */
   const handleTimeChange = (time, fieldName = 'endTime') => {
     setFormData(prev => ({ ...prev, [fieldName]: time }));
     
-    // Clear error for this field if it exists
+    // Clear error for this field when user selects time
     if (errors[fieldName]) {
       setErrors(prev => ({ ...prev, [fieldName]: undefined }));
     }
   };
   
-  // Handle form submission
+  /**
+   * Handles form submission
+   * Updates trip with end details and advances to review step
+   * @param {Event} e - Form submit event
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate form
+    // Validate all form fields
     const validationErrors = validateForm(formData);
     setErrors(validationErrors);
     
     // Only proceed if no validation errors
     if (Object.keys(validationErrors).length === 0) {
       try {
+        // Update trip with end details
         const success = await updateTrip({
           ...formData,
           status: "in-progress",
-          step: 4
+          step: 4 // Move to step 4 (Review & Submit)
         });
         
         if (success) {
+          // Navigate to review page with trip context
           navigateWithTripId("/review", tripId);
         } else {
           throw new Error("Failed to update trip");
@@ -110,7 +157,8 @@ function EndTrip() {
     }
   };
   
-  // Show loading message while fetching data
+  // --- Render Logic ---
+  // Show loading state while fetching trip data
   if (isLoading) {
     return <div className="padding-5 text-center">Loading trip end details...</div>;
   }
@@ -135,8 +183,9 @@ function EndTrip() {
               </StepIndicator>
             </div>
             
+            {/* End Trip Form */}
             <Form onSubmit={handleSubmit} large className="margin-top-3">
-              {/* End Weather */}
+              {/* End Weather Selection */}
               <FormGroup error={errors.endWeather}>
                 <Label htmlFor="endWeather" error={errors.endWeather} requiredMarker>
                   End Weather
@@ -161,7 +210,7 @@ function EndTrip() {
                 </ErrorMessage>
               </FormGroup>
 
-              {/* End Time */}
+              {/* End Time Selection */}
               <FormGroup error={errors.endTime}>
                 <Label htmlFor="endTime" error={errors.endTime} requiredMarker>
                   End Time
