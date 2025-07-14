@@ -84,65 +84,42 @@ function CatchLog() {
 
   // --- Event Handlers for New Catch Form ---
 
-  /**
-   * Handles new catch form submission
-   * @param {Event} e - Form submit event
-   */
+  const handleInputChange = (e) => {
+
+  }
+
+  const handleTimeChange = (time) => {
+
+  }
+
+  const resetForm = () => {
+    
+  }
+
   const handleSubmit = async (e) => {
 
   };
 
-  /**
-   * Handles main form submission to proceed to next step
-   * @param {Event} e - Form submit event
-   */
   const handleMainSubmit = async (e) => {
 
   };
 
-  // --- Event Handlers for Recorded Catches ---
-  /**
-   * Update a specific catch
-   * @param {number} index - Index of the catch in the catches array
-   * @param {string} field - Field to update
-   * @param {any} value - New value for the field
-   * @returns {boolean} Success status
-   */
   const updateCatch = async (index, field, value) => {
+
   };
-  
-  /**
-   * Delete a catch
-   * @param {number} index - Index of the catch to delete
-   * @param {boolean} skipConfirmation - Skip confirmation dialog (default: false)
-   * @returns {boolean} Success status
-   */
-  const deleteCatch = async (index, skipConfirmation = false) => {
-  };
-  
-  /**
-   * Handles changes to recorded catch fields
-   * @param {number} index - Index of the catch in the catches array
-   * @param {string} field - Field name to update
-   * @param {any} value - New value for the field
-   */
+
   const handleRecordedCatchChange = async (index, field, value) => {
 
   };
   
-  /**
-   * Handles time changes for recorded catches
-   * @param {number} index - Index of the catch in the catches array
-   * @param {string} time - New time value
-   */
   const handleRecordedTimeChange = async (index, time) => {
 
   };
   
-  /**
-   * Handles deletion of a recorded catch
-   * @param {number} index - Index of the catch to delete
-   */
+  const deleteCatch = async (index, skipConfirmation = false) => {
+
+  };
+
   const handleDeleteCatch = async (index) => {
   };
 
@@ -155,7 +132,6 @@ function CatchLog() {
     if (!checkLesson4Complete()) {
       return renderLessonIncomplete();
     }
-  
 
   return (
     <>
