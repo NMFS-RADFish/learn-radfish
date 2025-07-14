@@ -151,7 +151,7 @@ export const useTripData = (tripId, onError, options = {}) => {
     if (loadOnMount && tripId) {
       loadTrip();
     }
-  }, [loadTrip, loadOnMount, tripId]);
+  }, [loadOnMount, tripId]); // eslint-disable-line react-hooks/exhaustive-deps
   
   return {
     // State
