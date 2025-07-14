@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
   Button,
-  ErrorMessage,
   Form,
   FormGroup,
   Grid,
@@ -17,6 +16,53 @@ import {
   TextInput,
   TimePicker,
 } from "@trussworks/react-uswds";
+
+// --- Helper Functions ---
+/**
+ * Checks if lesson 4 implementation is complete by verifying required imports exist
+ * @returns {boolean} True if all required imports are available
+ */
+const checkLesson4Complete = () => {
+  try {
+    // This will throw if the imports don't exist
+    return typeof SPECIES_OPTIONS !== 'undefined' && 
+           typeof useTripNavigation !== 'undefined' &&
+           typeof TIME_PICKER_CONFIG !== 'undefined';
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Renders the lesson completion message when implementation is missing
+ * @returns {JSX.Element} The lesson completion UI
+ */
+const renderLessonIncomplete = () => (
+  <GridContainer className="padding-y-4 padding-x-2 width-full maxw-mobile-lg">
+    <Grid row>
+      <Grid col="fill">
+        <div className="text-center padding-4">
+          <div className="margin-bottom-4">
+            <h1 className="font-heading-xl text-primary">Lesson 4: Dynamic Inputs</h1>
+            <p className="font-body-lg text-base-dark margin-top-2">
+              Complete the lesson implementation to access this page
+            </p>
+          </div>
+          
+          <div className="margin-top-4">
+            <Button 
+              outline 
+              type="button"
+              onClick={() => window.history.back()}
+            >
+              ← Back
+            </Button>
+          </div>
+        </div>
+      </Grid>
+    </Grid>
+  </GridContainer>
+);
 
 // --- Component Definition ---
 /**
@@ -31,49 +77,6 @@ import {
 function CatchLog() {
   // --- RADFish Application Context ---
   const app = useApplication();
-  
-  // Check if lesson 4 implementation is complete by checking for imports
-  let isComplete = true;
-  try {
-    // This will throw if the imports don't exist
-    if (typeof SPECIES_OPTIONS === 'undefined' || 
-        typeof useTripNavigation === 'undefined' ||
-        typeof TIME_PICKER_CONFIG === 'undefined') {
-      isComplete = false;
-    }
-  } catch {
-    isComplete = false;
-  }
-
-  // If lesson 4 is not complete, show helpful message
-  if (!isComplete) {
-    return (
-      <GridContainer className="padding-y-4 padding-x-2 width-full maxw-mobile-lg">
-        <Grid row>
-          <Grid col="fill">
-            <div className="text-center padding-4">
-              <div className="margin-bottom-4">
-                <h1 className="font-heading-xl text-primary">Lesson 4: Dynamic Inputs</h1>
-                <p className="font-body-lg text-base-dark margin-top-2">
-                  Complete the lesson implementation to access this page
-                </p>
-              </div>
-              
-              <div className="margin-top-4">
-                <Button 
-                  outline 
-                  type="button"
-                  onClick={() => window.history.back()}
-                >
-                  ← Back
-                </Button>
-              </div>
-            </div>
-          </Grid>
-        </Grid>
-      </GridContainer>
-    );
-  }
 
   // --- Custom Hooks ---
 
@@ -147,6 +150,12 @@ function CatchLog() {
   if (isLoading) {
     return <div className="padding-5 text-center">Loading catches...</div>;
   }
+
+    // Check if lesson 4 implementation is complete
+    if (!checkLesson4Complete()) {
+      return renderLessonIncomplete();
+    }
+  
 
   return (
     <>
