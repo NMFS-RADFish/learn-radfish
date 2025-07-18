@@ -1,6 +1,7 @@
 // --- Imports ---
 import "../index.css";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Button,
   Form,
@@ -9,154 +10,71 @@ import {
   StepIndicator,
   StepIndicatorStep,
 } from "@trussworks/react-uswds";
-import { validateRequired, FIELD_NAMES } from "../utils";
-import { useTripNavigation, useTripData } from "../hooks";
 
 // --- Component Definition ---
 /**
  * StartTrip - First step in the trip recording workflow
- * This component demonstrates:
- * - Form state management with validation
- * - Custom hooks for navigation and data management
- * - Creating/updating trips in RADFish stores
- * - Step-based workflow navigation
+ * - Basic form structure with no input fields yet
+ * - Step indicator showing current progress
+ * - Basic state management setup
+ * - Foundation for form building exercises
  */
 function StartTrip() {
-  // --- Custom Hooks ---
-  // Navigation hook that handles trip-specific routing
-  const { tripId, navigateHome, navigateWithTripId } = useTripNavigation();
+  // --- Navigation ---
+  // React Router navigation hook for programmatic routing
+  const navigate = useNavigate();
 
   // --- State Management ---
-  // Form data state - tracks all user inputs for the start trip form
+  // Form data state
   const [formData, setFormData] = useState({
     tripDate: "",
     startWeather: "",
     startTime: "",
   });
 
-  // Validation errors state - stores field-specific error messages
-  const [errors, setErrors] = useState({});
-
-  // --- Trip Data Management ---
-  // Custom hook for managing trip data with RADFish stores
-  // Handles both creating new trips and updating existing ones
-  const { trip, isLoading, updateTrip, createTrip } = useTripData(
-    tripId,
-    (error) => {
-      // Error callback - redirects to home if trip loading fails
-      console.warn("Trip loading error:", error);
-      navigateHome();
-    },
-    { formatFields: ["tripDate"] }, // Auto-formats date fields for display
-  );
-
-  // --- Effects ---
-  /**
-   * Populates form with existing trip data when editing
-   * This allows users to resume an in-progress trip
-   */
-  useEffect(() => {
-    if (trip) {
-      setFormData({
-        tripDate: trip.tripDate || "",
-        startWeather: trip.startWeather || "",
-        startTime: trip.startTime || "",
-      });
-    }
-  }, [trip]);
-
-  // --- Validation ---
-  /**
-   * Validates all form fields before submission
-   * Uses centralized validation utilities for consistency
-   * @param {Object} data - Form data to validate
-   * @returns {Object} Validation errors object (empty if valid)
-   */
-  const validateForm = (data) => {
-    const newErrors = {};
-
-    // Validate each required field using centralized validators
-    const dateError = validateRequired(data.tripDate, FIELD_NAMES.DATE);
-    if (dateError) newErrors.tripDate = dateError;
-
-    const weatherError = validateRequired(
-      data.startWeather,
-      FIELD_NAMES.START_WEATHER,
-    );
-    if (weatherError) newErrors.startWeather = weatherError;
-
-    const timeError = validateRequired(data.startTime, FIELD_NAMES.START_TIME);
-    if (timeError) newErrors.startTime = timeError;
-
-    return newErrors;
-  };
+  // Trip state - used for defaultValue in form fields
+  const [trip, setTrip] = useState(null);
 
   // --- Event Handlers ---
   /**
-   * Handles input field changes
-   * Updates form state and clears validation errors on change
-   * @param {Event} e - Input change event
+   * Handles text input and select changes
+   * Updates form state with new values
    */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Clear error for this field when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
   };
 
   /**
    * Handles time picker changes
-   * @param {string} time - Selected time value
-   * @param {string} fieldName - Name of the time field
+   * TimePicker component passes time value directly
    */
-  const handleTimeChange = (time, fieldName = "startTime") => {
-    setFormData((prev) => ({ ...prev, [fieldName]: time }));
-
-    // Clear error for this field when user selects time
-    if (errors[fieldName]) {
-      setErrors((prev) => ({ ...prev, [fieldName]: undefined }));
-    }
+  const handleTimeChange = (time) => {
+    setFormData((prev) => ({ ...prev, startTime: time }));
   };
 
   /**
    * Handles date picker changes
-   * @param {string} date - Selected date value
-   * @param {string} fieldName - Name of the date field
+   * DatePicker component passes date value directly
    */
-  const handleDateChange = (date, fieldName = "tripDate") => {
-    setFormData((prev) => ({ ...prev, [fieldName]: date || "" }));
-
-    // Clear error for this field when user selects date
-    if (errors[fieldName]) {
-      setErrors((prev) => ({ ...prev, [fieldName]: undefined }));
-    }
+  const handleDateChange = (date) => {
+    setFormData((prev) => ({ ...prev, tripDate: date || "" }));
   };
 
   /**
    * Handles form submission
-   * Creates new trip or updates existing trip in RADFish store
-   * Navigates to next step on success
-   * @param {Event} e - Form submit event
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-      try {
-        let navigateToId = tripId;
-
-      } catch (error) {
-        console.error("Error saving trip data:", error, "Trip ID:", tripId);
-      }
+    console.log("Form submitted with data:", formData);
   };
 
-  // --- Render Logic ---
-  // Show loading state while fetching existing trip data
-  if (isLoading) {
-    return <div className="padding-5 text-center">Loading trip...</div>;
-  }
+  /**
+   * Navigates back to the home page
+   */
+  const navigateHome = () => {
+    navigate("/");
+  };
 
   return (
     <>
@@ -179,14 +97,16 @@ function StartTrip() {
                 </StepIndicator>
               </div>
 
-              {/* Form fields will be added here in the learning exercises */}
               <Form onSubmit={handleSubmit} large className="margin-top-3">
+
               </Form>
             </div>
           </Grid>
         </Grid>
       </GridContainer>
 
+      {/* --- Footer Navigation --- */}
+      {/* Fixed footer with navigation buttons */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
