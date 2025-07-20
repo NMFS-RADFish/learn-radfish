@@ -1,3 +1,4 @@
+// --- Imports ---
 import "../index.css";
 
 import React, { useState } from "react";
@@ -17,111 +18,208 @@ import {
   TextInput,
   TimePicker,
 } from "@trussworks/react-uswds";
-
-// --- Helper Functions ---
-/**
- * Checks if lesson 4 implementation is complete by verifying required imports exist
- * @returns {boolean} True if all required imports are available
- */
-const checkLesson4Complete = () => {
-  try {
-    // This will throw if the imports don't exist
-    return typeof SPECIES_OPTIONS !== 'undefined' && 
-           typeof useTripNavigation !== 'undefined' &&
-           typeof TIME_PICKER_CONFIG !== 'undefined';
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Renders the lesson completion message when implementation is missing
- * @returns {JSX.Element} The lesson completion UI
- */
-const renderLessonIncomplete = () => (
-  <GridContainer className="padding-y-4 padding-x-2 width-full maxw-mobile-lg">
-    <Grid row>
-      <Grid col="fill">
-        <div className="text-center padding-4">
-          <div className="margin-bottom-4">
-            <h1 className="font-heading-xl text-primary">Lesson 4: Dynamic Inputs</h1>
-            <p className="font-body-lg text-base-dark margin-top-2">
-              Complete the lesson implementation to access this page
-            </p>
-          </div>
-          
-          <div className="margin-top-4">
-            <Button 
-              outline 
-              type="button"
-              onClick={() => window.history.back()}
-            >
-              ← Back
-            </Button>
-          </div>
-        </div>
-      </Grid>
-    </Grid>
-  </GridContainer>
-);
+import {
+  FIELD_NAMES,
+  SPECIES_OPTIONS,
+  TIME_PICKER_CONFIG,
+  STORE_NAMES,
+  COLLECTION_NAMES,
+} from "../utils";
+import { useTripNavigation, useTripData, useCatchData } from "../hooks";
 
 // --- Component Definition ---
 /**
  * CatchLog - Second step in the trip recording workflow
- * This component demonstrates:
- * - Managing multiple related records (catches) within a trip
- * - Complex form validation for both new and existing records
+ * This component demonstrates lesson 4 concepts:
+ * - Custom hooks for data management
+ * - Dynamic form inputs for multiple catch records
  * - CRUD operations with RADFish collections
- * - Dynamic UI updates with optimistic rendering
- * - Handling collections that may not exist in early lessons
+ * - Event handlers for form management
  */
 function CatchLog() {
   // --- RADFish Application Context ---
   const app = useApplication();
 
   // --- Custom Hooks ---
+  // Navigation hook for trip-specific routing
+  const { tripId, navigateHome, navigateWithTripId } = useTripNavigation();
+
+  // Trip data hook - only used for verification and step updates
+  const { updateTrip } = useTripData(
+    tripId,
+    (error) => {
+      console.warn("Trip loading error:", error);
+      navigateHome();
+    },
+    { loadOnMount: false } // Don't load trip data, just verify existence
+  );
+
+  // Use custom hook for catch data management
+  const {
+    catches,
+    isLoading,
+    addCatch,
+    setCatches
+  } = useCatchData(tripId, (error) => {
+    console.warn("Catch data error:", error);
+    if (error.message === "Trip not found" || error.message === "No trip ID provided") {
+      navigateHome();
+    }
+  });
 
   // --- State Management ---
+  // Form management state
+  const [catchTimeKey, setCatchTimeKey] = useState(0); // Forces TimePicker re-render on reset
+  
+  // New catch form state
+  const [currentCatch, setCurrentCatch] = useState({
+    species: "",
+    weight: "",
+    length: "",
+    latitude: "",
+    longitude: "",
+    time: "",
+  });
+  const [errors, setErrors] = useState({}); // Validation errors for new catch form
 
-  // --- Event Handlers for New Catch Form ---
+  // --- Event Handlers ---
 
-  const handleInputChange = (e) => {
+  // const handleInputChange = (e) => {
+  //   // Handle input changes for new catch form
+  // };
 
-  }
+  // const handleTimeChange = (time, fieldName = "time") => {
+  //   // Handle time picker changes
+  // };
 
-  const handleTimeChange = (time) => {
+  // const resetForm = () => {
+  //   // Reset form to initial state
+  // };
 
-  }
+  // const handleSubmit = async (e) => {
+  //   // Handle new catch form submission
+  // };
 
-  const resetForm = () => {
-    
-  }
+  // const handleMainSubmit = async (e) => {
+  //   // Handle main form submission to proceed to next step
+  // };
 
-  const handleSubmit = async (e) => {
-
-  };
-
-  const handleMainSubmit = async (e) => {
-
-  };
-
+  // --- Event Handlers for Recorded Catches ---
+  // These are provided for advanced functionality (editing existing catches)
+  
+  /**
+   * Update a specific catch
+   * @param {number} index - Index of the catch in the catches array
+   * @param {string} field - Field to update
+   * @param {any} value - New value for the field
+   * @returns {boolean} Success status
+   */
   const updateCatch = async (index, field, value) => {
+    if (!app || index < 0 || index >= catches.length) {
+      console.error("Cannot update catch: invalid parameters");
+      return false;
+    }
+    
+    const catchToUpdate = catches[index];
+    
+    try {
+      const tripStore = app.stores[STORE_NAMES.TRIP];
+      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCH);
 
+      // Prepare data for update (ensure correct types)
+      const updateData = { [field]: value };
+
+      // Convert to number if it's a numeric field, handle empty string
+      if (["weight", "length", "latitude", "longitude"].includes(field)) {
+        updateData[field] = value === "" ? undefined : Number(value);
+      }
+      
+      // Update in RADFish/IndexedDB
+      await Catch.update({ id: catchToUpdate.id, ...updateData });
+
+      // Optimistic UI update
+      const updatedCatches = [...catches];
+      updatedCatches[index] = { ...catchToUpdate, [field]: updateData[field] };
+      setCatches(updatedCatches);
+      return true;
+    } catch (err) {
+      console.error("Error updating catch:", err, "Catch ID:", catchToUpdate.id);
+      return false;
+    }
   };
 
+  /**
+   * Handles changes to recorded catch fields
+   * @param {number} index - Index of the catch in the catches array
+   * @param {string} field - Field name to update
+   * @param {any} value - New value for the field
+   */
   const handleRecordedCatchChange = async (index, field, value) => {
-
+    const success = await updateCatch(index, field, value);
+    
+    if (!success) {
+      console.error("Failed to update recorded catch");
+    }
   };
   
+  /**
+   * Handles time changes for recorded catches
+   * @param {number} index - Index of the catch in the catches array
+   * @param {string} time - New time value
+   */
   const handleRecordedTimeChange = async (index, time) => {
-
+    const success = await updateCatch(index, "time", time);
+    
+    if (!success) {
+      console.error("Failed to update recorded catch time");
+    }
   };
   
+  /**
+   * Delete a catch
+   * @param {number} index - Index of the catch to delete
+   * @param {boolean} skipConfirmation - Skip confirmation dialog (default: false)
+   * @returns {boolean} Success status
+   */
   const deleteCatch = async (index, skipConfirmation = false) => {
-
+    if (index < 0 || index >= catches.length) {
+      console.error("Cannot delete catch: invalid index");
+      return false;
+    }
+    
+    if (!skipConfirmation && !window.confirm("Are you sure you want to delete this catch?")) {
+      return false;
+    }
+    
+    const catchToDelete = catches[index];
+    
+    try {
+      const tripStore = app.stores[STORE_NAMES.TRIP];
+      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCH);
+      
+      // Remove from RADFish/IndexedDB
+      await Catch.delete(catchToDelete.id);
+      
+      // Update local state to remove from UI
+      setCatches(prev => prev.filter((_, i) => i !== index));
+      
+      return true;
+    } catch (err) {
+      console.error("Error deleting catch:", err, "Catch ID:", catchToDelete.id);
+      return false;
+    }
   };
 
+  /**
+   * Handles deletion of a recorded catch
+   * @param {number} index - Index of the catch to delete
+   */
   const handleDeleteCatch = async (index) => {
+    const success = await deleteCatch(index);
+    
+    if (!success) {
+      console.error("Failed to delete catch");
+    }
   };
 
   // --- Render Logic ---
@@ -129,18 +227,13 @@ function CatchLog() {
     return <div className="padding-5 text-center">Loading catches...</div>;
   }
 
-    // Check if lesson 4 implementation is complete
-    if (!checkLesson4Complete()) {
-      return renderLessonIncomplete();
-    }
-
   return (
     <>
       <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
         <Grid row>
           <Grid col="fill">
             <div className="text-left">
-              {/* --- Embedded Step Indicator --- */}
+              {/* --- Step Indicator --- */}
               <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
                 <StepIndicator
                   headingLevel="h4"
@@ -156,10 +249,11 @@ function CatchLog() {
                 </StepIndicator>
               </div>
 
-              {/* New Catch Entry Form Section */}
+              {/* --- New Catch Entry Form --- */}
+              {/* Complete form structure provided*/}
               <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
                 <Form
-                  onSubmit={handleSubmit}
+                  onSubmit={() => {}}
                   large
                   className="margin-top-3 width-full"
                 >
@@ -172,7 +266,7 @@ function CatchLog() {
                       id="species"
                       name="species"
                       value={currentCatch.species}
-                      onChange={handleInputChange}
+                      onChange={() => {}}
                     >
                       <option value="">-Select-</option>
                       {SPECIES_OPTIONS.map((species) => (
@@ -185,7 +279,7 @@ function CatchLog() {
 
                   {/* Weight & Length Inputs Row */}
                   <div className="display-flex gap-2 width-full">
-                    {/* Weight Input*/}
+                    {/* Weight Input */}
                     <div className="flex-1">
                       <FormGroup error={errors.weight}>
                         <Label
@@ -203,18 +297,16 @@ function CatchLog() {
                           name="weight"
                           type="number"
                           value={currentCatch.weight}
-                          onChange={handleInputChange}
+                          onChange={() => {}}
                           validationStatus={errors.weight ? "error" : undefined}
                           aria-describedby="weight-error-message"
                         />
-                        <ErrorMessage
-                          id="weight-error-message"
-                          className="font-sans-2xs"
-                        >
+                        <ErrorMessage id="weight-error-message" className="font-sans-2xs">
                           {errors.weight}
                         </ErrorMessage>
                       </FormGroup>
                     </div>
+
                     {/* Length Input */}
                     <div className="flex-1">
                       <FormGroup error={errors.length}>
@@ -233,14 +325,11 @@ function CatchLog() {
                           name="length"
                           type="number"
                           value={currentCatch.length}
-                          onChange={handleInputChange}
+                          onChange={() => {}}
                           validationStatus={errors.length ? "error" : undefined}
                           aria-describedby="length-error-message"
                         />
-                        <ErrorMessage
-                          id="length-error-message"
-                          className="font-sans-2xs"
-                        >
+                        <ErrorMessage id="length-error-message" className="font-sans-2xs">
                           {errors.length}
                         </ErrorMessage>
                       </FormGroup>
@@ -262,7 +351,7 @@ function CatchLog() {
                       id="catchTime"
                       name="time"
                       defaultValue={currentCatch.time}
-                      onChange={handleTimeChange}
+                      onChange={() => {}}
                       minTime={TIME_PICKER_CONFIG.MIN_TIME}
                       maxTime="23:30"
                       step={TIME_PICKER_CONFIG.STEP}
@@ -270,10 +359,7 @@ function CatchLog() {
                       className={errors.time ? "usa-input--error" : ""}
                       aria-describedby="time-error-message"
                     />
-                    <ErrorMessage
-                      id="time-error-message"
-                      className="font-sans-2xs"
-                    >
+                    <ErrorMessage id="time-error-message" className="font-sans-2xs">
                       {errors.time}
                     </ErrorMessage>
                   </FormGroup>
@@ -294,20 +380,16 @@ function CatchLog() {
                           name="latitude"
                           type="number"
                           value={currentCatch.latitude}
-                          onChange={handleInputChange}
-                          validationStatus={
-                            errors.latitude ? "error" : undefined
-                          }
+                          onChange={() => {}}
+                          validationStatus={errors.latitude ? "error" : undefined}
                           aria-describedby="latitude-error-message"
                         />
-                        <ErrorMessage
-                          id="latitude-error-message"
-                          className="font-sans-2xs"
-                        >
+                        <ErrorMessage id="latitude-error-message" className="font-sans-2xs">
                           {errors.latitude}
                         </ErrorMessage>
                       </FormGroup>
                     </div>
+
                     {/* Longitude Input */}
                     <div className="flex-1">
                       <FormGroup error={errors.longitude}>
@@ -322,16 +404,11 @@ function CatchLog() {
                           name="longitude"
                           type="number"
                           value={currentCatch.longitude}
-                          onChange={handleInputChange}
-                          validationStatus={
-                            errors.longitude ? "error" : undefined
-                          }
+                          onChange={() => {}}
+                          validationStatus={errors.longitude ? "error" : undefined}
                           aria-describedby="longitude-error-message"
                         />
-                        <ErrorMessage
-                          id="longitude-error-message"
-                          className="font-sans-2xs"
-                        >
+                        <ErrorMessage id="longitude-error-message" className="font-sans-2xs">
                           {errors.longitude}
                         </ErrorMessage>
                       </FormGroup>
@@ -362,8 +439,8 @@ function CatchLog() {
                     {/* List container for individual catch items */}
                     <div className="display-flex flex-column width-full">
                       {catches.map((catchItem, index) => {
-                        // Get errors for this specific catch item, default to empty object if none
-                        const catchErrors = recordedCatchErrors[index] || {};
+                        // Error handling will be added in lesson 5
+                        const catchErrors = {};
 
                         return (
                           // Container for a single recorded catch item
@@ -529,7 +606,7 @@ function CatchLog() {
                                     handleRecordedTimeChange(index, time)
                                   }
                                   minTime={TIME_PICKER_CONFIG.MIN_TIME}
-                                  maxTime={TIME_PICKER_CONFIG.MAX_TIME}
+                                  maxTime="23:30"
                                   step={TIME_PICKER_CONFIG.STEP}
                                   className={
                                     catchErrors.time ? "usa-input--error" : ""
@@ -646,21 +723,21 @@ function CatchLog() {
         </Grid>
       </GridContainer>
 
-      {/* Footer uses USWDS utilities */}
+      {/* --- Footer Navigation --- */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
             outline
             type="button"
             className="width-card-lg bg-white"
-            onClick={() => navigateWithTripId("/start", tripId)}
+            onClick={navigateHome}
           >
             Back
           </Button>
           <Button
             type="button"
             className="width-full margin-left-2"
-            onClick={handleMainSubmit}
+            onClick={() => {}}
           >
             Next
           </Button>
