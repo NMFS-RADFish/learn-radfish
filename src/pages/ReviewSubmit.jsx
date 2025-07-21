@@ -172,9 +172,7 @@ function ReviewSubmit() {
           </div>
           <div className="padding-0">
             {aggregatedCatches.length > 0 ? (
-              <p className="padding-2 text-base-dark">
-                Table component will be added here.
-              </p>
+              <></>
             ) : (
               <p className="padding-2 text-base-dark">
                 No catches recorded for this trip.
