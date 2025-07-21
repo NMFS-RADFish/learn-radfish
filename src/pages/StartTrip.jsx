@@ -4,11 +4,8 @@ import { useNavigate } from "react-router-dom";
 import {
   Button,
   Form,
-  Grid,
-  GridContainer,
-  StepIndicator,
-  StepIndicatorStep,
 } from "@trussworks/react-uswds";
+import Layout from "../components/Layout";
 
 // --- Component Definition ---
 /**
@@ -77,32 +74,11 @@ function StartTrip() {
 
   return (
     <>
-      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
-        <Grid row>
-          <Grid col="fill">
-            <div className="width-full text-left">
-              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-                <StepIndicator
-                  headingLevel="h4"
-                  ofText="of"
-                  stepText="Step"
-                  className="usa-step-indicator margin-bottom-0"
-                  showLabels={false}
-                >
-                  <StepIndicatorStep label="Start Trip" status="current" />
-                  <StepIndicatorStep label="Log Catch" />
-                  <StepIndicatorStep label="End Trip" />
-                  <StepIndicatorStep label="Review and Submit" />
-                </StepIndicator>
-              </div>
+      <Layout currentStep="Start Trip">
+        <Form onSubmit={handleSubmit} large className="margin-top-3">
 
-              <Form onSubmit={handleSubmit} large className="margin-top-3">
-
-              </Form>
-            </div>
-          </Grid>
-        </Grid>
-      </GridContainer>
+        </Form>
+      </Layout>
 
       {/* --- Footer Navigation --- */}
       {/* Fixed footer with navigation buttons */}
