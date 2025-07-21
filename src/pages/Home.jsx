@@ -25,20 +25,8 @@ function HomePage() {
   // --- State Management ---
   // Trip list state - will be populated in later lessons
   const [trips, setTrips] = useState([]);
-  // Loading state for async operations
-  const [isLoading, setIsLoading] = useState(true);
   // Error state for error handling
   const [error, setError] = useState(null);
-
-  // --- Render Logic ---
-  // Show loading state while initializing
-  if (isLoading) {
-    return (
-      <div className="padding-5 text-center">
-        <p className="font-heading-lg">Loading trips...</p>
-      </div>
-    );
-  }
 
   // Show error state if something went wrong
   if (error) {
@@ -87,7 +75,6 @@ function HomePage() {
           <Button
             type="button"
             className="bg-primary hover:bg-primary-darker width-full"
-            onClick={() => navigate("/start")}
           >
             Start New Trip
           </Button>
