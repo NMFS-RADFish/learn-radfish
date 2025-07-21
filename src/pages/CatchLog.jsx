@@ -198,7 +198,7 @@ function CatchLog() {
       const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCH);
       
       // Remove from RADFish/IndexedDB
-      await Catch.delete(catchToDelete.id);
+      await Catch.delete({ id: catchToDelete.id });
       
       // Update local state to remove from UI
       setCatches(prev => prev.filter((_, i) => i !== index));
