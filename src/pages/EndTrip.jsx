@@ -6,14 +6,11 @@ import {
   Button,
   Form,
   FormGroup,
-  Grid,
-  GridContainer,
   Label,
   Select,
-  StepIndicator,
-  StepIndicatorStep,
   TimePicker,
 } from "@trussworks/react-uswds";
+import Layout from "../components/Layout";
 import {
   FIELD_NAMES,
 } from "../utils";
@@ -88,60 +85,41 @@ function EndTrip() {
   
   return (
     <>
-      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
-        <Grid row>
-          <Grid col="fill">
-            <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-              <StepIndicator
-                headingLevel="h4"
-                ofText="of"
-                stepText="Step"
-                className="usa-step-indicator margin-bottom-0"
-                showLabels={false}
-              >
-                <StepIndicatorStep label="Start Trip" status="complete" />
-                <StepIndicatorStep label="Log Catch" status="complete" />
-                <StepIndicatorStep label="End Trip" status="current" />
-                <StepIndicatorStep label="Review and Submit" />
-              </StepIndicator>
-            </div>
-            
-            <Form onSubmit={handleSubmit} large className="margin-top-3">
-              <FormGroup>
-                <Label htmlFor="endWeather" requiredMarker>
-                  End Weather
-                </Label>
-                <Select
-                  id="endWeather"
-                  name="endWeather"
-                  value={formData.endWeather}
-                  onChange={handleInputChange}
-                >
-                  <option value="">-Select-</option>
-                  <option value="Sunny">Sunny</option>
-                  <option value="Cloudy">Cloudy</option>
-                  <option value="Rainy">Rainy</option>
-                </Select>
-              </FormGroup>
+      <Layout currentStep="End Trip">
+        <Form onSubmit={handleSubmit} large className="margin-top-3">
+          <FormGroup>
+            <Label htmlFor="endWeather" requiredMarker>
+              End Weather
+            </Label>
+            <Select
+              id="endWeather"
+              name="endWeather"
+              value={formData.endWeather}
+              onChange={handleInputChange}
+            >
+              <option value="">-Select-</option>
+              <option value="Sunny">Sunny</option>
+              <option value="Cloudy">Cloudy</option>
+              <option value="Rainy">Rainy</option>
+            </Select>
+          </FormGroup>
 
-              <FormGroup>
-                <Label htmlFor="endTime" requiredMarker>
-                  End Time
-                </Label>
-                <TimePicker
-                  id="endTime"
-                  name="endTime"
-                  defaultValue={formData.endTime}
-                  onChange={(time) => handleTimeChange(time, 'endTime')}
-                  minTime="00:00"
-                  maxTime="23:30"
-                  step={30}
-                />
-              </FormGroup>
-            </Form>
-          </Grid>
-        </Grid>
-      </GridContainer>
+          <FormGroup>
+            <Label htmlFor="endTime" requiredMarker>
+              End Time
+            </Label>
+            <TimePicker
+              id="endTime"
+              name="endTime"
+              defaultValue={formData.endTime}
+              onChange={(time) => handleTimeChange(time, 'endTime')}
+              minTime="00:00"
+              maxTime="23:30"
+              step={30}
+            />
+          </FormGroup>
+        </Form>
+      </Layout>
       
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
