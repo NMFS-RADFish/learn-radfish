@@ -10,10 +10,10 @@ import {
   GridContainer,
   Grid,
 } from "@trussworks/react-uswds";
-import { 
-  formatDate, 
-  format24HourTo12Hour, 
-  aggregateCatchesBySpecies
+import {
+  formatDate,
+  format24HourTo12Hour,
+  aggregateCatchesBySpecies,
 } from "../utils";
 
 /**
@@ -39,13 +39,14 @@ function ReviewSubmit() {
       setError(null);
 
       if (!app || !tripId) {
-        console.warn("App or Trip ID not available in state, cannot load review data.");
+        console.warn(
+          "App or Trip ID not available in state, cannot load review data.",
+        );
         navigate("/");
         return;
       }
 
       try {
-        
       } catch (err) {
         console.error("Error loading trip data:", err);
         setError("Failed to load trip data");
@@ -61,7 +62,12 @@ function ReviewSubmit() {
   // --- Event Handlers ---
   const handleSubmit = async () => {
     if (!trip) return;
-    
+
+    try {
+    } catch (error) {
+      console.error("Error submitting trip:", error);
+      setError("Failed to submit trip. Please try again.");
+    }
   };
 
   // --- Dynamic Footer Logic ---
@@ -123,77 +129,86 @@ function ReviewSubmit() {
                   <StepIndicatorStep label="Start Trip" status="complete" />
                   <StepIndicatorStep label="Log Catch" status="complete" />
                   <StepIndicatorStep label="End Trip" status="complete" />
-                  <StepIndicatorStep label="Review and Submit" status="current" />
+                  <StepIndicatorStep
+                    label="Review and Submit"
+                    status="current"
+                  />
                 </StepIndicator>
               </div>
 
-            {/* Trip Summary Card */}
-            <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
-              <div className="bg-primary-darker padding-y-1 padding-x-2">
-                <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">
-                  Trip Summary
-                </h3>
-              </div>
-              <div className="padding-2 display-flex flex-column gap-2">
-                {trip && (
-                  <>
-                    {/* Date Row */}
-                    <div className="display-flex flex-align-center gap-1">
-                      <div className="width-10 text-bold font-sans-xs">Date</div>
-                      <span className="text-base-dark font-sans-sm">
-                        {formatDate(trip.tripDate)}
-                      </span>
-                    </div>
-                    {/* Weather Row */}
-                    <div className="display-flex flex-align-center gap-1">
-                      <div className="width-10 text-bold font-sans-xs">Weather</div>
-                      <div className="display-flex flex-align-center">
+              {/* Trip Summary Card */}
+              <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+                <div className="bg-primary-darker padding-y-1 padding-x-2">
+                  <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">
+                    Trip Summary
+                  </h3>
+                </div>
+                <div className="padding-2 display-flex flex-column gap-2">
+                  {trip && (
+                    <>
+                      {/* Date Row */}
+                      <div className="display-flex flex-align-center gap-1">
+                        <div className="width-10 text-bold font-sans-xs">
+                          Date
+                        </div>
                         <span className="text-base-dark font-sans-sm">
-                          {trip.startWeather}
-                        </span>
-                        <span className="margin-x-1 text-base-dark">→</span>
-                        <span className="text-base-dark font-sans-sm">
-                          {trip.endWeather}
+                          {formatDate(trip.tripDate)}
                         </span>
                       </div>
-                    </div>
-                    {/* Time Row */}
-                    <div className="display-flex flex-align-center gap-1">
-                      <div className="width-10 text-bold font-sans-xs">Time</div>
-                      <div className="display-flex flex-align-center">
-                        <span className="text-base-dark font-sans-sm">
-                          {format24HourTo12Hour(trip.startTime)}
-                        </span>
-                        <span className="margin-x-1 text-base-dark">→</span>
-                        <span className="text-base-dark font-sans-sm">
-                          {format24HourTo12Hour(trip.endTime)}
-                        </span>
+                      {/* Weather Row */}
+                      <div className="display-flex flex-align-center gap-1">
+                        <div className="width-10 text-bold font-sans-xs">
+                          Weather
+                        </div>
+                        <div className="display-flex flex-align-center">
+                          <span className="text-base-dark font-sans-sm">
+                            {trip.startWeather}
+                          </span>
+                          <span className="margin-x-1 text-base-dark">→</span>
+                          <span className="text-base-dark font-sans-sm">
+                            {trip.endWeather}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </>
-                )}
+                      {/* Time Row */}
+                      <div className="display-flex flex-align-center gap-1">
+                        <div className="width-10 text-bold font-sans-xs">
+                          Time
+                        </div>
+                        <div className="display-flex flex-align-center">
+                          <span className="text-base-dark font-sans-sm">
+                            {format24HourTo12Hour(trip.startTime)}
+                          </span>
+                          <span className="margin-x-1 text-base-dark">→</span>
+                          <span className="text-base-dark font-sans-sm">
+                            {format24HourTo12Hour(trip.endTime)}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Aggregated Catch Data Card */}
-            <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
-              <div className="bg-primary-darker padding-y-1 padding-x-2">
-                <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">
-                  Aggregate Catches
-                </h3>
+              {/* Aggregated Catch Data Card */}
+              <div className="bg-white border border-base-lighter radius-md shadow-2 margin-y-4 maxw-full overflow-hidden">
+                <div className="bg-primary-darker padding-y-1 padding-x-2">
+                  <h3 className="margin-0 font-sans-lg text-semibold text-white text-center">
+                    Aggregate Catches
+                  </h3>
+                </div>
+                <div className="padding-0">
+                  {aggregatedCatches.length > 0 ? (
+                    <p className="padding-2 text-base-dark">
+                      Table component will be added here.
+                    </p>
+                  ) : (
+                    <p className="padding-2 text-base-dark">
+                      No catches recorded for this trip.
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="padding-0">
-                {aggregatedCatches.length > 0 ? (
-                  <p className="padding-2 text-base-dark">
-                    Table component will be added here.
-                  </p>
-                ) : (
-                  <p className="padding-2 text-base-dark">
-                    No catches recorded for this trip.
-                  </p>
-                )}
-              </div>
-            </div>
             </div>
           </Grid>
         </Grid>
@@ -221,7 +236,11 @@ function ReviewSubmit() {
           {footerProps.showNextButton && (
             <Button
               type="button"
-              className={`${footerProps.showBackButton ? "width-full margin-left-2" : "width-full"} ${footerProps.nextButtonProps.className || ""}`}
+              className={`${
+                footerProps.showBackButton
+                  ? "width-full margin-left-2"
+                  : "width-full"
+              } ${footerProps.nextButtonProps.className || ""}`}
               onClick={footerProps.onNextClick}
             >
               {footerProps.nextLabel}
