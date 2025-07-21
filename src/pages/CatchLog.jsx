@@ -7,16 +7,13 @@ import {
   ErrorMessage,
   Form,
   FormGroup,
-  Grid,
-  GridContainer,
   Icon,
   Label,
   Select,
-  StepIndicator,
-  StepIndicatorStep,
   TextInput,
   TimePicker,
 } from "@trussworks/react-uswds";
+import Layout from "../components/Layout";
 import {
   FIELD_NAMES,
   SPECIES_OPTIONS,
@@ -228,34 +225,15 @@ function CatchLog() {
 
   return (
     <>
-      <GridContainer className="padding-y-4 padding-x-0 width-full maxw-mobile-lg">
-        <Grid row>
-          <Grid col="fill">
-            <div className="text-left">
-              {/* --- Step Indicator --- */}
-              <div className="margin-top-4 border-bottom border-base-light padding-bottom-2">
-                <StepIndicator
-                  headingLevel="h4"
-                  ofText="of"
-                  stepText="Step"
-                  className="usa-step-indicator margin-bottom-0"
-                  showLabels={false}
-                >
-                  <StepIndicatorStep label="Start Trip" status="complete" />
-                  <StepIndicatorStep label="Log Catch" status="current" />
-                  <StepIndicatorStep label="End Trip" />
-                  <StepIndicatorStep label="Review and Submit" />
-                </StepIndicator>
-              </div>
-
-              {/* --- New Catch Entry Form --- */}
-              {/* Complete form structure provided*/}
-              <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
-                <Form
-                  onSubmit={() => {}}
-                  large
-                  className="margin-top-3 width-full"
-                >
+      <Layout currentStep="Log Catch">
+        {/* --- New Catch Entry Form --- */}
+        {/* Complete form structure provided*/}
+        <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
+          <Form
+            onSubmit={() => {}}
+            large
+            className="margin-top-3 width-full"
+          >
                   {/* Species Dropdown */}
                   <FormGroup>
                     <Label htmlFor="species" requiredMarker>
@@ -717,10 +695,7 @@ function CatchLog() {
                   </div>
                 </>
               )}
-            </div>
-          </Grid>
-        </Grid>
-      </GridContainer>
+      </Layout>
 
       {/* --- Footer Navigation --- */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
