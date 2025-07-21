@@ -96,11 +96,11 @@ function CatchLog() {
   //   // Reset form to initial state
   // };
 
-  // const handleSubmit = async (e) => {
+  // const handleAddCatch = async (e) => {
   //   // Handle new catch form submission
   // };
 
-  // const handleMainSubmit = async (e) => {
+  // const handleSubmit = async (e) => {
   //   // Handle main form submission to proceed to next step
   // };
 
