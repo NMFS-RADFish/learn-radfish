@@ -1,4 +1,3 @@
-// --- Imports ---
 import "../index.css";
 
 import React, { useState } from "react";
