@@ -36,7 +36,7 @@ export const useCatchData = (tripId, onError = () => {}) => {
     try {
       // First verify the trip exists
       const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Form = tripStore.getCollection(COLLECTION_NAMES.FORM);
+      const Form = tripStore.getCollection(COLLECTION_NAMES.TRIPFORM);
       const existingTrips = await Form.find({ id: tripId });
       
       if (existingTrips.length === 0) {
@@ -47,7 +47,7 @@ export const useCatchData = (tripId, onError = () => {}) => {
       
       // Load catches for this trip
       try {
-        const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCH);
+        const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCHFORM);
         const existingCatches = await Catch.find({ tripId: tripId });
         
         if (existingCatches.length > 0) {
@@ -84,7 +84,7 @@ export const useCatchData = (tripId, onError = () => {}) => {
     }
     
     try {
-      const Catch = app.stores[STORE_NAMES.TRIP].getCollection(COLLECTION_NAMES.CATCH);
+      const Catch = app.stores[STORE_NAMES.TRIP].getCollection(COLLECTION_NAMES.CATCHFORM);
       
       // Format the data for storage
       const newCatchData = {

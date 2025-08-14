@@ -24,8 +24,8 @@ export const STORE_NAMES = {
 };
 
 export const COLLECTION_NAMES = {
-  FORM: "Form",
-  CATCH: "Catch",
+  TRIPFORM: "TripForm",
+  CATCHFORM: "CatchForm",
 };
 
 // ============================================================================

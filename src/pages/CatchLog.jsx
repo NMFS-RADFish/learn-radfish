@@ -13,7 +13,7 @@ import {
   TextInput,
   TimePicker,
 } from "@trussworks/react-uswds";
-import Layout from "../components/Layout";
+import Layout from "../../src/components/Layout";
 import {
   FIELD_NAMES,
   SPECIES_OPTIONS,
@@ -120,7 +120,7 @@ function CatchLog() {
     
     try {
       const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCH);
+      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCHFORM);
 
       // Prepare data for update (ensure correct types)
       const updateData = { [field]: value };
@@ -191,7 +191,7 @@ function CatchLog() {
     
     try {
       const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCH);
+      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCHFORM);
       
       // Remove from RADFish/IndexedDB
       await Catch.delete({ id: catchToDelete.id });
@@ -224,16 +224,17 @@ function CatchLog() {
   }
 
   return (
-    <>
-      <Layout currentStep="Log Catch">
-        {/* --- New Catch Entry Form --- */}
-        {/* Complete form structure provided*/}
-        <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
-          <Form
-            onSubmit={() => {}}
-            large
-            className="margin-top-3 width-full"
-          >
+    <Layout currentStep="Log Catch">
+      <div className="text-left">
+
+              {/* --- New Catch Entry Form --- */}
+              {/* Complete form structure provided*/}
+              <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
+                <Form
+                  onSubmit={() => {}}
+                  large
+                  className="margin-top-3 width-full"
+                >
                   {/* Species Dropdown */}
                   <FormGroup>
                     <Label htmlFor="species" requiredMarker>
@@ -695,29 +696,8 @@ function CatchLog() {
                   </div>
                 </>
               )}
-      </Layout>
-
-      {/* --- Footer Navigation --- */}
-      <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
-        <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
-          <Button
-            outline
-            type="button"
-            className="width-card-lg bg-white"
-            onClick={navigateHome}
-          >
-            Back
-          </Button>
-          <Button
-            type="button"
-            className="width-full margin-left-2"
-            onClick={() => {}}
-          >
-            Next
-          </Button>
-        </div>
-      </footer>
-    </>
+      </div>
+    </Layout>
   );
 }
 

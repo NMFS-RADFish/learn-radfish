@@ -14,7 +14,7 @@ const app = new Application({
     trip: {
       connector: new IndexedDBConnector("learn-radfish"),
       collections: {
-        Form: {
+        TripForm: {
           schema: {
             fields: {
               id: {
