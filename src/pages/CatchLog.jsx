@@ -119,8 +119,8 @@ function CatchLog() {
     const catchToUpdate = catches[index];
     
     try {
-      const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCHFORM);
+      const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+      const catchCollection = tripStore.getCollection(COLLECTION_NAMES.CATCH_COLLECTION);
 
       // Prepare data for update (ensure correct types)
       const updateData = { [field]: value };
@@ -131,7 +131,7 @@ function CatchLog() {
       }
       
       // Update in RADFish/IndexedDB
-      await Catch.update({ id: catchToUpdate.id, ...updateData });
+      await catchCollection.update({ id: catchToUpdate.id, ...updateData });
 
       // Optimistic UI update
       const updatedCatches = [...catches];
@@ -190,11 +190,11 @@ function CatchLog() {
     const catchToDelete = catches[index];
     
     try {
-      const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCHFORM);
+      const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+      const catchCollection = tripStore.getCollection(COLLECTION_NAMES.CATCH_COLLECTION);
       
       // Remove from RADFish/IndexedDB
-      await Catch.delete({ id: catchToDelete.id });
+      await catchCollection.delete({ id: catchToDelete.id });
       
       // Update local state to remove from UI
       setCatches(prev => prev.filter((_, i) => i !== index));

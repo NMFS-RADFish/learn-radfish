@@ -40,11 +40,11 @@ export const useTripData = (tripId, onError, options = {}) => {
     
     try {
       // Get the trip form collection
-      const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Form = tripStore.getCollection(COLLECTION_NAMES.TRIPFORM);
+      const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+      const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
       
       // Find the trip by ID
-      const existingTrips = await Form.find({ id: tripId });
+      const existingTrips = await tripCollection.find({ id: tripId });
       
       if (existingTrips.length > 0) {
         const tripData = existingTrips[0];
@@ -88,11 +88,11 @@ export const useTripData = (tripId, onError, options = {}) => {
     }
     
     try {
-      const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Form = tripStore.getCollection(COLLECTION_NAMES.TRIPFORM);
+      const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+      const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
       
       // Update the trip in RADFish
-      await Form.update({
+      await tripCollection.update({
         id: tripId,
         ...updateData
       });
@@ -120,8 +120,8 @@ export const useTripData = (tripId, onError, options = {}) => {
     }
     
     try {
-      const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Form = tripStore.getCollection(COLLECTION_NAMES.TRIPFORM);
+      const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+      const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
       
       // Generate new trip ID
       const newTripId = crypto.randomUUID();
@@ -133,7 +133,7 @@ export const useTripData = (tripId, onError, options = {}) => {
         createdAt: new Date().toISOString(),
       };
       
-      await Form.create(newTripData);
+      await tripCollection.create(newTripData);
       
       // Update local state
       setTrip(newTripData);

@@ -35,9 +35,9 @@ export const useCatchData = (tripId, onError = () => {}) => {
     
     try {
       // First verify the trip exists
-      const tripStore = app.stores[STORE_NAMES.TRIP];
-      const Form = tripStore.getCollection(COLLECTION_NAMES.TRIPFORM);
-      const existingTrips = await Form.find({ id: tripId });
+      const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+      const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
+      const existingTrips = await tripCollection.find({ id: tripId });
       
       if (existingTrips.length === 0) {
         console.warn("Trip not found");
@@ -47,12 +47,12 @@ export const useCatchData = (tripId, onError = () => {}) => {
       
       // Load catches for this trip
       try {
-        const Catch = tripStore.getCollection(COLLECTION_NAMES.CATCHFORM);
-        const existingCatches = await Catch.find({ tripId: tripId });
+        const catchCollection = tripStore.getCollection(COLLECTION_NAMES.CATCH_COLLECTION);
+        const existingCatchesData = await catchCollection.find({ tripId: tripId });
         
-        if (existingCatches.length > 0) {
+        if (existingCatchesData.length > 0) {
           // Sort catches by creation date (most recent first)
-          const sortedCatches = existingCatches.sort(
+          const sortedCatches = existingCatchesData.sort(
             (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
           );
           setCatches(sortedCatches);
@@ -84,7 +84,7 @@ export const useCatchData = (tripId, onError = () => {}) => {
     }
     
     try {
-      const Catch = app.stores[STORE_NAMES.TRIP].getCollection(COLLECTION_NAMES.CATCHFORM);
+      const catchCollection = app.stores[STORE_NAMES.TRIP_STORE].getCollection(COLLECTION_NAMES.CATCH_COLLECTION);
       
       // Format the data for storage
       const newCatchData = {
@@ -99,7 +99,7 @@ export const useCatchData = (tripId, onError = () => {}) => {
       };
       
       // Save to RADFish store
-      await Catch.create(newCatchData);
+      await catchCollection.create(newCatchData);
       
       // Update local state (add to beginning of array for most recent first)
       setCatches(prev => [newCatchData, ...prev]);
