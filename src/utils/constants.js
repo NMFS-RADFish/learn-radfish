@@ -20,12 +20,12 @@ export const TRIP_STATUS_LABELS = {
 // ============================================================================
 
 export const STORE_NAMES = {
-  TRIP_STORE: "tripStore",
+  TRIP_STORE: "TripStore",
 };
 
 export const COLLECTION_NAMES = {
-  TRIP_COLLECTION: "tripCollection",
-  CATCH_COLLECTION: "catchCollection",
+  TRIP_COLLECTION: "TripCollection",
+  CATCH_COLLECTION: "CatchCollection",
 };
 
 // ============================================================================

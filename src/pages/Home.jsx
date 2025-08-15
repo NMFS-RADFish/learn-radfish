@@ -17,7 +17,7 @@ function HomePage() {
   // --- RADFish Application Context ---
   const app = useApplication();
   const { isOffline } = useOfflineStatus();
-  
+
   // --- Navigation ---
   // React Router navigation hook for programmatic routing
   const navigate = useNavigate();

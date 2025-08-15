@@ -11,7 +11,7 @@ const app = new Application({
     url: "/service-worker.js",
   },
   stores: {
-    tripStore: {
+    TripStore: {
       connector: new IndexedDBConnector("learn-radfish"),
       collections: {
         TripCollection: {
