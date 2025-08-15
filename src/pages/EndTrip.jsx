@@ -24,7 +24,7 @@ function EndTrip() {
   const { tripId, navigateHome, navigateWithTripId } = useTripNavigation();
   
   // --- State Management ---
-  const [formData, setFormData] = useState({
+  const [tripData, setTripData] = useState({
     endWeather: "",
     endTime: "",
   });
@@ -41,7 +41,7 @@ function EndTrip() {
   // --- Effects ---
   useEffect(() => {
     if (trip) {
-      setFormData({
+      setTripData({
         endWeather: trip.endWeather || "",
         endTime: trip.endTime || "",
       });
@@ -51,11 +51,11 @@ function EndTrip() {
   // --- Event Handlers ---
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setTripData(prev => ({ ...prev, [name]: value }));
   };
   
   const handleTimeChange = (time, fieldName = 'endTime') => {
-    setFormData(prev => ({ ...prev, [fieldName]: time }));
+    setTripData(prev => ({ ...prev, [fieldName]: time }));
   };
   
   const handleSubmit = async (e) => {
@@ -63,7 +63,7 @@ function EndTrip() {
     
     try {
       const success = await updateTrip({
-        ...formData,
+        ...tripData,
         status: "in-progress",
         step: 4
       });
@@ -94,7 +94,7 @@ function EndTrip() {
             <Select
               id="endWeather"
               name="endWeather"
-              value={formData.endWeather}
+              value={tripData.endWeather}
               onChange={handleInputChange}
             >
               <option value="">-Select-</option>
@@ -111,7 +111,7 @@ function EndTrip() {
             <TimePicker
               id="endTime"
               name="endTime"
-              defaultValue={formData.endTime}
+              defaultValue={tripData.endTime}
               onChange={(time) => handleTimeChange(time, 'endTime')}
               minTime="00:00"
               maxTime="23:30"

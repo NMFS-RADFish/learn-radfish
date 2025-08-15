@@ -22,14 +22,14 @@ function StartTrip() {
 
   // --- State Management ---
   // Form data state
-  const [formData, setFormData] = useState({
+  const [tripData, setTripData] = useState({
     tripDate: "",
     startWeather: "",
     startTime: "",
   });
 
   // Trip state - used for defaultValue in form fields
-  const [trip, setTrip] = useState(null);
+  const [defaultTripData, setDefaultTripData] = useState(null);
 
   // --- Event Handlers ---
   /**
@@ -38,7 +38,7 @@ function StartTrip() {
    */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setTripData((prev) => ({ ...prev, [name]: value }));
   };
 
   /**
@@ -46,7 +46,7 @@ function StartTrip() {
    * TimePicker component passes time value directly
    */
   const handleTimeChange = (time) => {
-    setFormData((prev) => ({ ...prev, startTime: time }));
+    setTripData((prev) => ({ ...prev, startTime: time }));
   };
 
   /**
@@ -54,7 +54,7 @@ function StartTrip() {
    * DatePicker component passes date value directly
    */
   const handleDateChange = (date) => {
-    setFormData((prev) => ({ ...prev, tripDate: date || "" }));
+    setTripData((prev) => ({ ...prev, tripDate: date || "" }));
   };
 
   /**
