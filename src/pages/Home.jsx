@@ -1,5 +1,5 @@
 import "../index.css";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import { useNavigate } from "react-router-dom";
 import { Button, GridContainer, Grid } from "@trussworks/react-uswds";
