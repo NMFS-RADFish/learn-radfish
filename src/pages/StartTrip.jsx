@@ -40,6 +40,10 @@ function StartTrip() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTripData((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user types
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   /**
@@ -48,6 +52,10 @@ function StartTrip() {
    */
   const handleTimeChange = (time) => {
     setTripData((prev) => ({ ...prev, startTime: time }));
+
+    if (errors.startTime) {
+      setErrors(prev => ({ ...prev, startTime: '' }));
+    }
   };
 
   /**
@@ -56,6 +64,10 @@ function StartTrip() {
    */
   const handleDateChange = (date) => {
     setTripData((prev) => ({ ...prev, tripDate: date || "" }));
+
+    if (errors.tripDate) {
+      setErrors(prev => ({ ...prev, tripDate: '' }));
+    }
   };
 
   /**

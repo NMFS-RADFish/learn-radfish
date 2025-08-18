@@ -29,6 +29,12 @@ function EndTrip() {
     endTime: "",
   });
   
+  // Validation errors state - stores field-specific error messages
+  const [errors, setErrors] = useState({});
+  
+  // Track if form has been submitted to show errors
+  const [submitted, setSubmitted] = useState(false);
+  
   // --- Trip Data Management ---
   const { trip, isLoading, updateTrip } = useTripData(
     tripId,
@@ -52,10 +58,18 @@ function EndTrip() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTripData(prev => ({ ...prev, [name]: value }));
+    // Clear error for this field when user types
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
   
   const handleTimeChange = (time, fieldName = 'endTime') => {
     setTripData(prev => ({ ...prev, [fieldName]: time }));
+    // Clear error for time field when user changes it
+    if (errors[fieldName]) {
+      setErrors(prev => ({ ...prev, [fieldName]: '' }));
+    }
   };
   
   const handleSubmit = async (e) => {
