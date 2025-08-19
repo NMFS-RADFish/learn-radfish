@@ -84,6 +84,15 @@ function StartTrip() {
     navigate("/");
   };
 
+  // Show loading state while fetching existing trip data
+  if (isLoading && tripId) {
+    return (
+      <Layout currentStep="Start Trip">
+        <div className="padding-5 text-center">Loading trip data...</div>
+      </Layout>
+    );
+  }
+
   return (
     <>
       <Layout currentStep="Start Trip">
