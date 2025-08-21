@@ -1,5 +1,4 @@
 import "../index.css";
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useApplication } from "@nmfs-radfish/react-radfish";
@@ -42,6 +41,7 @@ function ReviewSubmit() {
       }
 
       try {
+
       } catch (err) {
         console.error("Error loading trip data:", err);
         setError("Failed to load trip data");
