@@ -77,12 +77,14 @@ function HomePage() {
         // Calculate statistics for each trip
         const stats = {};
 
-        for (const trip of sortedTrips) {
-          // Find all catches associated with this trip
-          const tripCatches = await catchCollection.find({ tripId: trip.id });
-
-          // Use the calculateTripStats function to get statistics
-          stats[trip.id] = calculateTripStats(tripCatches);
+        // CatchCollection will be added in Lesson 4 - for now, gracefully handle if not present    
+        if (catchCollection) {
+          for (const trip of sortedTrips) {
+            // Find all catches associated with this trip
+            const tripCatches = await catchCollection.find({ tripId: trip.id });
+            // Use the calculateTripStats function to get statistics
+            stats[trip.id] = calculateTripStats(tripCatches);
+          }
         }
 
         setTripStats(stats);
