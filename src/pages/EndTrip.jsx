@@ -25,8 +25,8 @@ function EndTrip() {
   
   // --- State Management ---
   const [tripData, setTripData] = useState({
-    endWeather: "",
-    endTime: "",
+    endWeather: undefined,
+    endTime: undefined,
   });
   
   // Validation errors state - stores field-specific error messages

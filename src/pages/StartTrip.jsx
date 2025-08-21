@@ -24,9 +24,9 @@ function StartTrip() {
   // --- State Management ---
   // Form data state
   const [tripData, setTripData] = useState({
-    tripDate: "",
-    startWeather: "",
-    startTime: "",
+    tripDate: undefined,
+    startWeather: undefined,
+    startTime: undefined,
   });
 
   // Trip state - used for defaultValue in form fields
