@@ -74,9 +74,6 @@ function StartTrip() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (errors.startWeather) {
-      setErrors((prev) => ({ ...prev, startWeather: "" }));
-    }
   };
 
   /**
