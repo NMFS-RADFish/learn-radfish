@@ -8,6 +8,7 @@ function StartTrip() {
   // --- Navigation ---
   // React Router navigation hook for programmatic routing
   const navigate = useNavigate();
+  const tripId = "";
 
   // --- State Management ---
   // Form data state
@@ -25,9 +26,6 @@ function StartTrip() {
 
   // Loading state - used to show loading message while fetching trip data
   const [isLoading, setIsLoading] = useState(false);
-
-  // Trip ID state - used to store the ID of the trip being edited
-  const [tripId, setTripId] = useState(null);
 
   // --- Event Handlers ---
   /**
@@ -74,6 +72,9 @@ function StartTrip() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (errors.startWeather) {
+      setErrors((prev) => ({ ...prev, startWeather: "" }));
+    }
   };
 
   /**
