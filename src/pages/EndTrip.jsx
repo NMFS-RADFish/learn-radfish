@@ -1,14 +1,9 @@
 import "../index.css";
-
 import React, { useState, useEffect } from "react";
 import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
   Button,
   Form,
-  FormGroup,
-  Label,
-  Select,
-  TimePicker,
 } from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
 import {
@@ -28,12 +23,6 @@ function EndTrip() {
     endWeather: undefined,
     endTime: undefined,
   });
-  
-  // Validation errors state - stores field-specific error messages
-  const [errors, setErrors] = useState({});
-  
-  // Track if form has been submitted to show errors
-  const [submitted, setSubmitted] = useState(false);
   
   // --- Trip Data Management ---
   const { trip, isLoading, updateTrip } = useTripData(
@@ -55,22 +44,6 @@ function EndTrip() {
   }, [trip]);
   
   // --- Event Handlers ---
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setTripData(prev => ({ ...prev, [name]: value }));
-    // Clear error for this field when user types
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-  
-  const handleTimeChange = (time, fieldName = 'endTime') => {
-    setTripData(prev => ({ ...prev, [fieldName]: time }));
-    // Clear error for time field when user changes it
-    if (errors[fieldName]) {
-      setErrors(prev => ({ ...prev, [fieldName]: '' }));
-    }
-  };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,37 +74,7 @@ function EndTrip() {
     <>
       <Layout currentStep="End Trip">
         <Form onSubmit={handleSubmit} large className="margin-top-3">
-          <FormGroup>
-            <Label htmlFor="endWeather" requiredMarker>
-              End Weather
-            </Label>
-            <Select
-              id="endWeather"
-              name="endWeather"
-              value={tripData.endWeather}
-              onChange={handleInputChange}
-            >
-              <option value="">-Select-</option>
-              <option value="Sunny">Sunny</option>
-              <option value="Cloudy">Cloudy</option>
-              <option value="Rainy">Rainy</option>
-            </Select>
-          </FormGroup>
 
-          <FormGroup>
-            <Label htmlFor="endTime" requiredMarker>
-              End Time
-            </Label>
-            <TimePicker
-              id="endTime"
-              name="endTime"
-              defaultValue={tripData.endTime}
-              onChange={(time) => handleTimeChange(time, 'endTime')}
-              minTime="00:00"
-              maxTime="23:30"
-              step={30}
-            />
-          </FormGroup>
         </Form>
       </Layout>
       

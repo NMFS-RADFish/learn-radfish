@@ -12,15 +12,6 @@ import {
   formatDate,
 } from "../utils";
 
-// --- Component Definition ---
-/**
- * HomePage - Main landing page for the trip logging application
- * This component demonstrates basic React patterns before lesson 1:
- * - Basic state management with useState
- * - Simple rendering without USWDS grid structure
- * - Navigation setup with React Router
- * - Basic RADFish hooks for application context
- */
 function HomePage() {
   // --- RADFish Application Context ---
   const app = useApplication();
