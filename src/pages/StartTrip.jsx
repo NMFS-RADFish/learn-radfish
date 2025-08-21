@@ -1,21 +1,9 @@
 import "../index.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Form,
-} from "@trussworks/react-uswds";
+import { Button, Form } from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
-import { STORE_NAMES, COLLECTION_NAMES } from "../utils/constants";
 
-// --- Component Definition ---
-/**
- * StartTrip - First step in the trip recording workflow
- * - Basic form structure with no input fields yet
- * - Step indicator showing current progress
- * - Basic state management setup
- * - Foundation for form building exercises
- */
 function StartTrip() {
   // --- Navigation ---
   // React Router navigation hook for programmatic routing
@@ -29,8 +17,17 @@ function StartTrip() {
     startTime: undefined,
   });
 
-  // Trip state - used for defaultValue in form fields
-  const [defaultTripData, setDefaultTripData] = useState(null);
+  // Validation errors state - stores field-specific error messages
+  const [errors, setErrors] = useState({});
+
+  // Track if form has been submitted to show errors
+  const [submitted, setSubmitted] = useState(false);
+
+  // Loading state - used to show loading message while fetching trip data
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Trip ID state - used to store the ID of the trip being edited
+  const [tripId, setTripId] = useState(null);
 
   // --- Event Handlers ---
   /**
@@ -40,9 +37,10 @@ function StartTrip() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTripData((prev) => ({ ...prev, [name]: value }));
+
     // Clear error for this field when user types
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -54,7 +52,7 @@ function StartTrip() {
     setTripData((prev) => ({ ...prev, startTime: time }));
 
     if (errors.startTime) {
-      setErrors(prev => ({ ...prev, startTime: '' }));
+      setErrors((prev) => ({ ...prev, startTime: "" }));
     }
   };
 
@@ -66,7 +64,7 @@ function StartTrip() {
     setTripData((prev) => ({ ...prev, tripDate: date || "" }));
 
     if (errors.tripDate) {
-      setErrors(prev => ({ ...prev, tripDate: '' }));
+      setErrors((prev) => ({ ...prev, tripDate: "" }));
     }
   };
 
@@ -75,6 +73,10 @@ function StartTrip() {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (errors.startWeather) {
+      setErrors((prev) => ({ ...prev, startWeather: "" }));
+    }
   };
 
   /**
