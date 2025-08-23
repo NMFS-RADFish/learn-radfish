@@ -1,7 +1,10 @@
 import "../index.css";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Form } from "@trussworks/react-uswds";
+import {
+  Button,
+  Form,
+} from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
 
 function StartTrip() {
@@ -72,9 +75,6 @@ function StartTrip() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (errors.startWeather) {
-      setErrors((prev) => ({ ...prev, startWeather: "" }));
-    }
   };
 
   /**
@@ -97,7 +97,6 @@ function StartTrip() {
     <>
       <Layout currentStep="Start Trip">
         <Form onSubmit={handleSubmit} large className="margin-top-3">
-
         </Form>
       </Layout>
 

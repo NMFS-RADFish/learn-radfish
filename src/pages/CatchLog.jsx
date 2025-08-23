@@ -79,25 +79,25 @@ function CatchLog() {
 
   // --- Event Handlers ---
 
-  // const handleInputChange = (e) => {
-  //   // Handle input changes for new catch form
-  // };
+  const handleInputChange = (e) => {
+    // Handle input changes for new catch form
+  };
 
-  // const handleTimeChange = (time, fieldName = "time") => {
-  //   // Handle time picker changes
-  // };
+  const handleTimeChange = (time, fieldName = "time") => {
+    // Handle time picker changes
+  };
 
-  // const resetForm = () => {
-  //   // Reset form to initial state
-  // };
+  const resetForm = () => {
+    // Reset form to initial state
+  };
 
-  // const handleAddCatch = async (e) => {
-  //   // Handle new catch form submission
-  // };
+  const handleAddCatch = async (e) => {
+    // Handle new catch form submission
+  };
 
-  // const handleSubmit = async (e) => {
-  //   // Handle main form submission to proceed to next step
-  // };
+  const handleSubmit = async (e) => {
+    // Handle main form submission to proceed to next step
+  };
 
   // --- Event Handlers for Recorded Catches ---
   // These are provided for advanced functionality (editing existing catches)

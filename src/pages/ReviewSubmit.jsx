@@ -1,7 +1,9 @@
 import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useApplication } from "@nmfs-radfish/react-radfish";
+import {
+  useApplication,
+} from "@nmfs-radfish/react-radfish";
 import { Button } from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
 import {
