@@ -24,7 +24,6 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "prebuild": "rm -rf dist",
     "server": "json-server --watch db.json --port 3002",
     "test": "echo \"Error: no test specified\" && exit 1",
     "test:e2e": "concurrently --kill-others --success first \"npm start\" \"vitest './src/__tests__/e2e/integration.e2e.test.jsx'\"",
