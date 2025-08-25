@@ -11,10 +11,10 @@ const app = new Application({
     url: "/service-worker.js",
   },
   stores: {
-    trip: {
+    TripStore: {
       connector: new IndexedDBConnector("learn-radfish"),
       collections: {
-        Form: {
+        TripCollection: {
           schema: {
             fields: {
               id: {

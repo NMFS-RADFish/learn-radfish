@@ -3,57 +3,33 @@ import React, { useState, useEffect } from "react";
 import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import { useNavigate } from "react-router-dom";
 import { Button, Grid } from "@trussworks/react-uswds";
-
-// Status constants
-const STATUS_SUBMITTED = "submitted";
-const STATUS_IN_PROGRESS = "in-progress";
-const STATUS_NOT_SUBMITTED = "Not Submitted";
-
-// Status label constants
-const LABEL_SUBMITTED = "SUBMITTED";
-const LABEL_IN_PROGRESS = "IN PROGRESS";
-const LABEL_READY_TO_SUBMIT = "READY TO SUBMIT";
-const LABEL_NOT_STARTED = "NOT STARTED";
+import {
+  TRIP_STATUS,
+  TRIP_STATUS_LABELS,
+  STORE_NAMES,
+  COLLECTION_NAMES,
+  calculateTripStats,
+  formatDate,
+} from "../utils";
 
 function HomePage() {
-  // RADFish hooks
-  const app = useApplication(); // Access the RADFish application instance
-  const { isOffline } = useOfflineStatus(); // Check offline status
+  // --- RADFish Application Context ---
+  const app = useApplication();
+  const { isOffline } = useOfflineStatus();
 
-  // React state
-  const [trips, setTrips] = useState([]);
-  const [tripStats, setTripStats] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
+  // --- Navigation ---
+  // React Router navigation hook for programmatic routing
   const navigate = useNavigate();
 
-  /**
-   * Calculates statistics for a trip based on its catch data
-   * @param {Array} tripCatches - Array of catch objects for a trip
-   * @returns {Object} Object containing totalCount, totalWeight, and avgLength
-   */
-  const calculateTripStats = (tripCatches) => {
-    if (!tripCatches || tripCatches.length === 0) {
-      return { totalCount: 0, totalWeight: 0, avgLength: 0 };
-    }
-
-    const totalCount = tripCatches.length;
-
-    const totalWeight = tripCatches
-      .reduce((sum, catchItem) => sum + (catchItem.weight || 0), 0)
-      .toFixed(1);
-
-    const totalLength = tripCatches.reduce(
-      (sum, catchItem) => sum + (catchItem.length || 0),
-      0,
-    );
-
-    const avgLength =
-      totalCount > 0 ? (totalLength / totalCount).toFixed(1) : 0;
-
-    return { totalCount, totalWeight, avgLength };
-  };
+  // --- State Management ---
+  // Trip list state - will be populated in later lessons
+  const [trips, setTrips] = useState([]);
+  // Trip statistics state
+  const [tripStats, setTripStats] = useState({});
+  // Loading state
+  const [isLoading, setIsLoading] = useState(true);
+  // Error state for error handling
+  const [error, setError] = useState(null);
 
   // Load trips and catch data on component mount
   useEffect(() => {
@@ -69,12 +45,16 @@ function HomePage() {
         }
 
         // Get collections from the trip store
-        const tripStore = app.stores["trip"];
-        const Form = tripStore.getCollection("Form");
-        const Catch = tripStore.getCollection("Catch");
+        const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+        const tripCollection = tripStore.getCollection(
+          COLLECTION_NAMES.TRIP_COLLECTION,
+        );
+        const catchCollection = tripStore.getCollection(
+          COLLECTION_NAMES.CATCH_COLLECTION,
+        );
 
         // Fetch all trips
-        const allTrips = await Form.find({});
+        const allTrips = await tripCollection.find({});
 
         // Sort trips by date (most recent first)
         const sortedTrips = [...allTrips].sort((a, b) => {
@@ -88,12 +68,14 @@ function HomePage() {
         // Calculate statistics for each trip
         const stats = {};
 
-        for (const trip of sortedTrips) {
-          // Find all catches associated with this trip
-          const tripCatches = await Catch.find({ tripId: trip.id });
-
-          // Use the calculateTripStats function to get statistics
-          stats[trip.id] = calculateTripStats(tripCatches);
+        // CatchCollection will be added in Lesson 4 - for now, gracefully handle if not present    
+        if (catchCollection) {
+          for (const trip of sortedTrips) {
+            // Find all catches associated with this trip
+            const tripCatches = await catchCollection.find({ tripId: trip.id });
+            // Use the calculateTripStats function to get statistics
+            stats[trip.id] = calculateTripStats(tripCatches);
+          }
         }
 
         setTripStats(stats);
@@ -109,34 +91,25 @@ function HomePage() {
   }, [app, isOffline]); // Re-run if app or offline status changes
 
   /**
-   * Format a date string to a localized date display
-   * @param {string} dateString - ISO date string
-   * @return {string} Formatted date
-   */
-  const formatDate = (dateString) => {
-    if (!dateString) return "No date";
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
-
-  /**
    * Get human-readable status label based on trip status
    * @param {object} trip - Trip object
    * @return {string} Status label
    */
   const getStatusLabel = (trip) => {
-    if (!trip || !trip.status) return LABEL_NOT_STARTED;
+    if (!trip || !trip.status) return TRIP_STATUS_LABELS.NOT_STARTED;
 
-    if (trip.status === STATUS_SUBMITTED) return LABEL_SUBMITTED;
-    if (trip.status === STATUS_IN_PROGRESS) {
+    if (trip.status === TRIP_STATUS.SUBMITTED)
+      return TRIP_STATUS_LABELS.SUBMITTED;
+    if (trip.status === TRIP_STATUS.IN_PROGRESS) {
       if (trip.step) {
-        return `${LABEL_IN_PROGRESS}: ${trip.step}/4`;
+        return `${TRIP_STATUS_LABELS.IN_PROGRESS}: ${trip.step}/4`;
       }
-      return LABEL_IN_PROGRESS;
+      return TRIP_STATUS_LABELS.IN_PROGRESS;
     }
-    if (trip.status === STATUS_NOT_SUBMITTED) return LABEL_READY_TO_SUBMIT;
+    if (trip.status === TRIP_STATUS.NOT_SUBMITTED)
+      return TRIP_STATUS_LABELS.READY_TO_SUBMIT;
 
-    return LABEL_NOT_STARTED;
+    return TRIP_STATUS_LABELS.NOT_STARTED;
   };
 
   /**
@@ -147,9 +120,9 @@ function HomePage() {
   const getHeaderClass = (trip) => {
     if (!trip || !trip.status) return "bg-secondary";
 
-    if (trip.status === STATUS_SUBMITTED) return "bg-green"; // Green
-    if (trip.status === STATUS_IN_PROGRESS) return "bg-accent-warm"; // Orange
-    if (trip.status === STATUS_NOT_SUBMITTED) return "bg-primary-darker"; // Blue
+    if (trip.status === TRIP_STATUS.SUBMITTED) return "bg-green"; // Green
+    if (trip.status === TRIP_STATUS.IN_PROGRESS) return "bg-accent-warm"; // Orange
+    if (trip.status === TRIP_STATUS.NOT_SUBMITTED) return "bg-primary-darker"; // Blue
 
     // Default to orange for any other status
     return "bg-accent-warm";
@@ -163,9 +136,9 @@ function HomePage() {
     // Pass tripId via React Router state (not URL parameters)
     const destinationState = { state: { tripId: trip.id } };
 
-    if (trip.status === STATUS_SUBMITTED) {
+    if (trip.status === TRIP_STATUS.SUBMITTED) {
       navigate(`/review`, destinationState);
-    } else if (trip.status === STATUS_IN_PROGRESS) {
+    } else if (trip.status === TRIP_STATUS.IN_PROGRESS) {
       // Navigate based on the step for in-progress trips
       if (trip.step === 2) {
         navigate(`/catch`, destinationState);
@@ -177,7 +150,7 @@ function HomePage() {
         // Default to start if step is missing or invalid
         navigate(`/start`, destinationState);
       }
-    } else if (trip.status === STATUS_NOT_SUBMITTED) {
+    } else if (trip.status === TRIP_STATUS.NOT_SUBMITTED) {
       navigate(`/review`, destinationState);
     } else {
       navigate(`/start`, destinationState);
@@ -193,7 +166,7 @@ function HomePage() {
     );
   }
 
-  // Show error state
+  // Show error state if something went wrong
   if (error) {
     return (
       <div className="padding-5 text-center">
@@ -211,87 +184,84 @@ function HomePage() {
 
   return (
     <>
-      <Grid row>
-        <Grid col="fill">
-          <h1 className="font-heading-xl text-center margin-0">
-            Hi, Captain
-          </h1>
+      {/* Main Content - Basic structure without USWDS grid components */}
+      <div className="padding-y-4 padding-x-2 text-center">
+        <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
+        <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
+          Recent Trips
+        </h2>
 
-          <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
-            Recent Trips
-          </h2>
-
-          <div className="width-full maxw-mobile-lg margin-x-auto margin-bottom-5">
-            {trips.length === 0 ? (
-              <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
-                <p className="text-base margin-0 text-center">
-                  No trips found. Start a new trip to record your fishing
-                  activity.
-                </p>
-              </div>
-            ) : (
-              trips.map((trip) => (
+        <div className="width-full maxw-mobile-lg margin-x-auto margin-bottom-5">
+          {trips.length === 0 ? (
+            <div className="border-dashed border-base-lighter bg-base-lightest padding-2 width-full maxw-mobile-lg margin-y-2">
+              <p className="text-base margin-0 text-center">
+                No trips found. Start a new trip to record your fishing
+                activity.
+              </p>
+            </div>
+          ) : (
+            trips.map((trip) => (
+              <div
+                key={trip.id}
+                className="display-flex flex-column width-full border-radius-md bg-white shadow-2 overflow-hidden margin-bottom-2 cursor-pointer hover:shadow-4 hover:transform-"
+                onClick={() => handleTripClick(trip)}
+              >
                 <div
-                  key={trip.id}
-                  className="display-flex flex-column width-full border-radius-md bg-white shadow-2 overflow-hidden margin-bottom-2 cursor-pointer hover:shadow-4 hover:transform-"
-                  onClick={() => handleTripClick(trip)}
+                  className={`display-flex flex-justify flex-align-center padding-y-2 padding-x-2 text-white radius-top-md ${getHeaderClass(trip)}`}
                 >
-                  <div
-                    className={`display-flex flex-justify flex-align-center padding-y-2 padding-x-2 text-white radius-top-md ${getHeaderClass(trip)}`}
-                  >
-                    <div className="text-white font-ui-md text-bold">
-                      {formatDate(trip.tripDate)}
-                    </div>
-                    <div className="text-white font-ui-md text-bold">
-                      {getStatusLabel(trip)}
-                    </div>
+                  <div className="text-white font-ui-md text-bold">
+                    {formatDate(trip.tripDate)}
                   </div>
-
-                  <div className="padding-2 bg-white radius-bottom-md">
-                    <Grid row>
-                      <Grid
-                        col={4}
-                        className="display-flex flex-column padding-y-1 stat-grid-column"
-                      >
-                        <div className="font-ui-xs text-base-dark margin-bottom-1">
-                          Fish Count
-                        </div>
-                        <div className="font-ui-lg text-bold">
-                          {tripStats[trip.id]?.totalCount || 0}
-                        </div>
-                      </Grid>
-                      <Grid
-                        col={4}
-                        className="display-flex flex-column padding-y-1 stat-grid-column"
-                      >
-                        <div className="font-ui-xs text-base-dark margin-bottom-1">
-                          Total Weight
-                        </div>
-                        <div className="font-ui-lg text-bold">
-                          {tripStats[trip.id]?.totalWeight || 0} lbs
-                        </div>
-                      </Grid>
-                      <Grid
-                        col={4}
-                        className="display-flex flex-column padding-y-1 stat-grid-column"
-                      >
-                        <div className="font-ui-xs text-base-dark margin-bottom-1">
-                          Avg. Length
-                        </div>
-                        <div className="font-ui-lg text-bold">
-                          {tripStats[trip.id]?.avgLength || 0} in
-                        </div>
-                      </Grid>
-                    </Grid>
+                  <div className="text-white font-ui-md text-bold">
+                    {getStatusLabel(trip)}
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        </Grid>
-      </Grid>
 
-      {/* Sticky footer with "Start New Trip" button */}
+                <div className="padding-2 bg-white radius-bottom-md">
+                  <Grid row>
+                    <Grid
+                      col={4}
+                      className="display-flex flex-column padding-y-1 stat-grid-column"
+                    >
+                      <div className="font-ui-xs text-base-dark margin-bottom-1">
+                        Fish Count
+                      </div>
+                      <div className="font-ui-lg text-bold">
+                        {tripStats[trip.id]?.totalCount || 0}
+                      </div>
+                    </Grid>
+                    <Grid
+                      col={4}
+                      className="display-flex flex-column padding-y-1 stat-grid-column"
+                    >
+                      <div className="font-ui-xs text-base-dark margin-bottom-1">
+                        Total Weight
+                      </div>
+                      <div className="font-ui-lg text-bold">
+                        {tripStats[trip.id]?.totalWeight || 0} lbs
+                      </div>
+                    </Grid>
+                    <Grid
+                      col={4}
+                      className="display-flex flex-column padding-y-1 stat-grid-column"
+                    >
+                      <div className="font-ui-xs text-base-dark margin-bottom-1">
+                        Avg. Length
+                      </div>
+                      <div className="font-ui-lg text-bold">
+                        {tripStats[trip.id]?.avgLength || 0} in
+                      </div>
+                    </Grid>
+                  </Grid>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* --- Footer Navigation --- */}
+      {/* Fixed footer with primary action button */}
       <footer className="position-fixed bottom-0 width-full bg-gray-5 padding-bottom-2 padding-x-2 shadow-1 z-top">
         <div className="display-flex flex-justify maxw-mobile-lg margin-x-auto padding-top-2">
           <Button
