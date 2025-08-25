@@ -2,7 +2,7 @@ import "../index.css";
 import React, { useState, useEffect } from "react";
 import { useApplication, useOfflineStatus } from "@nmfs-radfish/react-radfish";
 import { useNavigate } from "react-router-dom";
-import { Button, Grid } from "@trussworks/react-uswds";
+import { Button, GridContainer, Grid } from "@trussworks/react-uswds";
 import {
   TRIP_STATUS,
   TRIP_STATUS_LABELS,
@@ -185,7 +185,9 @@ function HomePage() {
   return (
     <>
       {/* Main Content - Basic structure without USWDS grid components */}
-      <div className="padding-y-4 padding-x-2 text-center">
+      <GridContainer className="padding-y-4 padding-x-2 text-center">
+        <Grid row>
+          <Grid col="fill">
         <h1 className="font-heading-xl text-center margin-0">Hi, Captain</h1>
         <h2 className="font-heading-lg text-center margin-top-4 margin-bottom-2">
           Recent Trips
@@ -258,7 +260,9 @@ function HomePage() {
             ))
           )}
         </div>
-      </div>
+          </Grid>
+        </Grid>
+      </GridContainer>
 
       {/* --- Footer Navigation --- */}
       {/* Fixed footer with primary action button */}
@@ -267,6 +271,9 @@ function HomePage() {
           <Button
             type="button"
             className="bg-primary hover:bg-primary-darker width-full"
+            onClick={() => {
+              navigate("/start");
+            }}
           >
             Start New Trip
           </Button>
