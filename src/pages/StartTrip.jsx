@@ -3,7 +3,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
+  DatePicker,
   Form,
+  FormGroup,
+  Label,
+  Select,
+  TimePicker,
 } from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
 
@@ -75,6 +80,13 @@ function StartTrip() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log("Trip Data:", {
+      tripDate: tripData.tripDate,
+      startWeather: tripData.startWeather,
+      startTime: tripData.startTime,
+      status: "in-progress",
+      step: 2,
+    });
   };
 
   /**
@@ -97,6 +109,74 @@ function StartTrip() {
     <>
       <Layout currentStep="Start Trip">
         <Form onSubmit={handleSubmit} large className="margin-top-3">
+          <FormGroup>
+            <Label
+              htmlFor="tripDate"
+              hint=" mm/dd/yyyy"
+              className="input-date-label"
+              requiredMarker
+            >
+              Date
+            </Label>
+            <DatePicker
+              id="tripDate"
+              name="tripDate"
+              defaultValue={tripData.tripDate}
+              onChange={handleDateChange}
+              aria-describedby="trip-date-hint"
+              required
+            />
+            <span id="trip-date-hint" className="usa-sr-only">
+              Please enter or select the date of your fishing trip.
+            </span>
+          </FormGroup>
+          <FormGroup>
+            <Label
+              htmlFor="startTime"
+              className="input-time-label"
+              requiredMarker
+            >
+              Time
+            </Label>
+            <TimePicker
+              id="startTime"
+              name="startTime"
+              defaultValue={tripData.startTime}
+              onChange={handleTimeChange}
+              minTime="00:00"
+              maxTime="23:45"
+              step={15}
+              aria-describedby="start-time-hint"
+              required
+            />
+            <span id="start-time-hint" className="usa-sr-only">
+              Please enter or select the time you started fishing.
+            </span>
+          </FormGroup>
+          <FormGroup>
+            <Label
+              htmlFor="startWeather"
+              requiredMarker
+            >
+              Weather
+            </Label>
+            <Select
+              id="startWeather"
+              name="startWeather"
+              value={tripData.startWeather}
+              onChange={handleInputChange}
+              aria-describedby="start-weather-hint"
+              required
+            >
+              <option value="">-Select-</option>
+              <option value="Sunny">Sunny</option>
+              <option value="Cloudy">Cloudy</option>
+              <option value="Rainy">Rainy</option>
+            </Select>
+            <span id="start-weather-hint" className="usa-sr-only">
+              Please select the weather conditions at the start of your fishing trip.
+            </span>
+          </FormGroup>
         </Form>
       </Layout>
 
