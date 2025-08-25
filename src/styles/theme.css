@@ -1,0 +1,95 @@
+:root {
+  --noaa-dark-blue: #0054a4;
+  --noaa-light-blue: #0093d0;
+  --noaa-yellow-one: #fff3cd;
+  --noaa-yellow-two: #ffeeba;
+  --noaa-yellow-three: #856404;
+  --noaa-accent-color: #00467f;
+  --noaa-text-color: #333;
+  --noaa-error-color: #af292e;
+  --noaa-button-hover: #0073b6;
+  --noaa-label-color: #0054a4;
+  --noaa-border-dark: #565c65;
+  --noaa-border-light: #ddd;
+}
+
+body {
+  font-family:
+    Arial Narrow,
+    sans-serif;
+  color: var(--noaa-text-color);
+  background-color: #f4f4f4;
+  line-height: 1.6;
+  border-radius: 4px;
+}
+
+.header-container {
+  background: var(--noaa-dark-blue);
+}
+
+.header-title {
+  color: white;
+}
+
+/* Minimum size for NOAA logo must be 72px (0.75 in) */
+.header-logo {
+  width: 72px;
+}
+
+/* 
+=========================================
+USWDS COMPONENT OVERRIDES
+=========================================
+*/
+
+.usa-navbar.usa-navbar {
+  border-bottom: none;
+}
+
+.usa-button.usa-button {
+  margin-right: 0;
+}
+
+.usa-combo-box.usa-combo-box {
+  width: 100%;
+}
+
+.usa-table.usa-table {
+  margin: 0;
+}
+
+/* Fit error border to TimePicker */
+.input-time-label+div>.usa-input--error {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.input-time-label+div>.usa-input--error>.usa-combo-box__input {
+  margin-top: 0;
+}
+
+/* Remove margin-top from TimePicker input */
+.input-time-label+div {
+  margin-top: 0;
+}
+
+.usa-logo.usa-logo {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+@media (min-width: 64em) {
+  .usa-nav__primary>.usa-nav__primary-item>a.usa-nav__link {
+    padding: 10px;
+  }
+
+  .usa-header--basic.usa-header--basic .usa-nav.usa-nav {
+    padding: 0;
+  }
+}
+
+@media (min-width: 480px) {
+  .usa-logo.usa-logo {
+    margin-left: 0;
+  }
+}
