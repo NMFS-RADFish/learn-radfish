@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   useApplication,
+  Table,
+  useOfflineStatus,
 } from "@nmfs-radfish/react-radfish";
 import { Button } from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
@@ -10,6 +12,8 @@ import {
   formatDate,
   format24HourTo12Hour,
   aggregateCatchesBySpecies,
+  STORE_NAMES,
+  COLLECTION_NAMES,
 } from "../utils";
 
 /**
@@ -19,6 +23,7 @@ function ReviewSubmit() {
   const navigate = useNavigate();
   const location = useLocation();
   const app = useApplication();
+  const { isOffline } = useOfflineStatus();
 
   // --- State ---
   const tripId = location.state?.tripId;
@@ -43,6 +48,32 @@ function ReviewSubmit() {
       }
 
       try {
+        // Access RADFish collections
+        const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+        const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
+        const catchCollection = tripStore.getCollection(COLLECTION_NAMES.CATCH_COLLECTION);
+
+        // Fetch the trip details
+        const tripsDataFromCollection = await tripCollection.find({ id: tripId });
+
+        // Handle trip not found
+        if (tripsDataFromCollection.length === 0) {
+          setError(`Trip with ID ${tripId} not found`);
+          navigate("/"); // Redirect home if trip doesn't exist
+          return;
+        }
+
+        const selectedTrip = tripsDataFromCollection[0];
+        setTrip(selectedTrip); // Store fetched trip data in state
+
+        // Fetch all catches associated with this trip
+        const tripCatches = await catchCollection.find({ tripId: selectedTrip.id });
+
+        // Store catches for API submission
+        setCatches(tripCatches);
+
+        const aggregatedData = aggregateCatchesBySpecies(tripCatches);
+        setAggregatedCatches(aggregatedData);
 
       } catch (err) {
         console.error("Error loading trip data:", err);
@@ -60,7 +91,20 @@ function ReviewSubmit() {
   const handleSubmit = async () => {
     if (!trip) return;
 
+    const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+    const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
+
     try {
+      const finalStatus = isOffline ? "Not Submitted" : "submitted";
+
+      await tripCollection.update({
+        id: trip.id,
+        status: finalStatus,
+        step: 4,
+      });
+
+      navigate(isOffline ? "/offline-confirm" : "/online-confirm");
+
     } catch (error) {
       console.error("Error submitting trip:", error);
       setError("Failed to submit trip. Please try again.");
@@ -92,6 +136,13 @@ function ReviewSubmit() {
     } else {
       defaultProps.backPath = `/end`;
       defaultProps.backNavState = { state: { tripId: tripId } };
+
+      if (isOffline) {
+        defaultProps.nextLabel = "Save";
+      } else {
+        defaultProps.nextLabel = "Submit";
+        defaultProps.nextButtonProps = { className: "bg-green hover:bg-green" };
+      }
 
       return defaultProps;
     }
@@ -174,7 +225,25 @@ function ReviewSubmit() {
           </div>
           <div className="padding-0">
             {aggregatedCatches.length > 0 ? (
-              <></>
+              <Table
+                // Map aggregated data to the format expected by the Table component
+                data={aggregatedCatches.map((item, index) => ({
+                  id: index, // Use index as ID for the table row
+                  species: item.species,
+                  count: item.count,
+                  totalWeight: `${item.totalWeight} lbs`, // Add units
+                  avgLength: `${item.avgLength} in`, // Add units
+                }))}
+                // Define table columns: key corresponds to data keys, label is header text
+                columns={[
+                  { key: "species", label: "Species", sortable: true },
+                  { key: "count", label: "Count", sortable: true },
+                  { key: "totalWeight", label: "Total Weight", sortable: true },
+                  { key: "avgLength", label: "Avg. Length", sortable: true },
+                ]}
+                // Enable striped rows for better readability
+                striped
+              />
             ) : (
               <p className="padding-2 text-base-dark">
                 No catches recorded for this trip.
