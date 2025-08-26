@@ -5,6 +5,7 @@ import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
   Button,
   DatePicker,
+  ErrorMessage,
   Form,
   FormGroup,
   Label,
@@ -12,7 +13,7 @@ import {
   TimePicker,
 } from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
-import { STORE_NAMES, COLLECTION_NAMES } from "../utils";
+import { validateRequired, FIELD_NAMES, STORE_NAMES, COLLECTION_NAMES } from "../utils";
 
 function StartTrip() {
   const navigate = useNavigate();
@@ -83,6 +84,32 @@ function StartTrip() {
     loadExistingTrip();
   }, [tripId, app]);
 
+  // --- Validation ---
+  /**
+   * Validates all form fields before submission
+   * Uses centralized validation utilities for consistency
+   * @param {Object} data - Form data to validate
+   * @returns {Object} Validation errors object (empty if valid)
+   */
+  const validateForm = (data) => {
+    const newErrors = {};
+
+    // Validate each required field using centralized validators
+    const dateError = validateRequired(data.tripDate, FIELD_NAMES.DATE);
+    if (dateError) newErrors.tripDate = dateError;
+
+    const weatherError = validateRequired(
+      data.startWeather,
+      FIELD_NAMES.START_WEATHER,
+    );
+    if (weatherError) newErrors.startWeather = weatherError;
+
+    const timeError = validateRequired(data.startTime, FIELD_NAMES.START_TIME);
+    if (timeError) newErrors.startTime = timeError;
+
+    return newErrors;
+  };
+
   // --- Event Handlers ---
   /**
    * Handles text input and select changes
@@ -127,8 +154,15 @@ function StartTrip() {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitted(true); // Mark form as submitted to show errors
 
-    try {
+    // Validate all form fields
+    const validationErrors = validateForm(tripData);
+    setErrors(validationErrors);
+
+    // Only proceed if no validation errors
+    if (Object.keys(validationErrors).length === 0) {
+      try {
       const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
       const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
 
@@ -149,12 +183,15 @@ function StartTrip() {
         await tripCollection.create({
           id: newTripId,
           ...tripDataToSave,
+          endTime: "",
+          endWeather: "",
         });
         navigateToId = newTripId;
       }
       navigateWithTripId("/catch", navigateToId);
-    } catch (error) {
-      console.error("Error saving trip data:", error, "Trip ID:", tripId);
+      } catch (error) {
+        console.error("Error saving trip data:", error, "Trip ID:", tripId);
+      }
     }
   };
 
@@ -183,9 +220,10 @@ function StartTrip() {
     <>
       <Layout currentStep="Start Trip">
         <Form onSubmit={handleSubmit} large className="margin-top-3">
-          <FormGroup>
+          <FormGroup error={submitted && errors.tripDate}>
             <Label
               htmlFor="tripDate"
+              error={submitted && errors.tripDate}
               hint=" mm/dd/yyyy"
               className="input-date-label"
               requiredMarker
@@ -197,16 +235,23 @@ function StartTrip() {
               name="tripDate"
               defaultValue={tripData.tripDate}
               onChange={handleDateChange}
-              aria-describedby="trip-date-hint"
+              validationStatus={submitted && errors.tripDate ? "error" : undefined}
+              aria-describedby="trip-date-hint trip-date-error-message"
               required
             />
             <span id="trip-date-hint" className="usa-sr-only">
               Please enter or select the date of your fishing trip.
             </span>
+            {submitted && errors.tripDate && (
+              <ErrorMessage id="trip-date-error-message" className="font-sans-2xs">
+                {errors.tripDate}
+              </ErrorMessage>
+            )}
           </FormGroup>
-          <FormGroup>
+          <FormGroup error={submitted && errors.startTime}>
             <Label
               htmlFor="startTime"
+              error={submitted && errors.startTime}
               className="input-time-label"
               requiredMarker
             >
@@ -220,16 +265,23 @@ function StartTrip() {
               minTime="00:00"
               maxTime="23:45"
               step={15}
-              aria-describedby="start-time-hint"
+              className={submitted && errors.startTime ? "usa-input--error" : undefined}
+              aria-describedby="start-time-hint start-time-error-message"
               required
             />
             <span id="start-time-hint" className="usa-sr-only">
               Please enter or select the time you started fishing.
             </span>
+            {submitted && errors.startTime && (
+              <ErrorMessage id="start-time-error-message" className="font-sans-2xs">
+                {errors.startTime}
+              </ErrorMessage>
+            )}
           </FormGroup>
-          <FormGroup>
+          <FormGroup error={submitted && errors.startWeather}>
             <Label
               htmlFor="startWeather"
+              error={submitted && errors.startWeather}
               requiredMarker
             >
               Weather
@@ -239,7 +291,8 @@ function StartTrip() {
               name="startWeather"
               value={tripData.startWeather}
               onChange={handleInputChange}
-              aria-describedby="start-weather-hint"
+              validationStatus={submitted && errors.startWeather ? "error" : undefined}
+              aria-describedby="start-weather-hint start-weather-error-message"
               required
             >
               <option value="">-Select-</option>
@@ -250,6 +303,11 @@ function StartTrip() {
             <span id="start-weather-hint" className="usa-sr-only">
               Please select the weather conditions at the start of your fishing trip.
             </span>
+            {submitted && errors.startWeather && (
+              <ErrorMessage id="start-weather-error-message" className="font-sans-2xs">
+                {errors.startWeather}
+              </ErrorMessage>
+            )}
           </FormGroup>
         </Form>
       </Layout>

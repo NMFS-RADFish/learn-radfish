@@ -43,6 +43,14 @@ const app = new Application({
                 type: "string",
                 required: true,
               },
+              endTime: {
+                type: "string",
+                required: true,
+              },
+              endWeather: {
+                type: "string",
+                required: true,
+              },
             },
           },
         },

@@ -18,6 +18,11 @@ import {
   TIME_PICKER_CONFIG,
   STORE_NAMES,
   COLLECTION_NAMES,
+  validateRequired,
+  validateNumberRange,
+  validateLatitude,
+  validateLongitude,
+  VALIDATION_RANGES,
 } from "../utils";
 import { useTripNavigation, useTripData, useCatchData } from "../hooks";
 import Layout from "../components/Layout";
@@ -76,6 +81,111 @@ function CatchLog() {
     time: "",
   });
   const [errors, setErrors] = useState({}); // Validation errors for new catch form
+  const [recordedCatchErrors, setRecordedCatchErrors] = useState({}); // For recorded catches validation
+
+  // --- Validation Functions ---
+  /**
+   * Validates new catch form data
+   * @returns {Object} Validation errors keyed by field name
+   */
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validate required fields
+    const speciesError = validateRequired(currentCatch.species, FIELD_NAMES.SPECIES);
+    if (speciesError) newErrors.species = speciesError;
+    
+    const weightError = validateRequired(currentCatch.weight, FIELD_NAMES.WEIGHT);
+    if (weightError) newErrors.weight = weightError;
+    
+    const lengthError = validateRequired(currentCatch.length, FIELD_NAMES.LENGTH);
+    if (lengthError) newErrors.length = lengthError;
+    
+    const timeError = validateRequired(currentCatch.time, FIELD_NAMES.TIME);
+    if (timeError) newErrors.time = timeError;
+
+    // Validate ranges if value exists and required check passed
+    if (!newErrors.weight && currentCatch.weight) {
+      const { min, max } = VALIDATION_RANGES.WEIGHT;
+      const rangeError = validateNumberRange(currentCatch.weight, min, max, FIELD_NAMES.WEIGHT, false);
+      if (rangeError) newErrors.weight = rangeError;
+    }
+    
+    if (!newErrors.length && currentCatch.length) {
+      const { min, max } = VALIDATION_RANGES.LENGTH;
+      const rangeError = validateNumberRange(currentCatch.length, min, max, FIELD_NAMES.LENGTH, false);
+      if (rangeError) newErrors.length = rangeError;
+    }
+
+    // Validate coordinates if entered (optional fields)
+    if (currentCatch.latitude) {
+      const latitudeError = validateLatitude(currentCatch.latitude);
+      if (latitudeError) newErrors.latitude = latitudeError;
+    }
+    
+    if (currentCatch.longitude) {
+      const longitudeError = validateLongitude(currentCatch.longitude);
+      if (longitudeError) newErrors.longitude = longitudeError;
+    }
+    
+    return newErrors;
+  };
+
+  /**
+   * Validates all recorded catches
+   * @returns {Object} Validation errors indexed by catch index
+   */
+  const validateRecordedCatches = () => {
+    const allErrors = {};
+    
+    catches.forEach((catchItem, index) => {
+      const catchErrors = {};
+
+      // Validate required fields for each recorded catch
+      const speciesError = validateRequired(catchItem.species, FIELD_NAMES.SPECIES);
+      if (speciesError) catchErrors.species = speciesError;
+      
+      const weightError = validateRequired(catchItem.weight, FIELD_NAMES.WEIGHT);
+      if (weightError) catchErrors.weight = weightError;
+      
+      const lengthError = validateRequired(catchItem.length, FIELD_NAMES.LENGTH);
+      if (lengthError) catchErrors.length = lengthError;
+      
+      const timeError = validateRequired(catchItem.time, FIELD_NAMES.TIME);
+      if (timeError) catchErrors.time = timeError;
+
+      // Validate ranges if value exists and required check passed
+      if (!catchErrors.weight && catchItem.weight) {
+        const { min, max } = VALIDATION_RANGES.WEIGHT;
+        const rangeError = validateNumberRange(catchItem.weight, min, max, FIELD_NAMES.WEIGHT, false);
+        if (rangeError) catchErrors.weight = rangeError;
+      }
+      
+      if (!catchErrors.length && catchItem.length) {
+        const { min, max } = VALIDATION_RANGES.LENGTH;
+        const rangeError = validateNumberRange(catchItem.length, min, max, FIELD_NAMES.LENGTH, false);
+        if (rangeError) catchErrors.length = rangeError;
+      }
+
+      // Validate coordinates if entered
+      if (catchItem.latitude) {
+        const latitudeError = validateLatitude(catchItem.latitude);
+        if (latitudeError) catchErrors.latitude = latitudeError;
+      }
+      
+      if (catchItem.longitude) {
+        const longitudeError = validateLongitude(catchItem.longitude);
+        if (longitudeError) catchErrors.longitude = longitudeError;
+      }
+
+      // If there are errors for this catch, add them to the main error object
+      if (Object.keys(catchErrors).length > 0) {
+        allErrors[index] = catchErrors;
+      }
+    });
+    
+    return allErrors;
+  };
 
   // --- Event Handlers ---
 
@@ -110,33 +220,49 @@ function CatchLog() {
 
   const handleAddCatch = async (e) => {
     e.preventDefault();
-    try {
-      const success = await addCatch(currentCatch);
+    
+    // Validate form before adding catch
+    const formErrors = validateForm();
+    setErrors(formErrors);
 
-      if (success) {
-        // Reset form and increment key to force TimePicker re-render
-        resetForm();
-        setCatchTimeKey((prevKey) => prevKey + 1);
-      } else {
-        throw new Error("Failed to add catch");
+    // Only proceed if validation passes
+    if (Object.keys(formErrors).length === 0) {
+      try {
+        const success = await addCatch(currentCatch);
+
+        if (success) {
+          // Reset form and increment key to force TimePicker re-render
+          resetForm();
+          setCatchTimeKey((prevKey) => prevKey + 1);
+        } else {
+          throw new Error("Failed to add catch");
+        }
+      } catch (error) {
+        console.error("Error adding catch:", error);
       }
-    } catch (error) {
-      console.error("Error adding catch:", error);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      // Update trip step
-      const success = await updateTrip({ step: 3 });
-      if (success) {
-        navigateWithTripId("/end", tripId);
-      } else {
-        throw new Error("Failed to update trip step");
+    
+    // Validate all recorded catches before proceeding
+    const recordedErrors = validateRecordedCatches();
+    setRecordedCatchErrors(recordedErrors);
+
+    // Only proceed if no validation errors exist
+    if (Object.keys(recordedErrors).length === 0) {
+      try {
+        // Update trip step
+        const success = await updateTrip({ step: 3 });
+        if (success) {
+          navigateWithTripId("/end", tripId);
+        } else {
+          throw new Error("Failed to update trip step");
+        }
+      } catch (error) {
+        console.error("Error updating trip step:", error, "Trip ID:", tripId);
       }
-    } catch (error) {
-      console.error("Error updating trip step:", error, "Trip ID:", tripId);
     }
   };
 
@@ -275,9 +401,10 @@ function CatchLog() {
             className="margin-top-3 width-full"
           >
             {/* Species Dropdown */}
-            <FormGroup>
+            <FormGroup error={errors.species}>
               <Label 
                 htmlFor="species"
+                error={errors.species}
                 requiredMarker
               >
                 Species
@@ -287,6 +414,8 @@ function CatchLog() {
                 name="species"
                 value={currentCatch.species}
                 onChange={handleInputChange}
+                validationStatus={errors.species ? "error" : undefined}
+                aria-describedby="species-error-message"
               >
                 <option value="">-Select-</option>
                 {SPECIES_OPTIONS.map((species) => (
@@ -295,6 +424,9 @@ function CatchLog() {
                   </option>
                 ))}
               </Select>
+              <ErrorMessage id="species-error-message" className="font-sans-2xs">
+                {errors.species}
+              </ErrorMessage>
             </FormGroup>
 
             {/* Weight & Length Inputs Row */}
@@ -459,8 +591,8 @@ function CatchLog() {
               {/* List container for individual catch items */}
               <div className="display-flex flex-column width-full">
                 {catches.map((catchItem, index) => {
-                  // Error handling will be added in lesson 5
-                  const catchErrors = {};
+                  // Get validation errors for this specific catch
+                  const catchErrors = recordedCatchErrors[index] || {};
 
                   return (
                     // Container for a single recorded catch item
