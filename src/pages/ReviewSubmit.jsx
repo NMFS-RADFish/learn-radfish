@@ -94,20 +94,62 @@ function ReviewSubmit() {
     const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
     const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
 
-    try {
-      const finalStatus = isOffline ? "Not Submitted" : "submitted";
+    if (isOffline) {
+      // Offline: Save status as "Not Submitted" locally
+      try {
+        await tripCollection.update({
+          id: trip.id,
+          status: "Not Submitted",
+          step: 4, // Mark as completed step 4 (review)
+        });
+        navigate("/offline-confirm");
+      } catch (error) {
+        console.error("Error saving trip offline:", error);
+        setError("Failed to save trip for offline submission. Please try again.");
+      }
+    } else {
+      // Online: Attempt to submit to the backend
+      try {
+        // Prepare submission data with trip and associated catches
+        const submissionData = {
+          trip: trip,
+          catches: catches,
+        };
 
-      await tripCollection.update({
-        id: trip.id,
-        status: finalStatus,
-        step: 4,
-      });
+        const response = await fetch("/api/trips", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        });
 
-      navigate(isOffline ? "/offline-confirm" : "/online-confirm");
+        if (!response.ok) {
+          const status = response.status;
+          const statusText = response.statusText ? response.statusText.trim() : "";
+          const errorDetail = statusText
+            ? `${status} ${statusText}`
+            : `${status} Server error occurred`;
 
-    } catch (error) {
-      console.error("Error submitting trip:", error);
-      setError("Failed to submit trip. Please try again.");
+          console.error("Server submission failed:", errorDetail);
+          setError(`Server submission failed: ${errorDetail}`);
+          return;
+        }
+
+        // If server submission is successful, update local status to "submitted"
+        await tripCollection.update({
+          id: trip.id,
+          status: "submitted",
+          step: 4,
+        });
+        navigate("/online-confirm");
+      } catch (error) {
+        // Catch network errors or other issues with the fetch call
+        console.error("Error submitting trip online:", error);
+        setError(
+          "Failed to submit trip. Check your internet connection or try saving offline.",
+        );
+      }
     }
   };
 
