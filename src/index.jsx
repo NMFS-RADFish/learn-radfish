@@ -46,6 +46,42 @@ const app = new Application({
             },
           },
         },
+        CatchCollection: {
+          schema: {
+            fields: {
+              id: {
+                type: "string",
+                primaryKey: true,
+              },
+              species: {
+                type: "string",
+                required: true,
+              },
+              weight: {
+                type: "number",
+                required: true,
+              },
+              length: {
+                type: "number",
+                required: true,
+              },
+              latitude: {
+                type: "number",
+              },
+              longitude: {
+                type: "number",
+              },
+              time: {
+                type: "string",
+                required: true,
+              },
+              tripId: {
+                type: "string",
+                required: true,
+              }
+            },
+          },
+        },
       },
     },
   }

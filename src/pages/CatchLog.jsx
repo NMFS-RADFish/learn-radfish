@@ -80,23 +80,64 @@ function CatchLog() {
   // --- Event Handlers ---
 
   const handleInputChange = (e) => {
-    // Handle input changes for new catch form
+    const { name, value } = e.target;
+    setCurrentCatch((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleTimeChange = (time, fieldName = "time") => {
-    // Handle time picker changes
+    setCurrentCatch((prev) => ({ ...prev, [fieldName]: time }));
+    // Clear error for this field when user selects time
+    if (errors[fieldName]) {
+      setErrors((prev) => ({ ...prev, [fieldName]: undefined }));
+    }
   };
 
   const resetForm = () => {
-    // Reset form to initial state
+    setCurrentCatch({
+      species: "",
+      weight: "",
+      length: "",
+      latitude: "",
+      longitude: "",
+      time: "",
+    });
+    setErrors({});
   };
 
   const handleAddCatch = async (e) => {
-    // Handle new catch form submission
+    e.preventDefault();
+    try {
+      const success = await addCatch(currentCatch);
+
+      if (success) {
+        // Reset form and increment key to force TimePicker re-render
+        resetForm();
+        setCatchTimeKey((prevKey) => prevKey + 1);
+      } else {
+        throw new Error("Failed to add catch");
+      }
+    } catch (error) {
+      console.error("Error adding catch:", error);
+    }
   };
 
   const handleSubmit = async (e) => {
-    // Handle main form submission to proceed to next step
+    e.preventDefault();
+    try {
+      // Update trip step
+      const success = await updateTrip({ step: 3 });
+      if (success) {
+        navigateWithTripId("/end", tripId);
+      } else {
+        throw new Error("Failed to update trip step");
+      }
+    } catch (error) {
+      console.error("Error updating trip step:", error, "Trip ID:", tripId);
+    }
   };
 
   // --- Event Handlers for Recorded Catches ---
@@ -229,7 +270,7 @@ function CatchLog() {
         {/* Complete form structure provided*/}
         <div className="width-full margin-y-0 margin-x-auto display-flex flex-column flex-align-start">
           <Form
-            onSubmit={() => { }}
+            onSubmit={handleAddCatch}
             large
             className="margin-top-3 width-full"
           >
@@ -245,7 +286,7 @@ function CatchLog() {
                 id="species"
                 name="species"
                 value={currentCatch.species}
-                onChange={() => { }}
+                onChange={handleInputChange}
               >
                 <option value="">-Select-</option>
                 {SPECIES_OPTIONS.map((species) => (
@@ -276,7 +317,7 @@ function CatchLog() {
                     name="weight"
                     type="number"
                     value={currentCatch.weight}
-                    onChange={() => { }}
+                    onChange={handleInputChange}
                     validationStatus={errors.weight ? "error" : undefined}
                     aria-describedby="weight-error-message"
                   />
@@ -304,7 +345,7 @@ function CatchLog() {
                     name="length"
                     type="number"
                     value={currentCatch.length}
-                    onChange={() => { }}
+                    onChange={handleInputChange}
                     validationStatus={errors.length ? "error" : undefined}
                     aria-describedby="length-error-message"
                   />
@@ -330,7 +371,7 @@ function CatchLog() {
                 id="catchTime"
                 name="time"
                 defaultValue={currentCatch.time}
-                onChange={() => { }}
+                onChange={handleTimeChange}
                 minTime={TIME_PICKER_CONFIG.MIN_TIME}
                 maxTime="23:30"
                 step={TIME_PICKER_CONFIG.STEP}
@@ -359,7 +400,7 @@ function CatchLog() {
                     name="latitude"
                     type="number"
                     value={currentCatch.latitude}
-                    onChange={() => { }}
+                    onChange={handleInputChange}
                     validationStatus={errors.latitude ? "error" : undefined}
                     aria-describedby="latitude-error-message"
                   />
@@ -383,7 +424,7 @@ function CatchLog() {
                     name="longitude"
                     type="number"
                     value={currentCatch.longitude}
-                    onChange={() => { }}
+                    onChange={handleInputChange}
                     validationStatus={errors.longitude ? "error" : undefined}
                     aria-describedby="longitude-error-message"
                   />
@@ -713,7 +754,7 @@ function CatchLog() {
           <Button
             type="button"
             className="width-full margin-left-2"
-            onClick={() => { }}
+            onClick={handleSubmit}
           >
             Next
           </Button>
