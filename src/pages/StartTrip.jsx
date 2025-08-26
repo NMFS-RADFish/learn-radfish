@@ -1,6 +1,7 @@
 import "../index.css";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useApplication } from "@nmfs-radfish/react-radfish";
 import {
   Button,
   DatePicker,
@@ -11,12 +12,13 @@ import {
   TimePicker,
 } from "@trussworks/react-uswds";
 import Layout from "../components/Layout";
+import { STORE_NAMES, COLLECTION_NAMES } from "../utils";
 
 function StartTrip() {
-  // --- Navigation ---
-  // React Router navigation hook for programmatic routing
   const navigate = useNavigate();
-  const tripId = "";
+  const app = useApplication();
+  const location = useLocation();
+  const tripId = location.state?.tripId;
 
   // --- State Management ---
   // Form data state
@@ -34,6 +36,52 @@ function StartTrip() {
 
   // Loading state - used to show loading message while fetching trip data
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load existing trip data if editing
+  useEffect(() => {
+    const loadExistingTrip = async () => {
+      // Only load if we have the app instance and a tripId
+      if (!app || !tripId) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        // Direct access to RADFish stores and collections
+        const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+        const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
+
+        // Find trips matching this ID
+        const existingTripsData = await tripCollection.find({ id: tripId });
+
+        if (existingTripsData.length > 0) {
+          const tripData = existingTripsData[0];
+
+          // Format date for DatePicker compatibility (YYYY-MM-DD)
+          const formattedDate = tripData.tripDate ? 
+            new Date(tripData.tripDate).toISOString().split('T')[0] : "";
+
+          setTripData({
+            tripDate: formattedDate,
+            startWeather: tripData.startWeather || "",
+            startTime: tripData.startTime || "",
+          });
+        } else {
+          // If trip not found, treat as new trip
+          console.warn(`Trip with ID ${tripId} not found. Starting new trip form.`);
+          setTripData({ tripDate: "", startWeather: "", startTime: "" });
+        }
+      } catch (error) {
+        console.error("Error loading trip data:", error);
+      } finally {
+        // Ensure loading indicator is turned off
+        setIsLoading(false);
+      }
+    };
+
+    loadExistingTrip();
+  }, [tripId, app]);
 
   // --- Event Handlers ---
   /**
@@ -80,13 +128,34 @@ function StartTrip() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Trip Data:", {
-      tripDate: tripData.tripDate,
-      startWeather: tripData.startWeather,
-      startTime: tripData.startTime,
-      status: "in-progress",
-      step: 2,
-    });
+    try {
+      const tripStore = app.stores[STORE_NAMES.TRIP_STORE];
+      const tripCollection = tripStore.getCollection(COLLECTION_NAMES.TRIP_COLLECTION);
+
+      const tripDataToSave = {
+        tripDate: tripData.tripDate,
+        startWeather: tripData.startWeather,
+        startTime: tripData.startTime,
+        status: "in-progress",
+        step: 2,
+      };
+
+      let navigateToId = tripId;
+
+      if (tripId) {
+        await tripCollection.update({ id: tripId, ...tripDataToSave });
+      } else {
+        const newTripId = crypto.randomUUID();
+        await tripCollection.create({
+          id: newTripId,
+          ...tripDataToSave,
+        });
+        navigateToId = newTripId;
+      }
+      navigateWithTripId("/catch", navigateToId);
+    } catch (error) {
+      console.error("Error saving trip data:", error, "Trip ID:", tripId);
+    }
   };
 
   /**
@@ -94,6 +163,11 @@ function StartTrip() {
    */
   const navigateHome = () => {
     navigate("/");
+  };
+
+  // Helper to pass tripId between pages in our multi-step form
+  const navigateWithTripId = (path, tripId) => {
+    navigate(path, { state: { tripId } });
   };
 
   // Show loading state while fetching existing trip data

@@ -31,6 +31,18 @@ const app = new Application({
                 required: true,
                 default: "none",
               },
+              tripDate: {
+                type: "string",
+                required: true,
+              },
+              startTime: {
+                type: "string",
+                required: true,
+              },
+              startWeather: {
+                type: "string",
+                required: true,
+              },
             },
           },
         },
